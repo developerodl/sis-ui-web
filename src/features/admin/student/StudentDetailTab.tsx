@@ -677,25 +677,56 @@ export default function StudentDetailTab({
     'Hall Ticket',
   ];
 
-  const tabs = rollid === 2 ? studenttabs : admintabs;
+  // const tabs = rollid === 2 ? studenttabs : admintabs;
 
-  const tabContents =
-    rollid === 2
-      ? [
-        basicInfoTab,
-        ...(hideDebTab ? [] : [debTab]),
-        IDCardTab,
-        HallTicketTab,
+  // const tabContents =
+  //   rollid === 2
+  //     ? [
+  //       basicInfoTab,
+  //       ...(hideDebTab ? [] : [debTab]),
+  //       IDCardTab,
+  //       HallTicketTab,
+  //     ]
+  //     : [
+  //       basicInfoTab,
+  //       academicTab,
+  //       ...(hideDebTab ? [] : [debTab]),
+  //       documentsTab,
+  //       IDCardTab,
+  //       HallTicketTab,
+  //       ...(isEligibleForResults ? [examResultsTab] : [])
+  //     ];
+
+  /* -------------------- Role-based Tabs -------------------- */
+
+const tabs =
+  rollid === 3
+    ? ['Basic Info'] // ✅ ONLY this tab
+    : rollid === 2
+      ? studenttabs
+      : admintabs;
+
+const tabContents =
+  rollid === 3
+    ? [
+        basicInfoTab, // ✅ ONLY this content
       ]
+    : rollid === 2
+      ? [
+          basicInfoTab,
+          ...(hideDebTab ? [] : [debTab]),
+          IDCardTab,
+          HallTicketTab,
+        ]
       : [
-        basicInfoTab,
-        academicTab,
-        ...(hideDebTab ? [] : [debTab]),
-        documentsTab,
-        IDCardTab,
-        HallTicketTab,
-        ...(isEligibleForResults ? [examResultsTab] : [])
-      ];
+          basicInfoTab,
+          academicTab,
+          ...(hideDebTab ? [] : [debTab]),
+          documentsTab,
+          IDCardTab,
+          HallTicketTab,
+          ...(isEligibleForResults ? [examResultsTab] : []),
+        ];
 
   // useEffect(() => {
   //   if (!isEligibleForResults) return;

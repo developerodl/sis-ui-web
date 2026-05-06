@@ -107,6 +107,38 @@ export default function Sidebar({
 
   }, [location.pathname]);
 
+  // const handleSelect = (
+  //   itemText: any,
+  //   routePath: any,
+  //   hasChildren: any,
+  //   parentText = ''
+  // ) => {
+  //   if (routePath) {
+  //     alert(itemText)
+  //     navigate(routePath);
+  //     setSelectedItem(itemText);
+  //     setSelectedParent(parentText);
+
+  //     if (parentText) {
+  //       setOpenItems({ [parentText]: true }); // ✅ keep only parent open
+  //     }
+
+  //     if (isDrawer && onClose) {
+  //       onClose();
+  //     }
+  //   } else if (hasChildren) {
+  //     if (!isSidebarVisible) {
+  //       setSidebarVisible?.(true);
+  //     }
+
+  //     setOpenItems((prev) => {
+  //       const isCurrentlyOpen = prev[itemText];
+
+  //       return isCurrentlyOpen ? {} : { [itemText]: true };
+  //     });
+  //   }
+  // };
+
   const handleSelect = (
     itemText: any,
     routePath: any,
@@ -114,30 +146,37 @@ export default function Sidebar({
     parentText = ''
   ) => {
     if (routePath) {
-      navigate(routePath);
+
+      // ✅ Special case for Mentees
+      if (itemText === "Mentees") {
+        navigate(`${routePath}?urlname=Mentees`);
+      } else {
+        navigate(routePath);
+      }
+
       setSelectedItem(itemText);
       setSelectedParent(parentText);
 
       if (parentText) {
-        setOpenItems({ [parentText]: true }); // ✅ keep only parent open
+        setOpenItems({ [parentText]: true });
       }
 
       if (isDrawer && onClose) {
         onClose();
       }
+
     } else if (hasChildren) {
+
       if (!isSidebarVisible) {
         setSidebarVisible?.(true);
       }
 
       setOpenItems((prev) => {
         const isCurrentlyOpen = prev[itemText];
-
         return isCurrentlyOpen ? {} : { [itemText]: true };
       });
     }
   };
-
 
   const registrationNo = getValue("username");
 
