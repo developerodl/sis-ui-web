@@ -164,6 +164,32 @@ export const STUDENT_MENU_ITEMS: MenuItem[] = [
   },
 ];
 export const FACULTY_MENU_ITEMS: MenuItem[] = [
+  {
+    text: 'Profile',
+    icon: 'Profile',
+    subItems: [
+    ],
+    routePath: '/students/detail'
+  },
+
+  {
+    text: 'Students',
+    icon: 'Students',
+    subItems: [
+      // { text: 'Students List', routePath: '/students/list' },
+      // { text: 'Fees List', routePath: '/students/feeslist' },
+    ],
+    routePath: '/students/list'
+  },
+  {
+    text: 'Mentees',
+    icon: 'Students',
+    subItems: [
+      // { text: 'Students List', routePath: '/students/list' },
+      // { text: 'Fees List', routePath: '/students/feeslist' },
+    ],
+    routePath: '/students/list'
+  },
 
   {
     text: 'Grievances',
@@ -174,6 +200,14 @@ export const FACULTY_MENU_ITEMS: MenuItem[] = [
     ],
     routePath: '/facultylogin/grievance/list',
   },
+  // {
+  //   text: 'Marks',
+  //   icon: 'Marks',
+  //   subItems: [
+  //     { text: 'Mark Entry', routePath: '/marks-entry' },
+  //   ],
+  //   routePath: '',
+  // },
 
 ];
 

@@ -21,6 +21,7 @@ interface FilterOption {
   visible?: boolean;
   sx?: SxProps<Theme>;
   menuProps?: any;
+  disabled?: boolean; // ✅ ADD THIS
 }
 
 interface ActionButton {
