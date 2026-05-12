@@ -9,7 +9,6 @@ import signature from "/assets/images/signature.jpg";
 import maleimage from "/assets/images/male-logo.jpg";
 import femaleimage from "/assets/images/female-logo.jpg";
 import { getValue } from "../../../../utils/localStorageUtil";
-import { BASE_URL } from "../../../../constants/ApiConstants";
 const cellStyle: React.CSSProperties = {
   border: "1px solid #000",
   padding: "8px",
@@ -28,183 +27,9 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const student_id = student?.id || getValue("student_id");
 
   const profileImageUrl = student_id
-    ? `${BASE_URL}student/profile-image-proxy/${student_id}`
+    ? `http://127.0.0.1:8000/student/profile-image-proxy/${student_id}`
     : null;
-  const eveningSessionStudents = [
-    "X0226023",
-    "X0226036",
-    "X0226018",
-    "X0226017",
-    "X0226030",
-    "X0226006",
-    "X0226034"
-  ];
 
-  const ihsMorningTimetable = [
-    [
-      "1",
-      "June 06 2026",
-      "EHE25OCT01",
-      "Occupational and Environmental Health",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 07 2026",
-      "EHE25OCT02",
-      "Fundamentals of Physiology and Industrial Toxicology",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 13 2026",
-      "EHE25OCT03",
-      "Occupational Exposure to Physical and Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 14 2026",
-      "EHE25OCT04",
-      "Occupational Exposure to Particulates and Chemical Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 20 2026",
-      "EHE25OCT05",
-      "Occupational Exposure to Biological and Ergonomic Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 21 2026",
-      "EHE25OCT06",
-      "Research Methodology",
-      "10.00 AM - 12.00 PM",
-    ],
-  ];
-
-  const ihsEveningTimetable = [
-    [
-      "1",
-      "June 06 2026",
-      "EHE25OCT01",
-      "Occupational and Environmental Health",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 07 2026",
-      "EHE25OCT02",
-      "Fundamentals of Physiology and Industrial Toxicology",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 13 2026",
-      "EHE25OCT03",
-      "Occupational Exposure to Physical and Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 14 2026",
-      "EHE25OCT04",
-      "Occupational Exposure to Particulates and Chemical Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 20 2026",
-      "EHE25OCT05",
-      "Occupational Exposure to Biological and Ergonomic Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 21 2026",
-      "EHE25OCT06",
-      "Research Methodology",
-      "6.30 PM - 8.30 PM",
-    ],
-  ];
-  const wellnessCoachingTimetable = [
-    [
-      "1",
-      "June 06 2026",
-      "MBL25OCT18",
-      "Foundations of Wellness Coaching",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 07 2026",
-      "MBL25OCT19",
-      "Diet and Holistic Wellness",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 13 2026",
-      "MBL25OCT20",
-      "Physical Activity & Fitness",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 14 2026",
-      "MBL25OCT21",
-      "Emotional Wellbeing, NLP & Stress Management",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 20 2026",
-      "MBL25OCT22",
-      "Coaching Special Populations",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 21 2026",
-      "MBL25OCT23",
-      "Research Methodology",
-      "10.00 AM - 12.00 PM",
-    ],
-  ];
-
-  const registrationNo = student?.registration_no;
-
-  // const isIndustrialHygiene =
-  //   String(student?.program_id) === "1500132";
-
-  // const isEveningStudent =
-  //   eveningSessionStudents.includes(registrationNo);
-
-  // Evening for listed students, morning for others
-  // const examTimetable = isEveningStudent
-  //   ? ihsEveningTimetable
-  //   : ihsMorningTimetable;
-
-  const isIndustrialHygiene =
-    String(student?.program_id) === "1500132";
-
-  const isWellnessCoaching =
-    String(student?.program_id) === "1500136";
-
-  const isEveningStudent =
-    eveningSessionStudents.includes(registrationNo);
-
-  let examTimetable:any = [];
-
-  if (isIndustrialHygiene) {
-    examTimetable = isEveningStudent
-      ? ihsEveningTimetable
-      : ihsMorningTimetable;
-  } else if (isWellnessCoaching) {
-    examTimetable = wellnessCoachingTimetable;
-  }
 
   const toggleFlip = () => setIsFlipped((prev) => !prev);
 
@@ -256,14 +81,14 @@ const HallTicket = ({ student }: HallTicketProps) => {
     page2Ref.current.style.transform = originalPage2Transform;
     setIsFlipped(originalFlip);
   };
-  // const cleanDocumentUrl = (value: string | null) => {
-  //   if (!value) return null;
+  const cleanDocumentUrl = (value: string | null) => {
+    if (!value) return null;
 
-  //   return value
-  //     .replace(/[{}"]/g, "")   // remove { } and "
-  //     .split(",")[0]           // take first if array
-  //     .trim();
-  // };
+    return value
+      .replace(/[{}"]/g, "")   // remove { } and "
+      .split(",")[0]           // take first if array
+      .trim();
+  };
   const formattedDOB = student?.date_of_birth
     ? new Date(student.date_of_birth).toLocaleDateString("en-GB")
     : "-";
@@ -280,11 +105,11 @@ const HallTicket = ({ student }: HallTicketProps) => {
       <Box component="span">B.Sc (Hons) - (Data Science)</Box>
     ) : student?.program_id == "1500132" ? (
       <Box component="span">
-        PG certificate in Industrial Hygiene
+        1-year online executive PG certificate in Industrial Hygiene
       </Box>
     ) : student?.program_id == "1500136" ? (
       <Box component="span">
-        PG certificate in Wellness Coaching
+        1-year online executive PG certificate in Wellness Coaching
       </Box>
     ) : (
       "-"
@@ -292,10 +117,6 @@ const HallTicket = ({ student }: HallTicketProps) => {
     userImage: profileImageUrl,
     passwordDOB: passwordDOB
   };
-
-  if (!isIndustrialHygiene && !isWellnessCoaching) {
-    return null;
-  }
 
   return (
     <Box
@@ -361,7 +182,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
                     CENTRE FOR DISTANCE AND ONLINE EDUCATION
                   </Typography>
                   <Typography align="center" sx={{ fontSize: 15, fontWeight: 600, color: "#090909ff" }}>
-                    HALL TICKET – JUNE 2026
+                    HALL TICKET – FEBRUARY 2026
                   </Typography>
                 </Box>
               </Box>
@@ -440,17 +261,21 @@ const HallTicket = ({ student }: HallTicketProps) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {
-                    examTimetable
-                      .map((row:any, index:any) => (
-                        <tr key={index}>
-                          {row.map((cell:any, i:any) => (
-                            <td key={i} style={cellStyle} align="center">
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
+                  {[
+                    ["1", "Feb 20 2026", "MTH24OCT01", "Mathematics", "10.00 AM – 1.30 PM"],
+                    ["1", "Feb 22 2026", "ENG24OCT01", "Communicative English", "10.00 AM – 1.30 PM"],
+                    ["1", "Feb 28 2026", "CDS24OCT01", "Fundamental of Computer Science", "10.00 AM – 1.30 PM"],
+                    ["1", "March 1 2026", "CDS24OCT02", "C Programming (Theory)", "10.00 AM - 1.30 PM"],
+                    ["1", "March 1 2026", "CDS24OCT02", "C Programming (Practical)", "3.00 PM - 5.00 PM"],
+                  ].map((row, index) => (
+                    <tr key={index}>
+                      {row.map((cell, i) => (
+                        <td key={i} style={cellStyle} align="center">
+                          {cell}
+                        </td>
                       ))}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </Box>
@@ -474,7 +299,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
               <Typography mt={1}>
                 5. Link to Access Exam Platform
                 <br />
-                https://exam.sriheronline.edu.in/login/index.php
+               https://exam.sriheronline.edu.in/login/index.php
                 <br />
                 UserName - {personalInfo.registrationNo}, Password - {personalInfo.passwordDOB}
               </Typography>

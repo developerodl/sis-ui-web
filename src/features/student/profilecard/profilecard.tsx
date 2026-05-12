@@ -7,7 +7,7 @@ import femaleimage from "/assets/images/female-logo.jpg";
 import signature from "/assets/images/signature.jpg";
 import { getValue } from "../../../utils/localStorageUtil";
 import { apiRequest } from "../../../utils/ApiRequest";
-import { ApiRoutes, BASE_URL } from "../../../constants/ApiConstants";
+import { ApiRoutes } from "../../../constants/ApiConstants";
 import Barcode from "react-barcode";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
@@ -18,9 +18,9 @@ import IDCardSkeleton from "../../../components/card/skeletonloader/IDCardSkelet
 const StudentHorizontalIDCard = () => {
 
   const getProxyImageUrl = (url: string | null) => {
-    if (!url) return null;
+  if (!url) return null;
 
-    return `${BASE_URL}student/profile-image-proxy/${student_id}`;
+  return `http://127.0.0.1:8000/student/profile-image-proxy/${student_id}`;
   };
   const [isFlipped, setIsFlipped] = useState(false);
   const student_id = getValue("student_id");
@@ -290,21 +290,15 @@ const StudentHorizontalIDCard = () => {
         <Box component="span">B.Sc (Hons) - (Data Science)</Box>
       ) : student?.program_id == "1500132" ? (
         <Box component="span">
-          PG certificate in Industrial Hygiene
+          1-year online executive PG certificate in Industrial Hygiene
         </Box>
       ) : student?.program_id == "1500136" ? (
         <Box component="span">
-          PG certificate in Wellness Coaching
+          1-year online executive PG certificate in Wellness Coaching
         </Box>
-      ) :
-        student?.program_id == "1500130" ? (
-          <Box component="span">
-            Pg Certificate in Organisational Behaviour Analysis
-          </Box>
-        ) :
-          (
-            "-"
-          ),
+      ) : (
+        "-"
+      ),
 
     department: student?.department || "CDOE",
 
