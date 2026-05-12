@@ -24,6 +24,11 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const page2Ref = useRef<HTMLDivElement>(null);
   const gender = getValue("gender");
   const userimage = gender == "Female" ? femaleimage : maleimage;
+  const student_id = student?.id || getValue("student_id");
+
+  const profileImageUrl = student_id
+    ? `http://127.0.0.1:8000/student/profile-image-proxy/${student_id}`
+    : null;
 
 
   const toggleFlip = () => setIsFlipped((prev) => !prev);
@@ -41,7 +46,9 @@ const HallTicket = ({ student }: HallTicketProps) => {
       const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
+        allowTaint: false,
         backgroundColor: "#ffffff",
+        imageTimeout: 15000
       });
       return canvas.toDataURL("image/png");
     };
@@ -107,7 +114,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     ) : (
       "-"
     ),
-    userImage: cleanDocumentUrl(student?.document_details?.profile_image),
+    userImage: profileImageUrl,
     passwordDOB: passwordDOB
   };
 
@@ -232,6 +239,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
                 <img
                   src={personalInfo.userImage ? personalInfo.userImage : userimage}
                   alt="Candidate"
+                  crossOrigin="anonymous"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>
