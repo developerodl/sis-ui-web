@@ -660,23 +660,47 @@ export default function StudentDetailTab({
     paymentDate <= cutoffDate &&
     !isBlockedStudent;
 
+  const batch = student?.batch
+  const isJulyBatch = batch?.toLowerCase() === 'july';
+
+  // const admintabs = [
+  //   'Basic Info',
+  //   'Academic',
+  //   ...(hideDebTab ? [] : ['DEB']),
+  //   'Documents',
+  //   'ID Card',
+  //   'Hall Ticket',
+  //   ...(isEligibleForResults ? ['Exam Results'] : [])
+  // ];
+
   const admintabs = [
     'Basic Info',
     'Academic',
     ...(hideDebTab ? [] : ['DEB']),
     'Documents',
     'ID Card',
-    'Hall Ticket',
-    ...(isEligibleForResults ? ['Exam Results'] : [])
+    ...(isJulyBatch ? ['Hall Ticket'] : []),
+    ...(isJulyBatch && isEligibleForResults
+      ? ['Exam Results']
+      : []),
   ];
+
+  // const studenttabs = [
+  //   'Basic Info',
+  //   ...(hideDebTab ? [] : ['DEB']),
+  //   'ID Card',
+  //   'Hall Ticket',
+  // ];
 
   const studenttabs = [
     'Basic Info',
     ...(hideDebTab ? [] : ['DEB']),
     'ID Card',
-    'Hall Ticket',
+    ...(isJulyBatch ? ['Hall Ticket'] : []),
+    // ...(isJulyBatch && isEligibleForResults
+    //   ? ['Exam Results']
+    //   : []),
   ];
-
   // const tabs = rollid === 2 ? studenttabs : admintabs;
 
   // const tabContents =
@@ -699,35 +723,62 @@ export default function StudentDetailTab({
 
   /* -------------------- Role-based Tabs -------------------- */
 
-const tabs =
-  rollid === 3
-    ? ['Basic Info'] // ✅ ONLY this tab
-    : rollid === 2
-      ? studenttabs
-      : admintabs;
 
-const tabContents =
-  rollid === 3
-    ? [
-        basicInfoTab, // ✅ ONLY this content
-      ]
-    : rollid === 2
+  const tabs =
+    rollid === 3
+      ? ['Basic Info'] // ✅ ONLY this tab
+      : rollid === 2
+        ? studenttabs
+        : admintabs;
+
+  // const tabContents =
+  //   rollid === 3
+  //     ? [
+  //         basicInfoTab, // ✅ ONLY this content
+  //       ]
+  //     : rollid === 2 && batch == 'July'
+  //       ? [
+  //           basicInfoTab,
+  //           ...(hideDebTab ? [] : [debTab]),
+  //           IDCardTab,
+  //           HallTicketTab,
+  //         ]
+  //       : [
+  //           basicInfoTab,
+  //           academicTab,
+  //           ...(hideDebTab ? [] : [debTab]),
+  //           documentsTab,
+  //           IDCardTab,
+  //           HallTicketTab,
+  //           ...(isEligibleForResults ? [examResultsTab] : []),
+  //         ];
+
+  const tabContents =
+    rollid === 3
       ? [
+        basicInfoTab,
+      ]
+      : rollid === 2
+        ? [
           basicInfoTab,
           ...(hideDebTab ? [] : [debTab]),
           IDCardTab,
-          HallTicketTab,
+          ...(isJulyBatch ? [HallTicketTab] : []),
+          ...(isJulyBatch && isEligibleForResults
+            ? [examResultsTab]
+            : []),
         ]
-      : [
+        : [
           basicInfoTab,
           academicTab,
           ...(hideDebTab ? [] : [debTab]),
           documentsTab,
           IDCardTab,
-          HallTicketTab,
-          ...(isEligibleForResults ? [examResultsTab] : []),
+          ...(isJulyBatch ? [HallTicketTab] : []),
+          ...(isJulyBatch && isEligibleForResults
+            ? [examResultsTab]
+            : []),
         ];
-
   // useEffect(() => {
   //   if (!isEligibleForResults) return;
 

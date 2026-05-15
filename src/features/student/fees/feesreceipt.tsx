@@ -30,6 +30,7 @@ export default function FeesReceipt() {
   const studentId = passedStudentId || getValue("student_id");
 
   const username = getValue("username");
+  const userfullname = getValue("userfullname");
 
   const [payments, setPayments] = useState<any[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -201,6 +202,22 @@ export default function FeesReceipt() {
               >
                 FEE RECEIPT
               </Typography>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={1}
+                px={1}
+              >
+                <Typography fontWeight="bold">
+                  Student Name : {userfullname || "-"}
+                </Typography>
+
+                {/* <Typography fontWeight="bold">
+                  Username : {username || "-"}
+                </Typography> */}
+              </Box>
+
 
               <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }} border="1px solid #ddd" mb={2}>
                 {[

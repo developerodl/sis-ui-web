@@ -82,14 +82,14 @@ const HallTicket = ({ student }: HallTicketProps) => {
     page2Ref.current.style.transform = originalPage2Transform;
     setIsFlipped(originalFlip);
   };
-  const cleanDocumentUrl = (value: string | null) => {
-    if (!value) return null;
+  // const cleanDocumentUrl = (value: string | null) => {
+  //   if (!value) return null;
 
-    return value
-      .replace(/[{}"]/g, "")   // remove { } and "
-      .split(",")[0]           // take first if array
-      .trim();
-  };
+  //   return value
+  //     .replace(/[{}"]/g, "")   // remove { } and "
+  //     .split(",")[0]           // take first if array
+  //     .trim();
+  // };
   const formattedDOB = student?.date_of_birth
     ? new Date(student.date_of_birth).toLocaleDateString("en-GB")
     : "-";

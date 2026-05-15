@@ -9,7 +9,7 @@ import StudentDetailTab from './StudentDetailTab';
 import theme from '../../../styles/theme';
 import { apiRequest } from '../../../utils/ApiRequest';
 import { ApiRoutes } from '../../../constants/ApiConstants';
-import { getValue } from '../../../utils/localStorageUtil';
+import { getValue, setValue } from '../../../utils/localStorageUtil';
 import { useLoader } from '../../../context/LoaderContext';
 import ProfileSkeleton from '../../../components/card/skeletonloader/Profileskeleton';
 import Customtext from '../../../components/inputs/customtext/Customtext';
@@ -31,7 +31,9 @@ export default function StudentDetailUI() {
         });
 
         if (response) {
+          setValue("userfullname", `${response.first_name} ${response.last_name}`);
           setStudent(response);
+
         } else {
         }
       } catch (error) {
