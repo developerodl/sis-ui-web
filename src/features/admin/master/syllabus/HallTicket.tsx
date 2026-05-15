@@ -9,6 +9,7 @@ import signature from "/assets/images/signature.jpg";
 import maleimage from "/assets/images/male-logo.jpg";
 import femaleimage from "/assets/images/female-logo.jpg";
 import { getValue } from "../../../../utils/localStorageUtil";
+import { BASE_URL } from "../../../../constants/ApiConstants";
 const cellStyle: React.CSSProperties = {
   border: "1px solid #000",
   padding: "8px",
@@ -24,6 +25,11 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const page2Ref = useRef<HTMLDivElement>(null);
   const gender = getValue("gender");
   const userimage = gender == "Female" ? femaleimage : maleimage;
+  const student_id = student?.id || getValue("student_id");
+
+  const profileImageUrl = student_id
+  ? `${BASE_URL}student/profile-image-proxy/${student_id}`
+  : null;
 
 
   const toggleFlip = () => setIsFlipped((prev) => !prev);
@@ -41,7 +47,9 @@ const HallTicket = ({ student }: HallTicketProps) => {
       const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
+        allowTaint: false,
         backgroundColor: "#ffffff",
+        imageTimeout: 15000
       });
       return canvas.toDataURL("image/png");
     };
@@ -74,14 +82,14 @@ const HallTicket = ({ student }: HallTicketProps) => {
     page2Ref.current.style.transform = originalPage2Transform;
     setIsFlipped(originalFlip);
   };
-  const cleanDocumentUrl = (value: string | null) => {
-    if (!value) return null;
+  // const cleanDocumentUrl = (value: string | null) => {
+  //   if (!value) return null;
 
-    return value
-      .replace(/[{}"]/g, "")   // remove { } and "
-      .split(",")[0]           // take first if array
-      .trim();
-  };
+  //   return value
+  //     .replace(/[{}"]/g, "")   // remove { } and "
+  //     .split(",")[0]           // take first if array
+  //     .trim();
+  // };
   const formattedDOB = student?.date_of_birth
     ? new Date(student.date_of_birth).toLocaleDateString("en-GB")
     : "-";
@@ -107,7 +115,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     ) : (
       "-"
     ),
-    userImage: cleanDocumentUrl(student?.document_details?.profile_image),
+    userImage: profileImageUrl,
     passwordDOB: passwordDOB
   };
 
@@ -232,6 +240,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
                 <img
                   src={personalInfo.userImage ? personalInfo.userImage : userimage}
                   alt="Candidate"
+                  crossOrigin="anonymous"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>

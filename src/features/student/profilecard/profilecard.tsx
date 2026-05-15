@@ -7,7 +7,7 @@ import femaleimage from "/assets/images/female-logo.jpg";
 import signature from "/assets/images/signature.jpg";
 import { getValue } from "../../../utils/localStorageUtil";
 import { apiRequest } from "../../../utils/ApiRequest";
-import { ApiRoutes } from "../../../constants/ApiConstants";
+import { ApiRoutes, BASE_URL } from "../../../constants/ApiConstants";
 import Barcode from "react-barcode";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
@@ -16,6 +16,12 @@ import DownloadIcon from "@mui/icons-material/Download";
 import IDCardSkeleton from "../../../components/card/skeletonloader/IDCardSkeleton";
 
 const StudentHorizontalIDCard = () => {
+
+  const getProxyImageUrl = (url: string | null) => {
+    if (!url) return null;
+
+    return `${BASE_URL}student/profile-image-proxy/${student_id}`;
+  };
   const [isFlipped, setIsFlipped] = useState(false);
   const student_id = getValue("student_id");
   const cardRef = useRef<HTMLDivElement>(null);
@@ -219,9 +225,10 @@ const StudentHorizontalIDCard = () => {
 
       const canvas = await html2canvas(wrapper, {
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: "#ffffff",
         scale: 3,
+        imageTimeout: 15000,
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -302,7 +309,8 @@ const StudentHorizontalIDCard = () => {
     registration_no: student?.registration_no,
     parent_guardian_name: student?.parent_guardian_name,
     address: `${student?.address_details?.corr_addr1 || ""}, ${student?.address_details?.corr_city || ""} - ${student?.address_details?.corr_pin || ""}`,
-    userImage: cleanDocumentUrl(student?.document_details?.profile_image),
+    // userImage: cleanDocumentUrl(student?.document_details?.profile_image),
+    userImage: getProxyImageUrl(cleanDocumentUrl(student?.document_details?.profile_image)),
     relationship_with_student: student?.relationship_with_student,
   };
 
@@ -366,8 +374,13 @@ const StudentHorizontalIDCard = () => {
             {/* Photo */}
             <Box>
               <img
-                src={personalInfo.userImage ? personalInfo.userImage : userimage}
+                // src={personalInfo.userImage ? personalInfo.userImage : userimage}
+                // alt="Student"
+                // crossOrigin="anonymous"
+                // className="w-[130px] h-[140px] rounded-md border border-gray-300 object-cover"
+                src={personalInfo.userImage || userimage}
                 alt="Student"
+                crossOrigin="anonymous"
                 className="w-[130px] h-[140px] rounded-md border border-gray-300 object-cover"
               />
             </Box>
