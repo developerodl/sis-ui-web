@@ -290,15 +290,21 @@ const StudentHorizontalIDCard = () => {
         <Box component="span">B.Sc (Hons) - (Data Science)</Box>
       ) : student?.program_id == "1500132" ? (
         <Box component="span">
-          1-year online executive PG certificate in Industrial Hygiene
+          PG certificate in Industrial Hygiene
         </Box>
       ) : student?.program_id == "1500136" ? (
         <Box component="span">
-          1-year online executive PG certificate in Wellness Coaching
+          PG certificate in Wellness Coaching
         </Box>
-      ) : (
-        "-"
-      ),
+      ) :
+        student?.program_id == "1500130" ? (
+          <Box component="span">
+            Pg Certificate in Organisational Behaviour Analysis
+          </Box>
+        ) :
+          (
+            "-"
+          ),
 
     department: student?.department || "CDOE",
 
