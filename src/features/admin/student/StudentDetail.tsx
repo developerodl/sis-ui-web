@@ -73,19 +73,20 @@ export default function StudentDetailUI() {
     email: student?.email,
     phoneNumber: student?.mobile_number,
     program:
-      student?.program_id == "1500038" ? (
-        <Box component="span">B.Sc (Hons) - (Data Science)</Box>
-      ) : student?.program_id == "1500132" ? (
-        <Box component="span">
-          1-year online executive PG certificate in Industrial Hygiene
-        </Box>
-      ) : student?.program_id == "1500136" ? (
-        <Box component="span">
-          1-year online executive PG certificate in Wellness Coaching
-        </Box>
-      ) : (
-        "-"
-      ),
+      student?.program_name,
+    // student?.program_id == "1500038" ? (
+    //   <Box component="span">B.Sc (Hons) - (Data Science)</Box>
+    // ) : student?.program_id == "1500132" ? (
+    //   <Box component="span">
+    //     1-year online executive PG certificate in Industrial Hygiene
+    //   </Box>
+    // ) : student?.program_id == "1500136" ? (
+    //   <Box component="span">
+    //     1-year online executive PG certificate in Wellness Coaching
+    //   </Box>
+    // ) : (
+    //   "-"
+    // ),
     department: student?.department,
     batch: regBatchYear?.batch || student?.batch || "July",
     year: regBatchYear?.year || student?.year || "2025",
