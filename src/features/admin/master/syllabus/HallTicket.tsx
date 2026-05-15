@@ -9,6 +9,7 @@ import signature from "/assets/images/signature.jpg";
 import maleimage from "/assets/images/male-logo.jpg";
 import femaleimage from "/assets/images/female-logo.jpg";
 import { getValue } from "../../../../utils/localStorageUtil";
+import { BASE_URL } from "../../../../constants/ApiConstants";
 const cellStyle: React.CSSProperties = {
   border: "1px solid #000",
   padding: "8px",
@@ -27,8 +28,8 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const student_id = student?.id || getValue("student_id");
 
   const profileImageUrl = student_id
-    ? `http://127.0.0.1:8000/student/profile-image-proxy/${student_id}`
-    : null;
+  ? `${BASE_URL}student/profile-image-proxy/${student_id}`
+  : null;
 
 
   const toggleFlip = () => setIsFlipped((prev) => !prev);
