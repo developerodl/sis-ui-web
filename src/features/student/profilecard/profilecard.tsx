@@ -7,7 +7,7 @@ import femaleimage from "/assets/images/female-logo.jpg";
 import signature from "/assets/images/signature.jpg";
 import { getValue } from "../../../utils/localStorageUtil";
 import { apiRequest } from "../../../utils/ApiRequest";
-import { ApiRoutes } from "../../../constants/ApiConstants";
+import { ApiRoutes, BASE_URL } from "../../../constants/ApiConstants";
 import Barcode from "react-barcode";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
@@ -18,9 +18,9 @@ import IDCardSkeleton from "../../../components/card/skeletonloader/IDCardSkelet
 const StudentHorizontalIDCard = () => {
 
   const getProxyImageUrl = (url: string | null) => {
-  if (!url) return null;
+    if (!url) return null;
 
-  return `http://127.0.0.1:8000/student/profile-image-proxy/${student_id}`;
+    return `${BASE_URL}student/profile-image-proxy/${student_id}`;
   };
   const [isFlipped, setIsFlipped] = useState(false);
   const student_id = getValue("student_id");
