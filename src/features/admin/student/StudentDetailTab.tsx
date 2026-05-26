@@ -436,96 +436,96 @@ export default function StudentDetailTab({
       </CardComponent>
     ),
   };
+  // hide temporary
+  // const registrationNo = student?.registration_no;
 
-  const registrationNo = student?.registration_no;
+  // const getResultPdfPath = (registrationNo?: string) => {
+  //   if (!registrationNo) return null;
 
-  const getResultPdfPath = (registrationNo?: string) => {
-    if (!registrationNo) return null;
+  //   return `/assets/results/MS-${registrationNo}-1-MS-FEBRUARY-2026.jpg`;
+  // };
 
-    return `/assets/results/MS-${registrationNo}-1-MS-FEBRUARY-2026.jpg`;
-  };
+  // const resultImage = getResultPdfPath(registrationNo);
+  // console.log(resultImage, "resultImage");
 
-  const resultImage = getResultPdfPath(registrationNo);
-  console.log(resultImage, "resultImage");
-
-  const examResultsTab: TabContent = {
-    title: "Exam Results",
-    items: [],
-    customRender: () => {
-      if (loading) return <BasicDetailsSkeleton />;
-
-
+  // const examResultsTab: TabContent = {
+  //   title: "Exam Results",
+  //   items: [],
+  //   customRender: () => {
+  //     if (loading) return <BasicDetailsSkeleton />;
 
 
-      return (
-        <CardComponent>
-          {/* Header */}
-          <Box className="py-2 px-3">
-            <Customtext fieldName="Exam Results" sx={{ mb: 0 }} />
-          </Box>
 
-          <Divider sx={{ borderColor: "#899000" }} />
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              p: 3, // 👈 increase padding a bit
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            {resultImage ? (
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: "650px", // ID card style width
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
-                  backgroundColor: "#fff",
-                }}
-              >
-                <img
-                  src={resultImage}
-                  alt="Exam Result"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                    objectFit: "contain", // 👈 ensures proper scaling
-                  }}
-                />
+  //     return (
+  //       <CardComponent>
+  //         {/* Header */}
+  //         <Box className="py-2 px-3">
+  //           <Customtext fieldName="Exam Results" sx={{ mb: 0 }} />
+  //         </Box>
 
-                {/* Download Button */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    p: 1,
-                  }}
-                >
-                  <IconButton
-                    onClick={() => handleDownload(resultImage)}
-                    sx={{
-                      backgroundColor: "black",
-                      color: "#fff",
-                      p: 0.6,
-                      "&:hover": { backgroundColor: "#333" },
-                    }}
-                  >
-                    <DownloadIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-            ) : (
-              <Customtext fieldName="No Result Available" />
-            )}
-          </Box>
-        </CardComponent>
-      );
-    },
-  };
+  //         <Divider sx={{ borderColor: "#899000" }} />
+
+  //         <Box
+  //           sx={{
+  //             display: "flex",
+  //             justifyContent: "center",
+  //             alignItems: "center",
+  //             p: 3, // 👈 increase padding a bit
+  //             backgroundColor: "#f5f5f5",
+  //           }}
+  //         >
+  //           {resultImage ? (
+  //             <Box
+  //               sx={{
+  //                 width: "100%",
+  //                 maxWidth: "650px", // ID card style width
+  //                 borderRadius: 2,
+  //                 overflow: "hidden",
+  //                 boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
+  //                 backgroundColor: "#fff",
+  //               }}
+  //             >
+  //               <img
+  //                 src={resultImage}
+  //                 alt="Exam Result"
+  //                 style={{
+  //                   width: "100%",
+  //                   height: "auto",
+  //                   display: "block",
+  //                   objectFit: "contain", // 👈 ensures proper scaling
+  //                 }}
+  //               />
+
+  //               {/* Download Button */}
+  //               <Box
+  //                 sx={{
+  //                   display: "flex",
+  //                   justifyContent: "flex-end",
+  //                   p: 1,
+  //                 }}
+  //               >
+  //                 <IconButton
+  //                   onClick={() => handleDownload(resultImage)}
+  //                   sx={{
+  //                     backgroundColor: "black",
+  //                     color: "#fff",
+  //                     p: 0.6,
+  //                     "&:hover": { backgroundColor: "#333" },
+  //                   }}
+  //                 >
+  //                   <DownloadIcon />
+  //                 </IconButton>
+  //               </Box>
+  //             </Box>
+  //           ) : (
+  //             <Customtext fieldName="No Result Available" />
+  //           )}
+  //         </Box>
+  //       </CardComponent>
+  //     );
+  //   },
+  // };
 
   // const examResultsTab: TabContent = {
   //   title: "Exam Results",
@@ -619,49 +619,52 @@ export default function StudentDetailTab({
 
   // ✅ PROGRAM + PAYMENT CONDITION
 
-  const cutoffDate = new Date("2025-10-16");
+  // const cutoffDate = new Date("2025-10-16");
 
-  // Function to safely get payment date
-  const getPaymentDate = (payments?: any[]) => {
-    if (!Array.isArray(payments)) return null;
+  // // Function to safely get payment date
+  // const getPaymentDate = (payments?: any[]) => {
+  //   if (!Array.isArray(payments)) return null;
 
-    // 1️⃣ Try semester fee first
-    const semesterPayment = payments.find(
-      (p) => p.payment_type === "semester_fee"
-    );
+  //   // 1️⃣ Try semester fee first
+  //   const semesterPayment = payments.find(
+  //     (p) => p.payment_type === "semester_fee"
+  //   );
 
-    if (semesterPayment?.payment_date) {
-      return new Date(semesterPayment.payment_date);
-    }
+  //   if (semesterPayment?.payment_date) {
+  //     return new Date(semesterPayment.payment_date);
+  //   }
 
-    // 2️⃣ Fallback to application fee
-    const applicationPayment = payments.find(
-      (p) => p.payment_type === "application_fee"
-    );
+  //   // 2️⃣ Fallback to application fee
+  //   const applicationPayment = payments.find(
+  //     (p) => p.payment_type === "application_fee"
+  //   );
 
-    if (applicationPayment?.payment_date) {
-      return new Date(applicationPayment.payment_date);
-    }
+  //   if (applicationPayment?.payment_date) {
+  //     return new Date(applicationPayment.payment_date);
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
-  // Get payment date
-  const paymentDate = getPaymentDate(student?.payments);
+  // // Get payment date
+  // const paymentDate = getPaymentDate(student?.payments);
 
-  // Block only this student
-  const isBlockedStudent =
-    student?.registration_no === "O0525003";
+  // // Block only this student
+  // const isBlockedStudent =
+  //   student?.registration_no === "O0525003";
 
-  // Final eligibility rule
-  const isEligibleForResults =
-    student?.program_id === 1500038 &&
-    paymentDate !== null &&
-    paymentDate <= cutoffDate &&
-    !isBlockedStudent;
+  // // Final eligibility rule
+  // const isEligibleForResults =
+  //   student?.program_id === 1500038 &&
+  //   paymentDate !== null &&
+  //   paymentDate <= cutoffDate &&
+  //   !isBlockedStudent;
 
-  const batch = student?.batch
-  const isJulyBatch = batch?.toLowerCase() === 'july';
+  // const batch = student?.batch
+  // const isJulyBatch = batch?.toLowerCase() === 'july';
+
+  const isHallTicketEligible =
+    String(student?.program_id) === "1500132";
 
   // const admintabs = [
   //   'Basic Info',
@@ -673,18 +676,33 @@ export default function StudentDetailTab({
   //   ...(isEligibleForResults ? ['Exam Results'] : [])
   // ];
 
+  // const admintabs = [
+  //   'Basic Info',
+  //   'Academic',
+  //   ...(hideDebTab ? [] : ['DEB']),
+  //   'Documents',
+  //   'ID Card',
+  //   ...(isJulyBatch ? ['Hall Ticket'] : []),
+  //   ...(isJulyBatch && isEligibleForResults
+  //     ? ['Exam Results']
+  //     : []),
+  // ];
+
   const admintabs = [
     'Basic Info',
     'Academic',
     ...(hideDebTab ? [] : ['DEB']),
     'Documents',
     'ID Card',
-    ...(isJulyBatch ? ['Hall Ticket'] : []),
-    ...(isJulyBatch && isEligibleForResults
-      ? ['Exam Results']
-      : []),
+    ...(isHallTicketEligible ? ['Hall Ticket'] : []),
   ];
 
+  const studenttabs = [
+    'Basic Info',
+    ...(hideDebTab ? [] : ['DEB']),
+    'ID Card',
+    ...(isHallTicketEligible ? ['Hall Ticket'] : []),
+  ];
   // const studenttabs = [
   //   'Basic Info',
   //   ...(hideDebTab ? [] : ['DEB']),
@@ -692,15 +710,17 @@ export default function StudentDetailTab({
   //   'Hall Ticket',
   // ];
 
-  const studenttabs = [
-    'Basic Info',
-    ...(hideDebTab ? [] : ['DEB']),
-    'ID Card',
-    ...(isJulyBatch ? ['Hall Ticket'] : []),
-    // ...(isJulyBatch && isEligibleForResults
-    //   ? ['Exam Results']
-    //   : []),
-  ];
+  // const studenttabs = [
+  //   'Basic Info',
+  //   ...(hideDebTab ? [] : ['DEB']),
+  //   'ID Card',
+  //   ...(isJulyBatch ? ['Hall Ticket'] : []),
+  //   // ...(isJulyBatch && isEligibleForResults
+  //   //   ? ['Exam Results']
+  //   //   : []),
+  // ];
+
+
   // const tabs = rollid === 2 ? studenttabs : admintabs;
 
   // const tabContents =
@@ -752,7 +772,6 @@ export default function StudentDetailTab({
   //           HallTicketTab,
   //           ...(isEligibleForResults ? [examResultsTab] : []),
   //         ];
-
   const tabContents =
     rollid === 3
       ? [
@@ -763,10 +782,7 @@ export default function StudentDetailTab({
           basicInfoTab,
           ...(hideDebTab ? [] : [debTab]),
           IDCardTab,
-          ...(isJulyBatch ? [HallTicketTab] : []),
-          ...(isJulyBatch && isEligibleForResults
-            ? [examResultsTab]
-            : []),
+          ...(isHallTicketEligible ? [HallTicketTab] : []),
         ]
         : [
           basicInfoTab,
@@ -774,11 +790,34 @@ export default function StudentDetailTab({
           ...(hideDebTab ? [] : [debTab]),
           documentsTab,
           IDCardTab,
-          ...(isJulyBatch ? [HallTicketTab] : []),
-          ...(isJulyBatch && isEligibleForResults
-            ? [examResultsTab]
-            : []),
+          ...(isHallTicketEligible ? [HallTicketTab] : []),
         ];
+  // const tabContents =
+  //   rollid === 3
+  //     ? [
+  //       basicInfoTab,
+  //     ]
+  //     : rollid === 2
+  //       ? [
+  //         basicInfoTab,
+  //         ...(hideDebTab ? [] : [debTab]),
+  //         IDCardTab,
+  //         ...(isJulyBatch ? [HallTicketTab] : []),
+  //         ...(isJulyBatch && isEligibleForResults
+  //           ? [examResultsTab]
+  //           : []),
+  //       ]
+  //       : [
+  //         basicInfoTab,
+  //         academicTab,
+  //         ...(hideDebTab ? [] : [debTab]),
+  //         documentsTab,
+  //         IDCardTab,
+  //         ...(isJulyBatch ? [HallTicketTab] : []),
+  //         ...(isJulyBatch && isEligibleForResults
+  //           ? [examResultsTab]
+  //           : []),
+  //       ];
   // useEffect(() => {
   //   if (!isEligibleForResults) return;
 
