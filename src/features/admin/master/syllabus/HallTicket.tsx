@@ -35,6 +35,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     "X0226036",
     "X0226018",
     "X0226017",
+    "X0226030"
   ];
 
   const ihsMorningTimetable = [
