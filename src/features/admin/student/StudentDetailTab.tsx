@@ -664,7 +664,7 @@ export default function StudentDetailTab({
   // const isJulyBatch = batch?.toLowerCase() === 'july';
 
   const isHallTicketEligible =
-    String(student?.program_id) === "1500132";
+    ["1500132", "1500136"].includes(String(student?.program_id));
 
   // const admintabs = [
   //   'Basic Info',
