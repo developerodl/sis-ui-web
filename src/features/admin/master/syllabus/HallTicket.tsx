@@ -127,19 +127,83 @@ const HallTicket = ({ student }: HallTicketProps) => {
       "6.30 PM - 8.30 PM",
     ],
   ];
+  const wellnessCoachingTimetable = [
+    [
+      "1",
+      "June 06 2026",
+      "MBL25OCT18",
+      "Foundations of Wellness Coaching",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 07 2026",
+      "MBL25OCT19",
+      "Diet and Holistic Wellness",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 13 2026",
+      "MBL25OCT20",
+      "Physical Activity & Fitness",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 14 2026",
+      "MBL25OCT21",
+      "Emotional Wellbeing, NLP & Stress Management",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 20 2026",
+      "MBL25OCT22",
+      "Coaching Special Populations",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 21 2026",
+      "MBL25OCT23",
+      "Research Methodology",
+      "10.00 AM - 12.00 PM",
+    ],
+  ];
 
   const registrationNo = student?.registration_no;
+
+  // const isIndustrialHygiene =
+  //   String(student?.program_id) === "1500132";
+
+  // const isEveningStudent =
+  //   eveningSessionStudents.includes(registrationNo);
+
+  // Evening for listed students, morning for others
+  // const examTimetable = isEveningStudent
+  //   ? ihsEveningTimetable
+  //   : ihsMorningTimetable;
 
   const isIndustrialHygiene =
     String(student?.program_id) === "1500132";
 
+  const isWellnessCoaching =
+    String(student?.program_id) === "1500136";
+
   const isEveningStudent =
     eveningSessionStudents.includes(registrationNo);
 
-  // Evening for listed students, morning for others
-  const examTimetable = isEveningStudent
-    ? ihsEveningTimetable
-    : ihsMorningTimetable;
+  let examTimetable:any = [];
+
+  if (isIndustrialHygiene) {
+    examTimetable = isEveningStudent
+      ? ihsEveningTimetable
+      : ihsMorningTimetable;
+  } else if (isWellnessCoaching) {
+    examTimetable = wellnessCoachingTimetable;
+  }
+
   const toggleFlip = () => setIsFlipped((prev) => !prev);
 
   const handleDownloadPDF = async () => {
@@ -227,7 +291,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     passwordDOB: passwordDOB
   };
 
-  if (!isIndustrialHygiene) {
+  if (!isIndustrialHygiene && !isWellnessCoaching) {
     return null;
   }
 
@@ -376,9 +440,9 @@ const HallTicket = ({ student }: HallTicketProps) => {
                 <tbody>
                   {
                     examTimetable
-                      .map((row, index) => (
+                      .map((row:any, index:any) => (
                         <tr key={index}>
-                          {row.map((cell, i) => (
+                          {row.map((cell:any, i:any) => (
                             <td key={i} style={cellStyle} align="center">
                               {cell}
                             </td>
