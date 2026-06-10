@@ -83,6 +83,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       { text: 'Payment Control', routePath: '/payment-control/list' },
       // { text: 'Batches', routePath: '/batch/list' },
       // { text: 'Years', routePath: '/year/list' },
+      {text: 'schemes', routePath: '/schemes/add' },
     ],
     routePath: '',
   },
