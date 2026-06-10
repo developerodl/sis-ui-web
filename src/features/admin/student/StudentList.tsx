@@ -243,6 +243,26 @@ export default function StudentTable() {
           render: (s) =>
             getSemesterPaymentDate(s.payments),
         },
+        {
+          header:'Date Of Birth',
+          key: 'date_of_birth',
+          render: (s) => formatDate(s.date_of_birth)
+        },
+        {
+          header:'Email',
+          key: 'email',
+          render: (s) => s.email
+        },
+        {
+          header: 'Current Address',
+          key: 'current_address',
+          render: (s) => `${s.address_details?.corr_addr1}, ${s.address_details?.corr_addr2}, ${s.address_details?.corr_city} - ${s.address_details?.corr_pin}`
+        },
+        {
+          header: 'Permanent Address',
+          key: 'permanent_address',
+          render: (s) => `${s.address_details?.perm_addr1}, ${s.address_details?.perm_addr2}, ${s.address_details?.perm_city} - ${s.address_details?.perm_pin}`
+        }
       ],
       'Students',
       'Students'
