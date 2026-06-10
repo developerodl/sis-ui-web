@@ -24,26 +24,32 @@ import CustomInputText from "../../../../components/inputs/customtext/CustomInpu
 import CustomNumberInput from "../../../../components/inputs/customtext/CustomNumberInput";
 
 interface FormValues {
-    programe_id: string;
-    regulation_year: string;
-    program_pattern: string;
-    program_pattern_no: number;
+    programe_id: number;
+    semester_id: number;
+    course_id?: number;
+    // regulation_year: string;
+    // program_pattern: string;
+    // program_pattern_no: number;
 }
 
 const defaultValues: FormValues = {
-    programe_id: "",
-    regulation_year: "",
-    program_pattern: "",
-    program_pattern_no: 0,
+    programe_id: 0,
+    semester_id: 0,
+    course_id:0,
+    // regulation_year: "",
+    // program_pattern: "",
+    // program_pattern_no: 0,
 };
 
 const schema = Yup.object().shape({
-    programe_id: Yup.string().required("Program is required"),
-    regulation_year: Yup.string().required("Regulation Year is required"),
-    program_pattern: Yup.string().required("Program Pattern is required"),
-    program_pattern_no: Yup.number()
-        .min(0, "Must be 0 or greater")
-        .required("Program Pattern No is required"),
+    programe_id: Yup.number().required("Program is required"),
+    semester_id: Yup.number().required("Semester is required"),
+    course_id: Yup.number().required("Course is required"),
+    // regulation_year: Yup.string().required("Regulation Year is required"),
+    // program_pattern: Yup.string().required("Program Pattern is required"),
+    // program_pattern_no: Yup.number()
+    //     .min(0, "Must be 0 or greater")
+    //     .required("Program Pattern No is required"),
 });
 
 export default function SchemesAdd() {
@@ -59,6 +65,8 @@ export default function SchemesAdd() {
         control,
         handleSubmit,
         reset,
+        watch,
+        setValue,
         formState: { errors, isDirty },
     } = useForm<FormValues>({
         resolver: yupResolver(schema),
@@ -66,6 +74,83 @@ export default function SchemesAdd() {
     });
 
     const [programs, setPrograms] = useState<{ value: string; label: string }[]>([]);
+    const selectedProgramId = watch("programe_id");
+    const [semesters, setSemesters] = useState<{ value: string; label: string }[]>([]);
+    const [courses, setCourses] = useState<{ value: string; label: string }[]>([]);
+
+        useEffect(() => {
+        if (!selectedProgramId) {
+            setCourses([]);
+            setValue("course_id", 0);
+            return;
+        }
+
+        const fetchCourses = async () => {
+            try {
+                const res = await apiClient.get(
+                    `${ApiRoutes.COURSES}/${selectedProgramId}/courses`
+                );
+
+                const coursesList =
+                    res.data?.courses || [];
+
+                const mapped = coursesList.map(
+                    (s: any) => ({
+                        value: String(s.course_no),
+                        label: `${s.course_name}`,
+                    })
+                );
+
+                setCourses(mapped);
+
+            } catch {
+                showAlert(
+                    "Failed to load courses list",
+                    "error"
+                );
+            }
+        };
+
+        fetchCourses();
+
+    }, [selectedProgramId]);
+    
+    useEffect(() => {
+        if (!selectedProgramId) {
+            setSemesters([]);
+            setValue("semester_id", 0);
+            return;
+        }
+
+        const fetchSemesters = async () => {
+            try {
+                const res = await apiClient.get(
+                    `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/semesters`
+                );
+
+                const semesterList =
+                    res.data?.semesters || [];
+
+                const mapped = semesterList.map(
+                    (s: any) => ({
+                        value: String(s.semester_no),
+                        label: `${s.semester_name}`,
+                    })
+                );
+
+                setSemesters(mapped);
+
+            } catch {
+                showAlert(
+                    "Failed to load semesters list",
+                    "error"
+                );
+            }
+        };
+
+        fetchSemesters();
+
+    }, [selectedProgramId]);
 
     useEffect(() => {
         clearError();
@@ -137,7 +222,7 @@ export default function SchemesAdd() {
             const payload = {
                 ...formData,
                 programe_id: Number(formData.programe_id),
-                program_pattern_no: Number(formData.program_pattern_no),
+                // program_pattern_no: Number(formData.program_pattern_no),
             };
 
             if (id) {
@@ -184,9 +269,39 @@ export default function SchemesAdd() {
                                 )}
                             />
                         </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="semester_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomSelect
+                                        label="Semester"
+                                        field={field}
+                                        options={semesters}
+                                        // error={errors.semester_id}
+                                        helperText={errors.semester_id?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="course_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomSelect
+                                        label="Course"
+                                        field={field}
+                                        options={courses}
+                                        // error={errors.course_id}
+                                        helperText={errors.course_id?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
 
                         {/* Regulation Year Input */}
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        {/* <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
                                 name="regulation_year"
                                 control={control}
@@ -199,11 +314,11 @@ export default function SchemesAdd() {
                                     />
                                 )}
                             />
-                        </Grid>
+                        </Grid> */}
 
 
                         {/* Program Pattern Input */}
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        {/* <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
                                 name="program_pattern"
                                 control={control}
@@ -216,11 +331,11 @@ export default function SchemesAdd() {
                                     />
                                 )}
                             />
-                        </Grid>
+                        </Grid> */}
 
 
                         {/* Program Pattern No Input */}
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        {/* <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
                                 name="program_pattern_no"
                                 control={control}
@@ -234,7 +349,7 @@ export default function SchemesAdd() {
                                     />
                                 )}
                             />
-                        </Grid>
+                        </Grid> */}
                     </Grid>
 
                     {/* Buttons */}

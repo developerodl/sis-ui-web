@@ -1,6 +1,18 @@
+<<<<<<< HEAD
 export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
 // export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
 import.meta.env.VITE_API_URL;
+=======
+<<<<<<< HEAD
+// export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+=======
+export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+import.meta.env.VITE_API_URL;
+>>>>>>> aad56a61 (hallticket and id card fixed)
+>>>>>>> local
 export const ApiRoutes = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
@@ -42,7 +54,7 @@ export const ApiRoutes = {
   GETDEPARTMENTBYID: 'department',
   SCHEMES: 'schemes',
   SEMESTERS: 'semesters',
-  COURSES: 'courses',
+  COURSES: 'courses', 
   COURSE_COMPONENTS: 'course-components',
   EXAMS: 'exams',
   EXAMTIMETABLES: 'exam-timetables',

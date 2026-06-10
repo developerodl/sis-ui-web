@@ -35,6 +35,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     "X0226036",
     "X0226018",
     "X0226017",
+<<<<<<< HEAD
     "X0226030",
     "X0226006",
     "X0226034"
@@ -205,7 +206,177 @@ const HallTicket = ({ student }: HallTicketProps) => {
   } else if (isWellnessCoaching) {
     examTimetable = wellnessCoachingTimetable;
   }
+=======
+    "X0226030"
+  ];
+>>>>>>> local
 
+  const ihsMorningTimetable: string[][]= [
+    [
+      "1",
+      "June 06 2026",
+      "EHE25OCT01",
+      "Occupational and Environmental Health",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 07 2026",
+      "EHE25OCT02",
+      "Fundamentals of Physiology and Industrial Toxicology",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 13 2026",
+      "EHE25OCT03",
+      "Occupational Exposure to Physical and Hazards",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 14 2026",
+      "EHE25OCT04",
+      "Occupational Exposure to Particulates and Chemical Hazards",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 20 2026",
+      "EHE25OCT05",
+      "Occupational Exposure to Biological and Ergonomic Hazards",
+      "10.00 AM - 12.00 PM",
+    ],
+    [
+      "1",
+      "June 21 2026",
+      "EHE25OCT06",
+      "Research Methodology",
+      "10.00 AM - 12.00 PM",
+    ],
+  ];
+
+  const ihsEveningTimetable_for_ihs: string[][]= [
+    [
+      "1",
+      "June 06 2026",
+      "EHE25OCT01",
+      "Occupational and Environmental Health",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "1",
+      "June 07 2026",
+      "EHE25OCT02",
+      "Fundamentals of Physiology and Industrial Toxicology",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "1",
+      "June 13 2026",
+      "EHE25OCT03",
+      "Occupational Exposure to Physical and Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "1",
+      "June 14 2026",
+      "EHE25OCT04",
+      "Occupational Exposure to Particulates and Chemical Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "1",
+      "June 20 2026",
+      "EHE25OCT05",
+      "Occupational Exposure to Biological and Ergonomic Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "1",
+      "June 21 2026",
+      "EHE25OCT06",
+      "Research Methodology",
+      "6.30 PM - 8.30 PM",
+    ],
+  ];
+
+  // const is welness_coaaching
+
+  const wellnessCoachingTimetable = [
+  [
+    "1",
+    "June 06 2026",
+    "MBL25OCT18",
+    "Foundations of Wellness Coaching",
+    "10.00 AM - 12.00 PM",
+  ],
+  [
+    "1",
+    "June 07 2026",
+    "MBL25OCT19",
+    "Diet and Holistic Wellness",
+    "10.00 AM - 12.00 PM",
+  ],
+  [
+    "1",
+    "June 13 2026",
+    "MBL25OCT20",
+    "Physical Activity & Fitness",
+    "10.00 AM - 12.00 PM",
+  ],
+  [
+    "1",
+    "June 14 2026",
+    "MBL25OCT21",
+    "Emotional Wellbeing, NLP & Stress Management",
+    "10.00 AM - 12.00 PM",
+  ],
+  [
+    "1",
+    "June 20 2026",
+    "MBL25OCT22",
+    "Coaching Special Populations",
+    "10.00 AM - 12.00 PM",
+  ],
+  [
+    "1",
+    "June 21 2026",
+    "MBL25OCT23",
+    "Research Methodology",
+    "10.00 AM - 12.00 PM",
+  ],
+];
+  // const isWellnessCoaching =
+  //   String(student?.program_id) === "1500136";
+
+  //   const isEveningStudent =
+  //     eveningSessionStudents.includes(registrationNo);
+
+  //   let examTimetable = [];
+
+  //   if (isWellnessCoaching) {
+  //     examTimetable = wellnessCoachingTimetable;
+  //   }
+  const registrationNo = student?.registration_no;
+
+  const isIndustrialHygiene =
+    String(student?.program_id) === "1500132";
+  const isWellnessCoaching =
+    String(student?.program_id) === "1500136";
+
+  const isEveningStudent =
+    eveningSessionStudents.includes(registrationNo);
+
+  let examTimetable: string[][] = [];
+
+  if (isIndustrialHygiene) {
+    examTimetable = isEveningStudent
+      ? ihsEveningTimetable_for_ihs
+      : ihsMorningTimetable;
+  } else if (isWellnessCoaching) {
+    examTimetable = wellnessCoachingTimetable;
+  }
   const toggleFlip = () => setIsFlipped((prev) => !prev);
 
   const handleDownloadPDF = async () => {
@@ -219,13 +390,13 @@ const HallTicket = ({ student }: HallTicketProps) => {
 
     const capture = async (element: HTMLElement) => {
       const canvas = await html2canvas(element, {
-        scale: 3,
+        scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
         imageTimeout: 15000
       });
-      return canvas.toDataURL("image/png");
+      return canvas.toDataURL("image/jpeg",0.7);
     };
 
     // 🔥 Save states
@@ -442,9 +613,15 @@ const HallTicket = ({ student }: HallTicketProps) => {
                 <tbody>
                   {
                     examTimetable
+<<<<<<< HEAD
                       .map((row:any, index:any) => (
                         <tr key={index}>
                           {row.map((cell:any, i:any) => (
+=======
+                      .map((row, index) => (
+                        <tr key={index}>
+                          {row.map((cell, i) => (
+>>>>>>> local
                             <td key={i} style={cellStyle} align="center">
                               {cell}
                             </td>
