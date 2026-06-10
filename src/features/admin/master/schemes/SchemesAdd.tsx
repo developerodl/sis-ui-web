@@ -20,8 +20,8 @@ import { ApiRoutes } from "../../../../constants/ApiConstants";
 import CardComponent from "../../../../components/card/Card";
 import CustomSelect from "../../../../components/inputs/customtext/CustomSelect";
 import apiClient from "../../../../services/ApiClient";
-import CustomInputText from "../../../../components/inputs/customtext/CustomInputText";
-import CustomNumberInput from "../../../../components/inputs/customtext/CustomNumberInput";
+// import CustomInputText from "../../../../components/inputs/customtext/CustomInputText";
+// import CustomNumberInput from "../../../../components/inputs/customtext/CustomNumberInput";
 
 interface FormValues {
     programe_id: number;
@@ -44,7 +44,7 @@ const defaultValues: FormValues = {
 const schema = Yup.object().shape({
     programe_id: Yup.number().required("Program is required"),
     semester_id: Yup.number().required("Semester is required"),
-    course_id: Yup.number().required("Course is required"),
+    // course_id: Yup.number().required("Course is required"),
     // regulation_year: Yup.string().required("Regulation Year is required"),
     // program_pattern: Yup.string().required("Program Pattern is required"),
     // program_pattern_no: Yup.number()
