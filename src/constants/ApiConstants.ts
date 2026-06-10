@@ -48,7 +48,7 @@ export const ApiRoutes = {
   GETDEPARTMENTBYID: 'department',
   SCHEMES: 'schemes',
   SEMESTERS: 'semesters',
-  COURSES: 'courses',
+  COURSES: 'courses', 
   COURSE_COMPONENTS: 'course-components',
   EXAMS: 'exams',
   EXAMTIMETABLES: 'exam-timetables',
