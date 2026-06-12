@@ -20,7 +20,6 @@ import TablePagination from "../../../../components/tablepagination/tablepaginat
 import { apiRequest } from "../../../../utils/ApiRequest";
 import CustomDialog from "../../../../context/ConfirmDialog";
 import { getValue } from "../../../../utils/localStorageUtil";
-// import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 
 
@@ -40,8 +39,6 @@ export default function CourseList() {
   const [programs, setPrograms] = React.useState<any[]>([]);
   const rollid = Number(getValue('rollid'));
   const selectedProgramId = programFilter;
-  const [courseOptions, setCourseOptions] = React.useState<any[]>([]);
-  const [courseList, setCourseList] = React.useState<any[]>([]);
   /* ---------------------------- API CALL ---------------------------- */
 
   //    useEffect(() => {

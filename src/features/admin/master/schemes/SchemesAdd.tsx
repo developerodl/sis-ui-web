@@ -26,7 +26,7 @@ import apiClient from "../../../../services/ApiClient";
 interface FormValues {
     programe_id: number;
     semester_id: number;
-    course_code?: number;
+    course_code: number;
     // regulation_year: string;
     // program_pattern: string;
     // program_pattern_no: number;
@@ -263,7 +263,7 @@ export default function SchemesAdd() {
                                         label="Program"
                                         field={field}
                                         options={programs}
-                                        error={errors.programe_id}
+                                        error={!!errors.programe_id}
                                         helperText={errors.programe_id?.message}
                                     />
                                 )}
