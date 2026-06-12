@@ -163,27 +163,27 @@ export default function CourseAdd() {
 
     const fetchSemesters = async () => {
       try {
-        const res = await apiClient.get(
-          `${ApiRoutes.SEMESTERS}/${selectedProgramId}`
-        );
+          const res = await apiClient.get(
+            `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/semesters`
+          );
 
-        const semesterList =
-          res.data?.[0]?.semesters || [];
+          const semesterList =
+            res.data?.semesters || [];
 
-        const mapped = semesterList.map(
-          (s: any) => ({
-            value: String(s.id),
-            label: `${s.semester_name}`,
-          })
-        );
+          const mapped = semesterList.map(
+            (s: any) => ({
+              value: String(s.semester_no),
+              label: `${s.semester_name}`,
+            })
+          );
 
-        setSemesters(mapped);
+          setSemesters(mapped);
 
       } catch {
-        showAlert(
-          "Failed to load semesters list",
-          "error"
-        );
+          showAlert(
+            "Failed to load semesters list",
+            "error"
+          );
       }
     };
 

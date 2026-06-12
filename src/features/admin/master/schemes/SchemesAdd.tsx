@@ -69,8 +69,8 @@ export default function SchemesAdd() {
         setValue,
         formState: { errors, isDirty },
     } = useForm<FormValues>({
-        resolver: yupResolver(schema),
-        defaultValues,
+      resolver: yupResolver(schema),
+      defaultValues,
     });
 
     const [programs, setPrograms] = useState<{ value: string; label: string }[]>([]);
@@ -263,7 +263,7 @@ export default function SchemesAdd() {
                                         label="Program"
                                         field={field}
                                         options={programs}
-                                        // error={errors.programe_id}
+                                        error={errors.programe_id}
                                         helperText={errors.programe_id?.message}
                                     />
                                 )}

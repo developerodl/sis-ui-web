@@ -13,7 +13,6 @@ import StudentCounselling from "../features/student/counselling/counselling";
 import ChangePasswordForm from "../features/student/passwordmang/ChangePasswordForm";
 import FacultyList from "../features/admin/faculty/FacultyList";
 import FacultyAdd from "../features/admin/faculty/FacultyAdd";
-import SyllabusAdd from "../features/admin/master/syllabus/syllabusadd";
 import SyllabusList from "../features/admin/master/syllabus/SyllabusList";
 import SyllabusTabView from "../features/admin/master/syllabus/SyllabusTabView";
 import MarksEntryScreen from "../features/admin/master/syllabus/MarksEntry";
@@ -114,12 +113,12 @@ export const routesConfig = [
       },
       {
         path: 'add',
-        element: <SyllabusAdd />,
+        // element: <SyllabusAd />,
         breadcrumb: 'Syllabus Add',
       },
       {
         path: 'add/:id',   // ✅ edit program route
-        element: <SyllabusAdd />,
+        // element: <SyllabusAdd />,
         breadcrumb: 'Syllabus Add',
       },
       {
