@@ -19,6 +19,10 @@ import ReusableTable from "../../../../components/table/table";
 import TablePagination from "../../../../components/tablepagination/tablepagination";
 import { apiRequest } from "../../../../utils/ApiRequest";
 import CustomDialog from "../../../../context/ConfirmDialog";
+import { getValue } from "../../../../utils/localStorageUtil";
+// import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+
 
 export default function CourseList() {
   const navigate = useNavigate();
@@ -31,28 +35,102 @@ export default function CourseList() {
   const [searchText, setSearchText] = React.useState("");
   const [courses, setCourses] = React.useState<any[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
-  const [selectedCourses, setSelectedCourses] =
-    React.useState<any>(null);
-
+  const [programFilter, setProgramFilter] = React.useState("1500038");
+  const [selectedCourses, setSelectedCourses] = React.useState<any>(null);
+  const [programs, setPrograms] = React.useState<any[]>([]);
+  const rollid = Number(getValue('rollid'));
+  const selectedProgramId = programFilter;
+  const [courseOptions, setCourseOptions] = React.useState<any[]>([]);
+  const [courseList, setCourseList] = React.useState<any[]>([]);
   /* ---------------------------- API CALL ---------------------------- */
+
+  //    useEffect(() => {
+  //     if (!selectedProgramId) {
+  //         setCourses([]);
+  //         setValue("course_id", 0);
+  //         return;
+  //     }
+
+  //     const fetchCourses = async () => {
+  //         try {
+  //             const res = await apiClient.get(
+  //                 `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
+  //             );
+
+  //             const coursesList =
+  //                 res.data?.courses || [];
+
+  //             const mapped = coursesList.map(
+  //                 (s: any) => ({
+  //                     value: String(s.course_no),
+  //                     label: `${s.course_name}`,
+  //                 })
+  //             );
+
+  //            setCourseOptions(mapped);
+
+  //         } catch {
+  //             showAlert(
+  //                 "Failed to load courses list",
+  //                 "error"
+  //             );
+  //         }
+  //     };
+
+  //     fetchCourses();
+
+  // }, [selectedProgramId]);
+
+
+  useEffect(() => {
+    if (!selectedProgramId) return;
+
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient.get(
+          `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
+        );
+
+        console.log("Course API Response:", res.data);
+
+        setCourses(res.data || []);
+      } catch (error) {
+        showAlert("Failed to load courses", "error");
+      }
+    };
+
+    fetchCourses();
+  }, [selectedProgramId]);
 
   React.useEffect(() => {
     clearError();
 
     apiClient
-      .get(ApiRoutes.COURSES)
+      .get(ApiRoutes.GETPROGRAMLIST)
       .then((res) => {
-        const data =
-          res.data?.data ?? res.data ?? [];
-        setCourses(data);
+        setPrograms(res.data || []);
       })
-      .catch(() =>
-        showAlert(
-          "Failed to load courses",
-          "error"
-        )
-      );
+      .catch(() => setPrograms([]));
+
   }, []);
+
+  React.useEffect(() => {
+
+    if (rollid == 3 && programs.length > 0) {
+      setProgramFilter("1500038");
+      setPage(0);
+    }
+
+  }, [rollid, programs]);
+
+  const programOptions = React.useMemo(
+    () =>
+      programs.map((p) => ({
+        label: p.programe,
+        value: p.id,
+      })),
+    [programs]
+  );
 
   /* ----------------------- DELETE WITH CONFIRM ---------------------- */
 
@@ -194,6 +272,35 @@ export default function CourseList() {
                 "Search courses",
               visible: true,
             },
+            {
+              key: "program",
+              label: "Select Program",
+              type: "select",
+              value: programFilter,
+              onChange: (val) => {
+                console.log("Program Selected:", val);
+                setProgramFilter(val);
+                setPage(0);
+              },
+              options: programOptions,
+
+              disabled:
+                rollid === 3,
+
+              sx: {
+                width: 250,
+              },
+
+              menuProps: {
+                PaperProps: {
+                  sx: {
+                    maxHeight: 250,
+                    overflowY: "auto",
+                  },
+                },
+              },
+
+            }
           ]}
           actions={[
             {
@@ -230,10 +337,10 @@ export default function CourseList() {
                 key: "course_title",
                 label: "Course Title",
               },
-               {
+              {
                 key: "course_category",
                 label: "Category",
-                 render: (row: any) =>
+                render: (row: any) =>
                   `${row.category_name} - (${row.category_code})`,
               },
               {
@@ -246,9 +353,9 @@ export default function CourseList() {
                 render: (row: any) =>
                   `${row.program_name} - (${row.program_code})`,
               },
-              
-             
-              
+
+
+
               {
                 key: "credits",
                 label: "Credits",

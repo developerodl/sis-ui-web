@@ -414,7 +414,7 @@ export default function StudentTable() {
 
             {
               key: "program",
-              label: "Select Course",
+              label: "Select Program",
               type: "select",
               value: programFilter,
               onChange: (val) => {

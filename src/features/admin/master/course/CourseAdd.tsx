@@ -270,7 +270,7 @@ export default function CourseAdd() {
         program_id: Number(data.program_id),
         semester_id: Number(data.semester_id),
 
-        course_category: data.course_category,
+        course_category_id: data.course_category,
         course_code: data.course_code,
         course_title: data.course_title,
         credits: Number(data.credits),

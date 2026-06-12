@@ -26,7 +26,7 @@ import apiClient from "../../../../services/ApiClient";
 interface FormValues {
     programe_id: number;
     semester_id: number;
-    course_id?: number;
+    course_code?: number;
     // regulation_year: string;
     // program_pattern: string;
     // program_pattern_no: number;
@@ -35,7 +35,7 @@ interface FormValues {
 const defaultValues: FormValues = {
     programe_id: 0,
     semester_id: 0,
-    course_id:0,
+    course_code:0,
     // regulation_year: "",
     // program_pattern: "",
     // program_pattern_no: 0,
@@ -44,7 +44,7 @@ const defaultValues: FormValues = {
 const schema = Yup.object().shape({
     programe_id: Yup.number().required("Program is required"),
     semester_id: Yup.number().required("Semester is required"),
-    // course_id: Yup.number().required("Course is required"),
+    course_code: Yup.number().required("Course Code is required"),
     // regulation_year: Yup.string().required("Regulation Year is required"),
     // program_pattern: Yup.string().required("Program Pattern is required"),
     // program_pattern_no: Yup.number()
@@ -81,23 +81,23 @@ export default function SchemesAdd() {
         useEffect(() => {
         if (!selectedProgramId) {
             setCourses([]);
-            setValue("course_id", 0);
+            setValue("course_code", 0);
             return;
         }
 
         const fetchCourses = async () => {
             try {
                 const res = await apiClient.get(
-                    `${ApiRoutes.COURSES}/${selectedProgramId}/courses`
+                    `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
                 );
 
                 const coursesList =
-                    res.data?.courses || [];
+                    res.data || [];
 
                 const mapped = coursesList.map(
                     (s: any) => ({
-                        value: String(s.course_no),
-                        label: `${s.course_name}`,
+                        value: String(s.course_code),
+                        label: `${s.course_title}`,
                     })
                 );
 
@@ -286,15 +286,14 @@ export default function SchemesAdd() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
-                                name="course_id"
+                                name="course_code"
                                 control={control}
                                 render={({ field }) => (
                                     <CustomSelect
                                         label="Course"
                                         field={field}
                                         options={courses}
-                                        // error={errors.course_id}
-                                        helperText={errors.course_id?.message}
+                                        helperText={errors.course_code?.message}
                                     />
                                 )}
                             />
