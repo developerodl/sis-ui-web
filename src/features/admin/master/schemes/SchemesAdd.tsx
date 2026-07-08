@@ -4,6 +4,7 @@ import {
     Grid,
     Button,
     CircularProgress,
+    Checkbox,
 } from "@mui/material";
 
 import { useForm, Controller } from "react-hook-form";
@@ -21,12 +22,18 @@ import CardComponent from "../../../../components/card/Card";
 import CustomSelect from "../../../../components/inputs/customtext/CustomSelect";
 import apiClient from "../../../../services/ApiClient";
 // import CustomInputText from "../../../../components/inputs/customtext/CustomInputText";
-// import CustomNumberInput from "../../../../components/inputs/customtext/CustomNumberInput";
+import CustomNumberInput from "../../../../components/inputs/customtext/CustomNumberInput";
 
 interface FormValues {
     programe_id: number;
     semester_id: number;
-    course_code?: number;
+    course_title?: string;
+    has_internal: boolean;
+    internal_min: number;
+    internal_max: number;
+    has_external: boolean;
+    external_min: number;
+    external_max: number;
     // regulation_year: string;
     // program_pattern: string;
     // program_pattern_no: number;
@@ -35,7 +42,13 @@ interface FormValues {
 const defaultValues: FormValues = {
     programe_id: 0,
     semester_id: 0,
-    course_code:0,
+    course_title: "",
+    has_internal: false,
+    internal_min: 0,
+    internal_max: 0,
+    has_external: false,
+    external_min: 0,
+    external_max: 0,
     // regulation_year: "",
     // program_pattern: "",
     // program_pattern_no: 0,
@@ -44,8 +57,31 @@ const defaultValues: FormValues = {
 const schema = Yup.object().shape({
     programe_id: Yup.number().required("Program is required"),
     semester_id: Yup.number().required("Semester is required"),
-    course_code: Yup.number().required("Course Code is required"),
-    // regulation_year: Yup.string().required("Regulation Year is required"),
+    course_title: Yup.string().required("Course is required"),
+
+    has_internal: Yup.boolean(),
+    has_external: Yup.boolean(),
+
+    internal_min: Yup.number().when("has_internal", {
+        is: true,
+        then: (schema) => schema.required("Internal min mark is required"),
+    }),
+
+    internal_max: Yup.number().when("has_internal", {
+        is: true,
+        then: (schema) => schema.required("Internal max mark is required"),
+    }),
+
+    external_min: Yup.number().when("has_external", {
+        is: true,
+        then: (schema) => schema.required("External min mark is required"),
+    }),
+
+    external_max: Yup.number().when("has_external", {
+        is: true,
+        then: (schema) => schema.required("External max mark is required"),
+    }),
+// regulation_year: Yup.string().required("Regulation Year is required"),
     // program_pattern: Yup.string().required("Program Pattern is required"),
     // program_pattern_no: Yup.number()
     //     .min(0, "Must be 0 or greater")
@@ -75,17 +111,21 @@ export default function SchemesAdd() {
 
     const [programs, setPrograms] = useState<{ value: string; label: string }[]>([]);
     const selectedProgramId = watch("programe_id");
+
+    const hasInternal = watch("has_internal");
+    const hasExternal = watch("has_external");
     const [semesters, setSemesters] = useState<{ value: string; label: string }[]>([]);
     const [courses, setCourses] = useState<{ value: string; label: string }[]>([]);
 
         useEffect(() => {
         if (!selectedProgramId) {
             setCourses([]);
-            setValue("course_code", 0);
+            setValue("course_title", "");
             return;
         }
 
         const fetchCourses = async () => {
+            console.log
             try {
                 const res = await apiClient.get(
                     `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
@@ -96,7 +136,7 @@ export default function SchemesAdd() {
 
                 const mapped = coursesList.map(
                     (s: any) => ({
-                        value: String(s.course_code),
+                        value: String(s.course_title),
                         label: `${s.course_title}`,
                     })
                 );
@@ -123,6 +163,9 @@ export default function SchemesAdd() {
         }
 
         const fetchSemesters = async () => {
+            console.log(
+                `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
+            );
             try {
                 const res = await apiClient.get(
                     `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/semesters`
@@ -222,6 +265,15 @@ export default function SchemesAdd() {
             const payload = {
                 ...formData,
                 programe_id: Number(formData.programe_id),
+                semester_id: Number(formData.semester_id),
+                course_title: Number(formData.course_title),
+                has_internal: formData.has_internal,
+                internal_min: Number(formData.internal_min),
+                internal_max: Number(formData.internal_max),
+
+                has_external: formData.has_external,
+                external_min: Number(formData.external_min),
+                external_max: Number(formData.external_max),
                 // program_pattern_no: Number(formData.program_pattern_no),
             };
 
@@ -286,18 +338,131 @@ export default function SchemesAdd() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
-                                name="course_code"
+                                name="course_title"
                                 control={control}
                                 render={({ field }) => (
                                     <CustomSelect
                                         label="Course"
                                         field={field}
                                         options={courses}
-                                        helperText={errors.course_code?.message}
+                                        helperText={errors.course_title?.message}
                                     />
                                 )}
                             />
                         </Grid>
+                        <Grid size={{ xs: 12 }}>
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: "200px 1fr 1fr",
+                                    gap: 2,
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ fontWeight: 600, display: "flex", alignItems: "center" }}>
+                                    <Controller
+                                        name="has_internal"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                checked={field.value}
+                                                onChange={(e) => field.onChange(e.target.checked)}
+                                            />
+                                        )}
+                                    />
+                                    Internal Mark
+                                </Box>
+
+                                {hasInternal && (
+                                    <>
+                                        <Controller
+                                            name="internal_min"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <CustomNumberInput
+                                                    label="Min Mark"
+                                                    value={field.value ?? ""}
+                                                    error={!!errors.internal_min}
+                                                    helperText={errors.internal_min?.message}
+                                                    onChange={(val) => field.onChange(val)}
+                                                />
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="internal_max"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <CustomNumberInput
+                                                    label="Max Mark"
+                                                    value={field.value ?? ""}
+                                                    error={!!errors.internal_max}
+                                                    helperText={errors.internal_max?.message}
+                                                    onChange={(val) => field.onChange(val)}
+                                                />
+                                            )}
+                                        />
+                                    </>
+                                )}
+                            </Box>
+                        </Grid>
+
+                        <Grid size={{ xs: 12 }}>
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: "200px 1fr 1fr",
+                                    gap: 2,
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ fontWeight: 600, display: "flex", alignItems: "center" }}>
+                                    <Controller
+                                        name="has_external"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                checked={field.value}
+                                                onChange={(e) => field.onChange(e.target.checked)}
+                                            />
+                                        )}
+                                    />
+                                    External Mark
+                                </Box>
+
+                                {hasExternal && (
+                                    <>
+                                        <Controller
+                                            name="external_min"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <CustomNumberInput
+                                                    label="Min Mark"
+                                                    value={field.value ?? ""}
+                                                    error={!!errors.external_min}
+                                                    helperText={errors.external_min?.message}
+                                                    onChange={(val) => field.onChange(val)}
+                                                />
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="external_max"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <CustomNumberInput
+                                                    label="Max Mark"
+                                                    value={field.value ?? ""}
+                                                    error={!!errors.external_max}
+                                                    helperText={errors.external_max?.message}
+                                                    onChange={(val) => field.onChange(val)}
+                                                />
+                                            )}
+                                        />
+                                    </>
+                                )}
+                            </Box>
+                        </Grid>    
 
                         {/* Regulation Year Input */}
                         {/* <Grid size={{ xs: 12, md: 6 }}>

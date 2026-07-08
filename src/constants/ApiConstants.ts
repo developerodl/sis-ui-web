@@ -41,7 +41,7 @@ export const ApiRoutes = {
   DEPARTMENTUPDATE: 'department/update',
   DEPARTMENTDELETE: 'department/delete',
   GETDEPARTMENTBYID: 'department',
-  SCHEMES: 'schemes',
+  SCHEMES: '/schemes',
   SEMESTERS: 'semesters',
   COURSES: 'courses', 
   COURSE_COMPONENTS: 'course-components',
