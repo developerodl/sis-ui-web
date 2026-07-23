@@ -265,6 +265,28 @@ export const routesConfig = [
     ]
   },
   {
+    path: '/marks',
+    //breadcrumb: 'Marks',
+    children: [
+      {
+        path:'list',
+        element: <MarksEntryScreen />,
+        breadcrumb: 'Marks List',
+      },
+      {
+        path:'add',
+        element: <MarksEntryScreen />,
+        breadcrumb: 'Marks Add',
+      },
+      {
+        path:'edit/:id',
+        element: <MarksEntryScreen />,
+        breadcrumb: 'Marks Edit',
+      },
+    ]
+
+  },
+  {
     path: '/semesters',
     children: [
       {

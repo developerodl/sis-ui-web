@@ -84,6 +84,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       // { text: 'Batches', routePath: '/batch/list' },
       // { text: 'Years', routePath: '/year/list' },
       {text: 'schemes', routePath: '/schemes/add' },
+      { text: 'marks', routePath: '/marks/add' }
     ],
     routePath: '',
   },
