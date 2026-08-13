@@ -7,7 +7,7 @@ import {
     Checkbox,
 } from "@mui/material";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 
@@ -38,20 +38,16 @@ interface FormValues {
     semester_id: number;
     course_title: string;
     has_internal: boolean;
+    has_external: boolean;
     internal_min?: number;
     internal_max?: number;
-    has_external: boolean;
     external_min?: number;
     external_max?: number;
-    // regulation_year: string;
-    // program_pattern: string;
-    // program_pattern_no: number;
 }
 
 const defaultValues: FormValues = {
     programe_id: 0,
-    // semester_id: 0,
-    semester_id: "" as any,
+    semester_id: 0,
     course_title: "",
     has_internal: false,
     internal_min: 0,
@@ -59,43 +55,43 @@ const defaultValues: FormValues = {
     has_external: false,
     external_min: 0,
     external_max: 0,
-    // regulation_year: "",
-    // program_pattern: "",
-    // program_pattern_no: 0,
 };
 
-const schema = Yup.object().shape({
+const schema: Yup.ObjectSchema<FormValues> = Yup.object({
     programe_id: Yup.number().required("Program is required"),
     semester_id: Yup.number().required("Semester is required"),
     course_title: Yup.string().required("Course is required"),
 
-    has_internal: Yup.boolean(),
-    has_external: Yup.boolean(),
+    has_internal: Yup.boolean().required(),
+    has_external: Yup.boolean().required(),
 
     internal_min: Yup.number().when("has_internal", {
         is: true,
-        then: (schema) => schema.required("Internal min mark is required"),
+        then: (schema) =>
+            schema.required("Internal min mark is required"),
+        otherwise: (schema) => schema.optional(),
     }),
 
     internal_max: Yup.number().when("has_internal", {
         is: true,
-        then: (schema) => schema.required("Internal max mark is required"),
+        then: (schema) =>
+            schema.required("Internal max mark is required"),
+        otherwise: (schema) => schema.optional(),
     }),
 
     external_min: Yup.number().when("has_external", {
         is: true,
-        then: (schema) => schema.required("External min mark is required"),
+        then: (schema) =>
+            schema.required("External min mark is required"),
+        otherwise: (schema) => schema.optional(),
     }),
 
     external_max: Yup.number().when("has_external", {
         is: true,
-        then: (schema) => schema.required("External max mark is required"),
+        then: (schema) =>
+            schema.required("External max mark is required"),
+        otherwise: (schema) => schema.optional(),
     }),
-// regulation_year: Yup.string().required("Regulation Year is required"),
-    // program_pattern: Yup.string().required("Program Pattern is required"),
-    // program_pattern_no: Yup.number()
-    //     .min(0, "Must be 0 or greater")
-    //     .required("Program Pattern No is required"),
 });
 
 export default function SchemesAdd() {
@@ -107,17 +103,17 @@ export default function SchemesAdd() {
     const [initialData, setInitialData] = useState<FormValues | null>(null);
 
 
-    const {
-        control,
-        handleSubmit,
-        reset,
-        watch,
-        setValue,
-        formState: { errors, isDirty },
-    } = useForm<FormValues>({resolver: yupResolver(schema),
-      defaultValues,
-    });
-
+   const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isDirty },
+} = useForm<FormValues>({
+    resolver: yupResolver(schema),
+    defaultValues,
+});
     const [programs, setPrograms] = useState<{ value: string; label: string }[]>([]);
     const selectedProgramId = watch("programe_id");
     const selectedSemester = watch("semester_id");
@@ -142,7 +138,7 @@ export default function SchemesAdd() {
         if (isDuplicateScheme) {
             setValue("has_internal", false);
             setValue("has_external", false);
-            showAlert("This course already has a scheme for the selected program & semester.", "warning");
+            showAlert("This course already has a scheme for the selected program & semester.", "error");
         }
     }, [isDuplicateScheme]);
 
@@ -177,11 +173,10 @@ export default function SchemesAdd() {
     
     useEffect(() => {
         if (!selectedProgramId) {
-            setSemesters([]);
-            // setValue("semester_id", 0);
-            setValue("semester_id", "" as any);
-            return;
-        }
+        setSemesters([]);
+        setValue("semester_id", 0);
+        return;
+    }
 
         const fetchSemesters = async () => {
             console.log(
@@ -316,7 +311,7 @@ export default function SchemesAdd() {
         navigate(`/schemes/edit/${row.id}`);
     };
 
-    const onSubmit = async (formData: FormValues) => {
+const onSubmit: SubmitHandler<FormValues> = async (formData) => {
         try {
             const selectedCourse = courses.find((c) => c.value === formData.course_title);
 
@@ -433,7 +428,7 @@ export default function SchemesAdd() {
                                         label="Program"
                                         field={field}
                                         options={programs}
-                                        error={errors.programe_id}
+                                        error={!!errors.programe_id}
                                         helperText={errors.programe_id?.message}
                                     />
                                 )}

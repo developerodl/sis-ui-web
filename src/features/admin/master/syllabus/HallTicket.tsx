@@ -200,7 +200,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
   //   if (isWellnessCoaching) {
   //     examTimetable = wellnessCoachingTimetable;
   //   }
-  const registrationNo = student?.registration_no;
+  // const registrationNo = student?.registration_no;
 
   const isOba=
     String(student?.program_id) === "1500130";

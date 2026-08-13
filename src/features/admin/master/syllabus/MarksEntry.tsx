@@ -339,7 +339,6 @@ export default function MarksEntryScreen() {
       const markValue = marksInput[s.id] ?? "";
       const attendanceValue = attendanceInput[s.id] ?? "";
       const attendanceValid = isAttendanceInRange(attendanceValue);
-      const lowAttendance = isLowAttendance(attendanceValue);
       const passStatus = computePassStatus(markValue);
 
       return {
