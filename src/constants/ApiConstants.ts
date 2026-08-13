@@ -1,5 +1,6 @@
-export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
 // export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
   LOGIN: '/auth/login',
@@ -48,6 +49,11 @@ export const ApiRoutes = {
   EXAMTIMETABLES: 'exam-timetables',
   MARKSADD: 'student/student-marks/',
   GETMARKSBYID: 'student/students/',
+  // STUDENTMARKSENTRY: 'students/marks-entry',
+  // STUDENTMARKSENTRYBULK: 'students/marks-entry/bulk',
+  STUDENTMARKSENTRY: 'student/students/marks-entry',
+  STUDENTMARKSENTRYBULK: 'student/students/marks-entry/bulk',
+  STUDENTBATCHES: 'student/students/batches',
   FORGOTPASSWORD: 'user/forgot-password',
   RESETPASSWORD: 'user/reset-password',
   GET_STUDENT_DUE: 'students/',

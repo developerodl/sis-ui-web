@@ -232,11 +232,16 @@ export default function StudentTable() {
         },
 
         { header: 'Program ID', key: 'program_id' },
+        {header:'Program Name', key:'program_name'},
 
         { header: 'Mobile', key: 'mobile_number' },
 
         { header: 'Gender', key: 'gender' },
-
+        {
+          header: 'Nationality',
+          key: 'nationality'
+        },
+        {header: 'Semester Name', key:'semester_name'},
         {
           header: 'Admission Date',
           key: 'admission_date',

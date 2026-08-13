@@ -158,21 +158,27 @@ export default function CourseAdd() {
     if (!selectedProgramId) {
       setSemesters([]);
       setValue("semester_id", 0);
+      // setValue("semester_id", "" as any);
       return;
     }
 
     const fetchSemesters = async () => {
+      console.log(
+                `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/courses`
+            );
       try {
+        
         const res = await apiClient.get(
-          `${ApiRoutes.SEMESTERS}/${selectedProgramId}`
+          `${ApiRoutes.PROGRAMFETCH}/${selectedProgramId}/semesters`
+          
         );
-
+        
         const semesterList =
-          res.data?.[0]?.semesters || [];
+          res.data?.semesters || [];
 
         const mapped = semesterList.map(
           (s: any) => ({
-            value: String(s.id),
+            value: String(s.semester_no),
             label: `${s.semester_name}`,
           })
         );
@@ -208,7 +214,8 @@ export default function CourseAdd() {
           program_id: data.program_id,
           semester_id: data.semester_id,
 
-          course_category: data.course_category,
+          // course_category: data.course_category,
+          course_category: String(data.course_category_id),
           course_code: data.course_code,
           course_title: data.course_title,
           credits: data.credits,
@@ -270,7 +277,7 @@ export default function CourseAdd() {
         program_id: Number(data.program_id),
         semester_id: Number(data.semester_id),
 
-        course_category: data.course_category,
+        course_category_id: Number(data.course_category),
         course_code: data.course_code,
         course_title: data.course_title,
         credits: Number(data.credits),

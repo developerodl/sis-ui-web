@@ -30,149 +30,164 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const profileImageUrl = student_id
     ? `${BASE_URL}student/profile-image-proxy/${student_id}`
     : null;
-  const eveningSessionStudents = [
-    "X0226023",
-    "X0226036",
-    "X0226018",
-    "X0226017",
-    "X0226030"
-  ];
+  // const eveningSessionStudents = [
+  //   "X0226023",
+  //   "X0226036",
+  //   "X0226018",
+  //   "X0226017",
+  //   "X0226030"
+  // ];
 
-  const ihsMorningTimetable: string[][]= [
-    [
-      "1",
-      "June 06 2026",
-      "EHE25OCT01",
-      "Occupational and Environmental Health",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 07 2026",
-      "EHE25OCT02",
-      "Fundamentals of Physiology and Industrial Toxicology",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 13 2026",
-      "EHE25OCT03",
-      "Occupational Exposure to Physical and Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 14 2026",
-      "EHE25OCT04",
-      "Occupational Exposure to Particulates and Chemical Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 20 2026",
-      "EHE25OCT05",
-      "Occupational Exposure to Biological and Ergonomic Hazards",
-      "10.00 AM - 12.00 PM",
-    ],
-    [
-      "1",
-      "June 21 2026",
-      "EHE25OCT06",
-      "Research Methodology",
-      "10.00 AM - 12.00 PM",
-    ],
-  ];
+  // const ihsMorningTimetable: string[][]= [
+  //   [
+  //     "1",
+  //     "June 06 2026",
+  //     "EHE25OCT01",
+  //     "Occupational and Environmental Health",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "June 07 2026",
+  //     "EHE25OCT02",
+  //     "Fundamentals of Physiology and Industrial Toxicology",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "June 13 2026",
+  //     "EHE25OCT03",
+  //     "Occupational Exposure to Physical and Hazards",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "June 14 2026",
+  //     "EHE25OCT04",
+  //     "Occupational Exposure to Particulates and Chemical Hazards",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "June 20 2026",
+  //     "EHE25OCT05",
+  //     "Occupational Exposure to Biological and Ergonomic Hazards",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "June 21 2026",
+  //     "EHE25OCT06",
+  //     "Research Methodology",
+  //     "10.00 AM - 12.00 PM",
+  //   ],
+  // ];
 
-  const ihsEveningTimetable_for_ihs: string[][]= [
-    [
-      "1",
-      "June 06 2026",
-      "EHE25OCT01",
-      "Occupational and Environmental Health",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 07 2026",
-      "EHE25OCT02",
-      "Fundamentals of Physiology and Industrial Toxicology",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 13 2026",
-      "EHE25OCT03",
-      "Occupational Exposure to Physical and Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 14 2026",
-      "EHE25OCT04",
-      "Occupational Exposure to Particulates and Chemical Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 20 2026",
-      "EHE25OCT05",
-      "Occupational Exposure to Biological and Ergonomic Hazards",
-      "6.30 PM - 8.30 PM",
-    ],
-    [
-      "1",
-      "June 21 2026",
-      "EHE25OCT06",
-      "Research Methodology",
-      "6.30 PM - 8.30 PM",
-    ],
-  ];
+  // const ihsEveningTimetable_for_ihs: string[][]= [
+  //   [
+  //     "1",
+  //     "Aug 22 2026",
+  //     "APY25OCT01",
+  //     "Behaviour in Organizations: Foundations and Individual Differences",
+  //     "6.30 PM - 8.30 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "Aug 23 2026",
+  //     "APY25OCT02",
+  //     "Work Motivation and Reward Systems",
+  //     "6.30 PM - 8.30 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "Aug 29 2026",
+  //     "APY25OCT03",
+  //     "Decision-Making in Organisations: Cognitive Perspectives",
+  //     "6.30 PM - 8.30 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "Aug 30 2026",
+  //     "APY25OCT04",
+  //     "Research Methods in Organisational  Behaviour",
+  //     "6.30 PM - 8.30 PM",
+  //   ],
+  //   [
+  //     "1",
+  //     "Sep 5, 2026",
+  //     "APY25OCT05",
+  //     "Well-Being at Work",
+  //     "6.30 PM - 8.30 PM",
+  //   ],
+  //   // [
+  //   //   "1",
+  //   //   "June 21 2026",
+  //   //   "EHE25OCT06",
+  //   //   "Research Methodology",
+  //   //   "6.30 PM - 8.30 PM",
+  //   // ],
+  // ];
 
   // const is welness_coaaching
 
-  const wellnessCoachingTimetable = [
+  const DataScienceTimetable = [
   [
-    "1",
-    "June 06 2026",
-    "MBL25OCT18",
-    "Foundations of Wellness Coaching",
-    "10.00 AM - 12.00 PM",
+    "August 22 2026",
+    "MTH24OCT02",
+    "Statistics",
+    "10.00 AM - 1.00 PM",
   ],
   [
-    "1",
-    "June 07 2026",
-    "MBL25OCT19",
-    "Diet and Holistic Wellness",
-    "10.00 AM - 12.00 PM",
+    "August 23 2026",
+    "CDS24OCT03",
+    "Data Structure and Algorithm",
+    "10.00 AM - 1.00 PM",
   ],
   [
-    "1",
-    "June 13 2026",
-    "MBL25OCT20",
-    "Physical Activity & Fitness",
-    "10.00 AM - 12.00 PM",
+    "August 29 2026",
+    "CDS24OCT04",
+    "Python programming",
+    "10.00 AM - 1.00 PM",
   ],
   [
-    "1",
-    "June 14 2026",
-    "MBL25OCT21",
-    "Emotional Wellbeing, NLP & Stress Management",
-    "10.00 AM - 12.00 PM",
+    "August 30 2026",
+    "CDS24OCT05",
+    "Introduction to data science",
+    "10.00 AM - 1.00 PM",
   ],
+  
+];
+  const ObaTimetable = [
   [
-    "1",
-    "June 20 2026",
-    "MBL25OCT22",
-    "Coaching Special Populations",
-    "10.00 AM - 12.00 PM",
-  ],
-  [
-    "1",
-    "June 21 2026",
-    "MBL25OCT23",
-    "Research Methodology",
-    "10.00 AM - 12.00 PM",
-  ],
+      "Aug 22 2026",
+      "APY25OCT01",
+      "Behaviour in Organizations: Foundations and Individual Differences",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "Aug 23 2026",
+      "APY25OCT02",
+      "Work Motivation and Reward Systems",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "Aug 29 2026",
+      "APY25OCT03",
+      "Decision-Making in Organisations: Cognitive Perspectives",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "Aug 30 2026",
+      "APY25OCT04",
+      "Research Methods in Organisational  Behaviour",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "Sep 05 2026",
+      "APY25OCT05",
+      "Well-Being at Work",
+      "6.30 PM - 8.30 PM",
+    ],
 ];
   // const isWellnessCoaching =
   //   String(student?.program_id) === "1500136";
@@ -187,22 +202,20 @@ const HallTicket = ({ student }: HallTicketProps) => {
   //   }
   const registrationNo = student?.registration_no;
 
-  const isIndustrialHygiene =
-    String(student?.program_id) === "1500132";
-  const isWellnessCoaching =
-    String(student?.program_id) === "1500136";
+  const isOba=
+    String(student?.program_id) === "1500130";
+  const isDatascince =
+    String(student?.program_id) === "1500038";
 
-  const isEveningStudent =
-    eveningSessionStudents.includes(registrationNo);
+  // const isEveningStudent =
+  //   eveningSessionStudents.includes(registrationNo);
 
   let examTimetable: string[][] = [];
 
-  if (isIndustrialHygiene) {
-    examTimetable = isEveningStudent
-      ? ihsEveningTimetable_for_ihs
-      : ihsMorningTimetable;
-  } else if (isWellnessCoaching) {
-    examTimetable = wellnessCoachingTimetable;
+  if (isOba) {
+    examTimetable = ObaTimetable;
+  } else if (isDatascince) {
+    examTimetable = DataScienceTimetable;
   }
   const toggleFlip = () => setIsFlipped((prev) => !prev);
 
@@ -273,12 +286,13 @@ const HallTicket = ({ student }: HallTicketProps) => {
     name: `${student?.first_name} ${student?.last_name}`,
     gender: gender,
     dob: formattedDOB,
+    semester: "Semester-2",
     registrationNo: student?.registration_no,
     program: student?.program_id == "1500038" ? (
-      <Box component="span">B.Sc (Hons) - (Data Science)</Box>
-    ) : student?.program_id == "1500132" ? (
+      <Box component="span">B.Sc (Hons) - (Data Science)  </Box>
+    ) : student?.program_id == "1500130" ? (
       <Box component="span">
-        PG certificate in Industrial Hygiene
+        PG CERTIFICATE IN ORGANISATIONAL BEHAVIOUR ANALYSIS
       </Box>
     ) : student?.program_id == "1500136" ? (
       <Box component="span">
@@ -291,7 +305,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     passwordDOB: passwordDOB
   };
 
-  if (!isIndustrialHygiene && !isWellnessCoaching) {
+  if (!isOba && !isDatascince) {
     return null;
   }
 
@@ -359,7 +373,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
                     CENTRE FOR DISTANCE AND ONLINE EDUCATION
                   </Typography>
                   <Typography align="center" sx={{ fontSize: 15, fontWeight: 600, color: "#090909ff" }}>
-                    HALL TICKET – JUNE 2026
+                    HALL TICKET – JANUARY 2026
                   </Typography>
                 </Box>
               </Box>
@@ -410,6 +424,13 @@ const HallTicket = ({ student }: HallTicketProps) => {
                   <br />
                   {personalInfo?.dob}
                 </Typography>
+
+                {/* Column 1 */}
+                <Typography>
+                  <b>Semester :</b>
+                  <br />
+                  {personalInfo.semester}
+                </Typography>
               </Box>
 
               <Box sx={{ width: 150, height: 150, border: "1px solid #000" }}>
@@ -430,7 +451,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
               >
                 <thead>
                   <tr style={{ backgroundColor: "#f5f5f5" }}>
-                    <th style={{ ...cellStyle, textAlign: "center" }}>Semester</th>
+                    {/* <th style={{ ...cellStyle, textAlign: "center" }}>Semester</th> */}
                     <th style={{ ...cellStyle, textAlign: "center" }}>Date</th>
                     <th style={{ ...cellStyle, textAlign: "center" }}>Course Code</th>
                     <th style={{ ...cellStyle, textAlign: "center" }}>Course</th>
@@ -469,13 +490,13 @@ const HallTicket = ({ student }: HallTicketProps) => {
               <Typography mt={1}>
                 4. Students must follow the prescribed dress code during the online examination.
               </Typography>
-              <Typography mt={1}>
+              {/* <Typography mt={1}>
                 5. Link to Access Exam Platform
                 <br />
                 https://exam.sriheronline.edu.in/login/index.php
                 <br />
                 UserName - {personalInfo.registrationNo}, Password - {personalInfo.passwordDOB}
-              </Typography>
+              </Typography> */}
             </Box>
 
             {/* SIGNATURE */}

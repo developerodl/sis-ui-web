@@ -663,8 +663,8 @@ export default function StudentDetailTab({
   // const batch = student?.batch
   // const isJulyBatch = batch?.toLowerCase() === 'july';
 
-  const isHallTicketEligible =
-    ["1500132", "1500136"].includes(String(student?.program_id));
+  // const isHallTicketEligible =
+  //   ["1500132", "1500136","1500038"].includes(String(student?.program_id));
 
   // const admintabs = [
   //   'Basic Info',
@@ -694,14 +694,16 @@ export default function StudentDetailTab({
     ...(hideDebTab ? [] : ['DEB']),
     'Documents',
     'ID Card',
-    ...(isHallTicketEligible ? ['Hall Ticket'] : []),
+    'Hall Ticket',
+    // ...(isHallTicketEligible ? ['Hall Ticket'] : []),
   ];
 
   const studenttabs = [
     'Basic Info',
     ...(hideDebTab ? [] : ['DEB']),
     'ID Card',
-    ...(isHallTicketEligible ? ['Hall Ticket'] : []),
+    'Hall Ticket',
+    // ...(isHallTicketEligible ? ['Hall Ticket'] : []),
   ];
   // const studenttabs = [
   //   'Basic Info',
@@ -782,7 +784,8 @@ export default function StudentDetailTab({
           basicInfoTab,
           ...(hideDebTab ? [] : [debTab]),
           IDCardTab,
-          ...(isHallTicketEligible ? [HallTicketTab] : []),
+          HallTicketTab,
+          // ...(isHallTicketEligible ? [HallTicketTab] : []),
         ]
         : [
           basicInfoTab,
@@ -790,7 +793,8 @@ export default function StudentDetailTab({
           ...(hideDebTab ? [] : [debTab]),
           documentsTab,
           IDCardTab,
-          ...(isHallTicketEligible ? [HallTicketTab] : []),
+          HallTicketTab,
+          // ...(isHallTicketEligible ? [HallTicketTab] : []),
         ];
   // const tabContents =
   //   rollid === 3
