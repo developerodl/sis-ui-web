@@ -53,6 +53,8 @@ export const ApiRoutes = {
   // STUDENTMARKSENTRYBULK: 'students/marks-entry/bulk',
   STUDENTMARKSENTRY: 'student/students/marks-entry',
   STUDENTMARKSENTRYBULK: 'student/students/marks-entry/bulk',
+  HODREVIEW: 'student/students/marks-entry/hod-review',
+  DIRECTORAPPROVE: 'student/students/marks-entry/director-approve',
   STUDENTBATCHES: 'student/students/batches',
   FORGOTPASSWORD: 'user/forgot-password',
   RESETPASSWORD: 'user/reset-password',

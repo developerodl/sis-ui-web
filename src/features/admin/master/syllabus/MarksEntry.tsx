@@ -30,6 +30,7 @@ import { apiRequest } from "../../../../utils/ApiRequest";
 import { ApiRoutes } from "../../../../constants/ApiConstants";
 import { exportToExcel } from "../../../../constants/excelExport";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { getValue } from "../../../../utils/localStorageUtil";
 
 /* ---------------- TYPES ---------------- */
 interface Program {
@@ -52,7 +53,10 @@ interface StudentRow {
   final_marks: number | null;
   pass_status: string | null;
   attendance_percentage: number | null;
-  status: string;
+  faculty_status: string;
+  hod_status: string;
+  director_status: string;
+  reject_reason: string | null;
 }
 
 interface Scheme {
@@ -99,8 +103,22 @@ export default function MarksEntryScreen() {
   const [marksInput, setMarksInput] = useState<Record<number, string>>({});
   const [attendanceInput, setAttendanceInput] = useState<Record<number, string>>({});
 
+  const getHodStatusLabel = (status: string): string => {
+    if (status === "Pending") return "Not Approved";
+    return status;
+  };
+  const rollId = getValue("rollid");
+  const isHOD = String(rollId) === "6";
+  const isDirector = String(rollId) === "7";
+  const isReviewer = isHOD || isDirector;
+
+  const [rejectReasonInput, setRejectReasonInput] = useState("");
+  const [showRejectBox, setShowRejectBox] = useState(false);
+
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
+
+
 
   /* ---------------- LOAD PROGRAMS + SCHEMES ---------------- */
   useEffect(() => {
@@ -291,8 +309,36 @@ export default function MarksEntryScreen() {
       showAlert(`Attendance must be between 0 and 100 for ${invalidAttendanceEntry.name}`, "error");
       return;
     }
+    // const marksPayload = students
+    //   .filter((s) => s.faculty_status !== "submitted" && marksInput[s.id] !== undefined && marksInput[s.id] !== "")
+    //   .map((s) => ({
+    //     student_id: s.id,
+    //     final_marks: Number(marksInput[s.id]),
+    //     pass_status: computePassStatus(marksInput[s.id]) || "fail",
+    //     attendance_percentage: attendanceInput[s.id] ? Number(attendanceInput[s.id]) : null,
+    //   }));
+
+    // if (marksPayload.length === 0) {
+    //   showAlert("Enter at least one mark before saving", "error");
+    //   return;
+    // }
+
+    // try {
+    //   await apiRequest({
+    //     url: ApiRoutes.STUDENTMARKSENTRYBULK,
+    //     method: "post",
+    //     data: {
+    //       program_id: Number(filters.programId),
+    //       batch: filters.batch,
+    //       semester: `semester_${filters.semesterNo}`,
+    //       course_name: selectedCourseLabel,
+    //       mark_type: filters.markType,
+    //       status,
+    //       marks: marksPayload,
+    //     },
+    //   });
     const marksPayload = students
-      .filter((s) => s.status !== "submitted" && marksInput[s.id] !== undefined && marksInput[s.id] !== "")
+      .filter((s) => s.faculty_status !== "Submitted" && marksInput[s.id] !== undefined && marksInput[s.id] !== "")
       .map((s) => ({
         student_id: s.id,
         final_marks: Number(marksInput[s.id]),
@@ -315,7 +361,7 @@ export default function MarksEntryScreen() {
           semester: `semester_${filters.semesterNo}`,
           course_name: selectedCourseLabel,
           mark_type: filters.markType,
-          status,
+          faculty_status: status === "submitted" ? "Submitted" : "Draft",
           marks: marksPayload,
         },
       });
@@ -326,12 +372,90 @@ export default function MarksEntryScreen() {
     }
   };
 
+  // const handleSave = () => saveMarks("draft");
+  // // const handleApprove = () => saveMarks("approved");
+  // const handleSubmit = () => {
+  //   showConfirm("Once submitted, marks cannot be edited. Continue?", () => saveMarks("submitted"));
+  // };
   const handleSave = () => saveMarks("draft");
-  // const handleApprove = () => saveMarks("approved");
   const handleSubmit = () => {
     showConfirm("Once submitted, marks cannot be edited. Continue?", () => saveMarks("submitted"));
   };
 
+  const handleHodApprove = async () => {
+    try {
+      await apiRequest({
+        url: ApiRoutes.HODREVIEW,
+        method: "put",
+        data: {
+          program_id: Number(filters.programId),
+          batch: filters.batch,
+          semester: `semester_${filters.semesterNo}`,
+          course_name: selectedCourseLabel,
+          mark_type: filters.markType,
+          action: "approve",
+        },
+      });
+      showAlert("Marks approved", "success");
+      handleViewStudents();
+    } catch (err) {
+      showAlert("Failed to approve marks", "error");
+    }
+  };
+
+  const handleHodReject = async () => {
+    if (!rejectReasonInput.trim()) {
+      showAlert("Please enter a rejection reason", "error");
+      return;
+    }
+    try {
+      await apiRequest({
+        url: ApiRoutes.HODREVIEW,
+        method: "put",
+        data: {
+          program_id: Number(filters.programId),
+          batch: filters.batch,
+          semester: `semester_${filters.semesterNo}`,
+          course_name: selectedCourseLabel,
+          mark_type: filters.markType,
+          action: "reject",
+          reject_reason: rejectReasonInput,
+        },
+      });
+      showAlert("Marks rejected and sent back to faculty", "success");
+      setShowRejectBox(false);
+      setRejectReasonInput("");
+      handleViewStudents();
+    } catch (err) {
+      showAlert("Failed to reject marks", "error");
+    }
+  };
+
+  const handleDirectorApprove = async () => {
+    try {
+      await apiRequest({
+        url: ApiRoutes.DIRECTORAPPROVE,
+        method: "put",
+        data: {
+          program_id: Number(filters.programId),
+          batch: filters.batch,
+          semester: `semester_${filters.semesterNo}`,
+          course_name: selectedCourseLabel,
+          mark_type: filters.markType,
+        },
+      });
+      showAlert("Marks approved by Director", "success");
+      handleViewStudents();
+    } catch (err) {
+      showAlert("Failed to approve marks", "error");
+    }
+  };
+
+  const visibleStudents = isDirector
+    ? students.filter((s) => s.hod_status === "Approved")
+    : isHOD
+    ? students.filter((s) => s.faculty_status === "Submitted")
+    : students;
   const paginatedStudents = students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleExportExcel = () => {
@@ -349,7 +473,7 @@ export default function MarksEntryScreen() {
         pass_status: !attendanceValid && attendanceValue !== "" ? "NOT ELIGIBLE" : (passStatus ? passStatus.toUpperCase() : "-"),
         admission_year: s.admission_year || "-",
         batch: s.batch || "-",
-        status: s.status,
+        status: s.faculty_status,
       };
     });
 
@@ -507,9 +631,19 @@ export default function MarksEntryScreen() {
                 "No minimum/maximum mark configured in Scheme for this selection."
               )}
             </Alert>
+            {!isDirector && (() => {
+              const rejectedEntry = visibleStudents.find((s) => s.hod_status === "Rejected" && s.reject_reason);
+              return rejectedEntry ? (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  <b>Marks rejected by HOD:</b> {rejectedEntry.reject_reason} — please review and re-enter the marks, then resubmit.
+                </Alert>
+              ) : null;
+            })()}
 
-            {students.length === 0 ? (
-              <Alert severity="warning">No students found for this program & semester.</Alert>
+            {visibleStudents.length === 0 ? (
+              <Alert severity="warning">
+                {isDirector ? "No HOD-approved marks available for review yet." : "No students found for this program & semester."}
+              </Alert>
             ) : (
               <>
                 <TableContainer component={Paper} variant="outlined">
@@ -521,6 +655,20 @@ export default function MarksEntryScreen() {
                         <TableCell>Attendance %</TableCell>
                         <TableCell>Marks</TableCell>
                         <TableCell>Pass / Fail</TableCell>
+                        {isDirector ? (
+                          <TableCell>HOD Status</TableCell>
+                        ) : isHOD ? (
+                          <>
+                            <TableCell>Admin Status</TableCell>
+                            <TableCell>Director Status</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell>Admin Status</TableCell>
+                            <TableCell>HOD Status</TableCell>
+                            <TableCell>Director Status</TableCell>
+                          </>
+                        )}
                         <TableCell>Academic Year</TableCell>
                         <TableCell>Batch</TableCell>
                       </TableRow>
@@ -533,7 +681,8 @@ export default function MarksEntryScreen() {
                         const attendanceValid = isAttendanceInRange(attendanceValue);
                         const lowAttendance = isLowAttendance(attendanceValue);
                         const passStatus = computePassStatus(markValue);
-                        const rowLocked = s.status === "submitted";
+                        // const rowLocked = s.status === "submitted";
+                        const rowLocked = s.faculty_status === "Submitted" || isReviewer;
 
                         return (
                           <TableRow key={s.id}>
@@ -581,6 +730,41 @@ export default function MarksEntryScreen() {
                                 )}
                               </Stack>
                             </TableCell>
+                            {isDirector ? (
+                              <TableCell>
+                                <Chip
+                                  label={getHodStatusLabel(s.hod_status)}
+                                  size="small"
+                                  color={s.hod_status === "Approved" ? "success" : "default"}
+                                />
+                              </TableCell>
+                            ) : (
+                              <>
+                                <TableCell>
+                                  <Chip
+                                    label={s.faculty_status}
+                                    size="small"
+                                    color={s.faculty_status === "Submitted" ? "success" : "default"}
+                                  />
+                                </TableCell>
+                                {!isHOD && (
+                                <TableCell>
+                                  <Chip
+                                    label={getHodStatusLabel(s.hod_status)}
+                                    size="small"
+                                    color={s.hod_status === "Approved" ? "success" : s.hod_status === "Rejected" ? "error" : "default"}
+                                  />
+                                </TableCell>
+                                )}
+                                <TableCell>
+                                  <Chip
+                                    label={getHodStatusLabel(s.director_status)}
+                                    size="small"
+                                    color={s.director_status === "Approved" ? "success" : "default"}
+                                  />
+                                </TableCell>
+                              </>
+                            )}
                             <TableCell>{s.admission_year || "-"}</TableCell>
                             <TableCell>{s.batch || "-"}</TableCell>
                           </TableRow>
@@ -592,22 +776,59 @@ export default function MarksEntryScreen() {
                   <TablePagination
                     page={page}
                     rowsPerPage={rowsPerPage}
-                    totalCount={students.length}
+                    totalCount={visibleStudents.length}
                     onPageChange={setPage}
                   />
                 </TableContainer>
 
-                <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
-                  <Button variant="contained" onClick={handleSave} >
-                    Save
-                  </Button>
-                  {/* <Button variant="outlined" onClick={handleApprove}>
-                    Approve
-                  </Button> */}
-                  <Button color="error" variant="contained" onClick={handleSubmit}>
-                    Submit
-                  </Button>
-                </Stack>
+                {!isReviewer && (
+                  <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+                    <Button variant="contained" onClick={handleSave}>
+                      Save
+                    </Button>
+                    <Button color="error" variant="contained" onClick={handleSubmit}>
+                      Submit
+                    </Button>
+                  </Stack>
+                )}
+
+                {isHOD && (
+                  <Box mt={3}>
+                    {showRejectBox && (
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={2}
+                        label="Rejection Reason"
+                        value={rejectReasonInput}
+                        onChange={(e) => setRejectReasonInput(e.target.value)}
+                        sx={{ mb: 2 }}
+                      />
+                    )}
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
+                      <Button variant="contained" color="success" onClick={handleHodApprove}>
+                        Approve
+                      </Button>
+                      {!showRejectBox ? (
+                        <Button variant="outlined" color="error" onClick={() => setShowRejectBox(true)}>
+                          Reject
+                        </Button>
+                      ) : (
+                        <Button variant="contained" color="error" onClick={handleHodReject}>
+                          Confirm Reject
+                        </Button>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+
+                {isDirector && (
+                  <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+                    <Button variant="contained" color="success" onClick={handleDirectorApprove}>
+                      Approve
+                    </Button>
+                  </Stack>
+                )}
               </>
             )}
           </Card>

@@ -147,6 +147,14 @@ export default function Navbar({ onHamburgerClick }: NavbarProps) {
 
           {/* Avatar (desktop only) */}
           <Box className="hidden md:flex items-center space-x-3">
+            <Customtext
+              fieldName={username}
+              sx={{
+                textTransform: 'capitalize',
+                fontWeight: 600,
+                color: theme.palette.secondary.main,
+              }}
+            />
             <Tooltip title="Profile" placement="bottom" arrow>
               <IconButton onClick={handleProfileClick} sx={{ p: 0 }}>
                 <Avatar

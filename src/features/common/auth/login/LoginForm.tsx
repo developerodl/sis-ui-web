@@ -116,6 +116,22 @@ function LoginPage() {
       );
 
       /* Role-based navigation */
+      const groupId = user.group_id;
+      if (groupId === 6 || groupId === 7) {
+        // HOD or Director — go straight to Marks page
+        navigate("/marks/add");
+      } else if (groupId === 1) {
+        // Admin
+        navigate("/dashboard");
+      } else if (groupId === 5) {
+        // Faculty
+        navigate("/marks/add");
+      } else {
+        // Student or anything else
+        navigate("/dashboard/student");
+      }
+
+      /* Role-based navigation */
       // if (user.group_id === 1) {
       //   navigate("/dashboard");
       // } else {
