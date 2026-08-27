@@ -132,27 +132,27 @@ const HallTicket = ({ student }: HallTicketProps) => {
 
   const DataScienceTimetable = [
   [
-    "August 22 2026",
-    "MTH24OCT02",
-    "Statistics",
+    "12 September 2026\n(Saturday)",
+    "MTH24OCT01",
+    "Mathematics",
     "10.00 AM - 1.00 PM",
   ],
   [
-    "August 23 2026",
-    "CDS24OCT03",
-    "Data Structure and Algorithm",
+    "13 September 2026\n(Sunday)",
+    "CDS24OCT01",
+    "Fundamentals of Computer Science",
     "10.00 AM - 1.00 PM",
   ],
   [
-    "August 29 2026",
-    "CDS24OCT04",
-    "Python programming",
+    "19 September 2026\n(Saturday)",
+    "CDS24OCT02",
+    "C Programming",
     "10.00 AM - 1.00 PM",
   ],
   [
-    "August 30 2026",
-    "CDS24OCT05",
-    "Introduction to data science",
+    "20 September 2026\n(Sunday)",
+    "ENG24OCT01",
+    "Communicative English",
     "10.00 AM - 1.00 PM",
   ],
   
@@ -286,7 +286,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     name: `${student?.first_name} ${student?.last_name}`,
     gender: gender,
     dob: formattedDOB,
-    semester: "Semester-2",
+    semester: "Semester-1",
     registrationNo: student?.registration_no,
     program: student?.program_id == "1500038" ? (
       <Box component="span">B.Sc (Hons) - (Data Science)  </Box>
@@ -464,7 +464,18 @@ const HallTicket = ({ student }: HallTicketProps) => {
                       .map((row, index) => (
                         <tr key={index}>
                           {row.map((cell, i) => (
-                            <td key={i} style={cellStyle} align="center">
+                            // <td key={i} style={cellStyle} align="center">
+                            //   {cell}
+                            // </td>
+                            <td
+                              key={i}
+                              style={{
+                                ...cellStyle,
+                                whiteSpace: "pre-line",
+                                textAlign: "center",
+                                verticalAlign: "middle",
+                              }}
+                            >
                               {cell}
                             </td>
                           ))}

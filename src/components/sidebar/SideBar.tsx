@@ -215,7 +215,9 @@ export default function Sidebar({
           return true;
         }) :
         rollId == "3" ?
-          FACULTY_MENU_ITEMS : [];
+          FACULTY_MENU_ITEMS : 
+          (rollId == "5" || rollId == "6" || rollId == "7") ?
+          [] : [];
 
 
   const drawerContent = (

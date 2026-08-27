@@ -29,6 +29,7 @@ import apiClient from "../../../../services/ApiClient";
 import { apiRequest } from "../../../../utils/ApiRequest";
 import { ApiRoutes } from "../../../../constants/ApiConstants";
 import { exportToExcel } from "../../../../constants/excelExport";
+import { exportToWord } from "../../../../constants/wordExport";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { getValue } from "../../../../utils/localStorageUtil";
 
@@ -57,6 +58,7 @@ interface StudentRow {
   hod_status: string;
   director_status: string;
   reject_reason: string | null;
+  is_arrear: boolean;
 }
 
 interface Scheme {
@@ -247,6 +249,7 @@ export default function MarksEntryScreen() {
       });
 
       const rows: StudentRow[] = res.data || [];
+      const sorted = [...rows].sort((a, b) => Number(b.is_arrear) - Number(a.is_arrear))
       setStudents(rows);
 
       const prefill: Record<number, string> = {};
@@ -442,6 +445,7 @@ export default function MarksEntryScreen() {
           semester: `semester_${filters.semesterNo}`,
           course_name: selectedCourseLabel,
           mark_type: filters.markType,
+          academic_year: students[0]?.admission_year || null,
         },
       });
       showAlert("Marks approved by Director", "success");
@@ -456,16 +460,17 @@ export default function MarksEntryScreen() {
     : isHOD
     ? students.filter((s) => s.faculty_status === "Submitted")
     : students;
-  const paginatedStudents = students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedStudents = visibleStudents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleExportExcel = () => {
-    const exportRows = students.map((s) => {
+    const exportRows = students.map((s, index) => {
       const markValue = marksInput[s.id] ?? "";
       const attendanceValue = attendanceInput[s.id] ?? "";
       const attendanceValid = isAttendanceInRange(attendanceValue);
       const passStatus = computePassStatus(markValue);
 
       return {
+        sno: index + 1,
         reg_no: s.reg_no,
         name: s.name,
         attendance_percentage: attendanceValue || s.attendance_percentage || "-",
@@ -479,8 +484,9 @@ export default function MarksEntryScreen() {
 
     exportToExcel(
       exportRows,
-      [
-        { header: "Roll No", key: "reg_no" },
+      [ 
+        { header: "S.No", key: "sno" },
+        { header: "Register No", key: "register_no" },
         { header: "Student Name", key: "name" },
         { header: "Attendance %", key: "attendance_percentage" },
         { header: "Marks", key: "final_marks" },
@@ -491,6 +497,44 @@ export default function MarksEntryScreen() {
       ],
       `Marks_${selectedCourseLabel}_${filters.markType}`,
       "Student_Marks"
+    );
+  };
+
+    const handleExportWord = async () => {
+    const programLabel =
+      programs.find((p) => String(p.id) === filters.programId)?.short_name ||
+      programs.find((p) => String(p.id) === filters.programId)?.programe ||
+      "-";
+    const semesterLabel =
+      semesters.find((s) => s.value === filters.semesterNo)?.label || `Semester ${filters.semesterNo}`;
+    const markTypeLabel = MARK_TYPES.find((m) => m.value === filters.markType)?.label || filters.markType;
+
+    const rows = visibleStudents.map((s, index) => {
+      const markValue = marksInput[s.id] ?? s.final_marks ?? "-";
+      const attendanceValue = attendanceInput[s.id] ?? s.attendance_percentage ?? "-";
+      const passStatus = computePassStatus(String(markValue)) || s.pass_status || "-";
+      return {
+        sno: index + 1,
+        reg_no: s.reg_no,
+        name: s.name,
+        attendance_percentage: attendanceValue,
+        final_marks: markValue,
+        pass_status: passStatus,
+        admission_year: s.admission_year,
+        batch: s.batch,
+      };
+    });
+
+    await exportToWord(
+      {
+        programName: programLabel,
+        batch: filters.batch,
+        semester: semesterLabel,
+        course: selectedCourseLabel || "-",
+        markType: markTypeLabel,
+      },
+      rows,
+      `Marks_${selectedCourseLabel}_${filters.markType}`
     );
   };
 
@@ -605,19 +649,24 @@ export default function MarksEntryScreen() {
         {/* TABLE */}
         {viewClicked && (
           <Card sx={{ mt: 4, p: 3 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6">
-                Student Mark Entry
-              </Typography>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<FileDownloadIcon />}
-                onClick={handleExportExcel}
-              >
-                Export Excel
-              </Button>
-            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<FileDownloadIcon />}
+                  onClick={handleExportExcel}
+                >
+                  Export Excel
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<FileDownloadIcon />}
+                  onClick={handleExportWord}
+                >
+                  Export Word
+                </Button>
+              </Box>
 
             {/* <Alert severity="info" sx={{ mb: 2 }}>
               {minMark !== undefined && minMark !== null
@@ -650,7 +699,7 @@ export default function MarksEntryScreen() {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Roll No</TableCell>
+                        <TableCell>Register No</TableCell>
                         <TableCell>Student Name</TableCell>
                         <TableCell>Attendance %</TableCell>
                         <TableCell>Marks</TableCell>
@@ -664,7 +713,7 @@ export default function MarksEntryScreen() {
                           </>
                         ) : (
                           <>
-                            <TableCell>Admin Status</TableCell>
+                            <TableCell>Faculty Status</TableCell>
                             <TableCell>HOD Status</TableCell>
                             <TableCell>Director Status</TableCell>
                           </>
@@ -687,7 +736,13 @@ export default function MarksEntryScreen() {
                         return (
                           <TableRow key={s.id}>
                             <TableCell>{s.reg_no}</TableCell>
-                            <TableCell>{s.name}</TableCell>
+                            {/* <TableCell>{s.name}</TableCell> */}
+                            <TableCell>
+                              {s.name}
+                              {s.is_arrear && (
+                                <Chip label="ARREAR" color="warning" size="small" sx={{ ml: 1 }} />
+                              )}
+                            </TableCell>
                             <TableCell>
                               <TextField
                                 size="small"
@@ -766,7 +821,7 @@ export default function MarksEntryScreen() {
                               </>
                             )}
                             <TableCell>{s.admission_year || "-"}</TableCell>
-                            <TableCell>{s.batch || "-"}</TableCell>
+                            {/* <TableCell>{s.batch || "-"}</TableCell> */}
                           </TableRow>
                         );
                       })}
