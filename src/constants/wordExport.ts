@@ -71,7 +71,7 @@ export async function exportToWord(meta: WordExportMeta, rows: WordExportRow[], 
           new Paragraph({ text: `Semester: ${meta.semester}` }),
           new Paragraph({ text: `Course: ${meta.course}` }),
           new Paragraph({ text: `Mark Type: ${meta.markType}` }),
-          new Paragraph({ text: `Academic Year: ${meta.admissionYear || "-"}` }),
+        //   new Paragraph({ text: `Academic Year: ${meta.admissionYear || "-"}` }), ---
           new Paragraph({ text: "" }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
