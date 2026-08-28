@@ -8,6 +8,7 @@ export const ApiRoutes = {
   USERS: '/users',
   PRODUCTS: '/products',
   GETSTUDENTSLIST: '/student/list',
+  PROFILEIMAGEPROXY: 'student/profile-image-proxy',
   GETSTUDENTBYID: 'student',
   STUDENTSYNC: 'student/sync',
   PUSHTODEBL: 'push/ugc',

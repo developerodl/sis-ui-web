@@ -1,6 +1,7 @@
 import * as React from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../../../utils/ApiRequest';
 import { ApiRoutes } from '../../../constants/ApiConstants';
@@ -9,7 +10,8 @@ import ReusableTable from '../../../components/table/table';
 import SyncIcon from '@mui/icons-material/Sync';
 import TableToolbar from '../../../components/tabletoolbar/tableToolbar';
 import TablePagination from '../../../components/tablepagination/tablepagination';
-import { exportToExcel } from '../../../constants/excelExport';
+import { exportToExcel } from '../../../constants/excelExport'; 
+import { exportToPdfWithPhotos } from '../../../constants/exportPdf';
 import { CloudUploadIcon } from 'lucide-react';
 import { useAlert } from '../../../context/AlertContext';
 import UploadExcelDialog from '../../../components/alertcard/Excelcard';
@@ -274,6 +276,51 @@ export default function StudentTable() {
     );
   };
 
+   /* -------------------- Export PDF -------------------- */
+
+  const handleExportPdf = async () => {
+
+    const selectedProgram = programOptions.find(
+      (p) => String(p.value) === String(programFilter)
+    );
+
+    const pdfTitle = selectedProgram
+      ? `CDOE ${selectedProgram.label.toUpperCase()} BATCH STUDENT DETAILS`
+      : 'CDOE STUDENT DETAILS';
+
+    await exportToPdfWithPhotos(
+      filteredStudents,
+      [
+        { header: 'S.No', key: 'sno' },
+        { header: 'Register No', key: 'registration_no' },
+        {
+          header: 'Name',
+          key: 'full_name',
+          render: (s) => `${s.title} ${s.first_name} ${s.last_name}`,
+        },
+        { header: 'Gender', key: 'gender' },
+        {
+          header: 'Date Of Birth',
+          key: 'date_of_birth',
+          render: (s) => formatDate(s.date_of_birth),
+        },
+        {
+          header: 'Parent/Guardian Name',
+          key: 'parent_guardian_name',
+          render: (s) => s.parent_guardian_name || '-',
+        },
+        {
+          header: 'ABC ID',
+          key: 'abc_id',
+          render: (s) => s.deb_details?.deb_abcid || 'Not Received ABC ID',
+        },
+      ],
+      (s) => s.id,
+      'Students',
+      pdfTitle          // ⬅ CHANGED — dynamic title instead of hardcoded string
+    );
+  };
+
   /* -------------------- Sync -------------------- */
 
   const handleSync = async () => {
@@ -475,6 +522,12 @@ export default function StudentTable() {
               startIcon:
                 <FileDownloadIcon />,
               onClick: handleExportExcel,
+            },
+            {
+              label: 'Export PDF',
+              color: 'secondary',
+              startIcon: <PictureAsPdfIcon />,
+              onClick: handleExportPdf,
             },
 
           ]}
