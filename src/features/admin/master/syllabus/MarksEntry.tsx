@@ -249,7 +249,6 @@ export default function MarksEntryScreen() {
       });
 
       const rows: StudentRow[] = res.data || [];
-      const sorted = [...rows].sort((a, b) => Number(b.is_arrear) - Number(a.is_arrear))
       setStudents(rows);
 
       const prefill: Record<number, string> = {};
@@ -463,7 +462,12 @@ export default function MarksEntryScreen() {
   const paginatedStudents = visibleStudents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleExportExcel = () => {
-    const exportRows = students.map((s, index) => {
+    // const exportRows = students.map((s, index) => {
+    const sortedForExcel = [...students].sort((a, b) =>
+      (a.reg_no || "").localeCompare(b.reg_no || "", undefined, { numeric: true })
+    );
+
+    const exportRows = sortedForExcel.map((s, index) => {
       const markValue = marksInput[s.id] ?? "";
       const attendanceValue = attendanceInput[s.id] ?? "";
       const attendanceValid = isAttendanceInRange(attendanceValue);
@@ -486,14 +490,14 @@ export default function MarksEntryScreen() {
       exportRows,
       [ 
         { header: "S.No", key: "sno" },
-        { header: "Register No", key: "register_no" },
+        { header: "Register No", key: "reg_no" },
         { header: "Student Name", key: "name" },
         { header: "Attendance %", key: "attendance_percentage" },
         { header: "Marks", key: "final_marks" },
         { header: "Pass / Fail", key: "pass_status" },
         { header: "Academic Year", key: "admission_year" },
         { header: "Batch", key: "batch" },
-        { header: "Record Status", key: "status" },
+        // { header: "Record Status", key: "status" },
       ],
       `Marks_${selectedCourseLabel}_${filters.markType}`,
       "Student_Marks"
@@ -509,7 +513,11 @@ export default function MarksEntryScreen() {
       semesters.find((s) => s.value === filters.semesterNo)?.label || `Semester ${filters.semesterNo}`;
     const markTypeLabel = MARK_TYPES.find((m) => m.value === filters.markType)?.label || filters.markType;
 
-    const rows = visibleStudents.map((s, index) => {
+    // const rows = visibleStudents.map((s, index) => {
+     const sortedForWord = [...visibleStudents].sort((a, b) =>
+      (a.reg_no || "").localeCompare(b.reg_no || "", undefined, { numeric: true })
+    );
+    const rows = sortedForWord.map((s, index) => {
       const markValue = marksInput[s.id] ?? s.final_marks ?? "-";
       const attendanceValue = attendanceInput[s.id] ?? s.attendance_percentage ?? "-";
       const passStatus = computePassStatus(String(markValue)) || s.pass_status || "-";
@@ -821,7 +829,7 @@ export default function MarksEntryScreen() {
                               </>
                             )}
                             <TableCell>{s.admission_year || "-"}</TableCell>
-                            {/* <TableCell>{s.batch || "-"}</TableCell> */}
+                            <TableCell>{s.batch || "-"}</TableCell>
                           </TableRow>
                         );
                       })}

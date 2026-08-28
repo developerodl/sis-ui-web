@@ -41,12 +41,12 @@ export default function Sidebar({
   const [selectedItem, setSelectedItem] = useState('Dashboard');
   const [selectedParent, setSelectedParent] = useState('');
   const rollId = getValue("rollid");
-  const isHOD = String(rollId) === "6";
-  const isDirector = String(rollId) === "7";
-  const isReviewer = isHOD || isDirector;
+  // const isHOD = String(rollId) === "6";
+  // const isDirector = String(rollId) === "7";
+  // const isReviewer = isHOD || isDirector;
 
-  const [rejectReasonInput, setRejectReasonInput] = useState("");
-  const [showRejectBox, setShowRejectBox] = useState(false);
+  // const [rejectReasonInput, setRejectReasonInput] = useState("");
+  // const [showRejectBox, setShowRejectBox] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme()
