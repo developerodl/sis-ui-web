@@ -261,24 +261,24 @@ const StudentHorizontalIDCard = () => {
       .trim();
   };
 
-  const getBatchYearFromRegNo = (regNo?: string) => {
-    if (!regNo) return null;
+  // const getBatchYearFromRegNo = (regNo?: string) => {
+  //   if (!regNo) return null;
 
-    const prefix = regNo.substring(0, 3); // X02, X03
+  //   const prefix = regNo.substring(0, 3); // X02, X03
 
-    if (prefix === "X02" || prefix === "X03") {
-      return {
-        batch: "January",
-        year: "2026",
-      };
-    }
+  //   if (prefix === "X02" || prefix === "X03") {
+  //     return {
+  //       batch: "January",
+  //       year: "2026",
+  //     };
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
 
 
-  const regBatchYear = getBatchYearFromRegNo(student?.registration_no);
+  // const regBatchYear = getBatchYearFromRegNo(student?.registration_no);
 
   const personalInfo = {
     fullName: `${student?.first_name || ""} ${student?.last_name || ""}`,
@@ -309,8 +309,10 @@ const StudentHorizontalIDCard = () => {
     department: student?.department || "CDOE",
 
     // ✅ HERE IS THE KEY PART
-    batch: regBatchYear?.batch || student?.batch || "July",
-    year: regBatchYear?.year || student?.year || "2025",
+    // batch: regBatchYear?.batch || student?.batch || "July",
+    // year: regBatchYear?.year || student?.admission_year || "2026",
+    batch: student?.batch || "July",
+    year: student?.admission_year || student?.year || "2025",
 
     registration_no: student?.registration_no,
     parent_guardian_name: student?.parent_guardian_name,
