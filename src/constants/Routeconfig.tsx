@@ -45,6 +45,10 @@ import GrievanceViewAdmin from "../features/student/grievances/admin/grievancevi
 import GrievanceAdminList from "../features/student/grievances/admin/Grievancelistadmin";
 import GrievanceFacultyView from "../features/student/grievances/faculty/GrievanceFacultyView";
 import GrievanceFacultyList from "../features/student/grievances/faculty/GrievanceFacultyList";
+import FeeDetailAdd from "../features/admin/finance/feesdetail/FeesDetailAdd";
+import FeeDetailList from "../features/admin/finance/feesdetail/FeesDetailList";
+import FeeComponentList from "../features/admin/finance/feecomponent/FeeComponentList";
+import FeeComponentAdd from "../features/admin/finance/feecomponent/FeeComponentAdd";
 
 export const routesConfig = [
   {
@@ -464,6 +468,48 @@ export const routesConfig = [
         element: <GrievanceFacultyView />,
         breadcrumb: 'Grievance View',
       },
+    ]
+  },
+  {
+    path: '/fee-detail',
+    breadcrumb: 'Fee Detail',
+    children: [
+      {
+        path: 'list',
+        element: <FeeDetailList />,
+        breadcrumb: 'Fee Detail List',
+      },
+      {
+        path: 'add',
+        element: <FeeDetailAdd />,
+        breadcrumb: 'Fee Detail Add',
+      },
+      {
+        path: 'edit/:id',
+        element: <FeeDetailAdd />,
+        breadcrumb: 'Fee Detail Edit',
+      }
+    ]
+  },
+  {
+    path: '/fee-component',
+    breadcrumb: 'Fee Component',
+    children: [
+      {
+        path: 'list',
+        element: <FeeComponentList />,
+        breadcrumb: 'Fee Component List',
+      },
+      {
+        path: 'add',
+        element: <FeeComponentAdd/>,
+        breadcrumb: 'Fee Component Add',
+      },
+      {
+        path: 'edit/:id',
+        element: <FeeComponentAdd />,
+        breadcrumb: 'Fee Component Edit',
+      }
     ]
   }
 ];

@@ -1,6 +1,6 @@
 // export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
-// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
-export const BASE_URL = "http://127.0.0.1:8000/";
+export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
   LOGIN: '/auth/login',
@@ -44,7 +44,7 @@ export const ApiRoutes = {
   GETDEPARTMENTBYID: 'department',
   SCHEMES: '/schemes',
   SEMESTERS: 'semesters',
-  COURSES: 'courses', 
+  COURSES: 'courses',
   COURSE_COMPONENTS: 'course-components',
   EXAMS: 'exams',
   EXAMTIMETABLES: 'exam-timetables',
@@ -103,9 +103,30 @@ export const ApiRoutes = {
 
   COURSECATEGORYLIST: 'course-categories',
   COURSECATEGORYADD: 'course-categories',
-  COURSECATEGORYUPDATE:'course-categories',
+  COURSECATEGORYUPDATE: 'course-categories',
   COURSECATEGORYDELETE: 'course-categories',
-  COURSECATEGORYBYID: 'course-categories'
+  COURSECATEGORYBYID: 'course-categories',
 
+  // endpoint for fees detail finance
+  FEEDETAILGETALL:
+    "/fee-details/getall",
 
+  FEEDETAILCREATE:
+    "/fee-details/create",
+
+  FEEDETAILGETBYID:
+    "/fee-details/get_by_id",
+
+  FEEDETAILUPDATE:
+    "/fee-details/update",
+
+  FEEDETAILDELETE:
+    "/fee-details/delete",
+
+  // fee-componets
+  FEECOMPONENTGETALL: "/fee-components/getall",
+  FEECOMPONENTCREATE: "/fee-components/create",
+  FEECOMPONENTGETBYID: "/fee-components/get_by_id",
+  FEECOMPONENTUPDATE: "/fee-components/update",
+  FEECOMPONENTDELETE: "/fee-components/delete",
 };
