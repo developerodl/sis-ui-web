@@ -1,5 +1,5 @@
-// export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
-export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
 // export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
@@ -129,4 +129,18 @@ export const ApiRoutes = {
   FEECOMPONENTGETBYID: "/fee-components/get_by_id",
   FEECOMPONENTUPDATE: "/fee-components/update",
   FEECOMPONENTDELETE: "/fee-components/delete",
+
+  //fees head
+  FEEHEADGETALL: "/fee-heads/getall",
+  FEEHEADGETBYID: "/fee-heads/get_by_id",
+  FEEHEADCREATE: "/fee-heads/create",
+  FEEHEADUPDATE: "/fee-heads/update",
+  FEEHEADDELETE: "/fee-heads/delete",
+
+  //program-batch-semesters
+  PROGRAMBATCHSEMESTERGETALL: "/program-batch-semesters",
+  PROGRAMBATCHSEMESTERGETBYID: "/program-batch-semesters",
+  PROGRAMBATCHSEMESTERCREATE: "/program-batch-semesters",
+  PROGRAMBATCHSEMESTERUPDATE: "/program-batch-semesters",
+  PROGRAMBATCHSEMESTERDELETE: "/program-batch-semesters",
 };

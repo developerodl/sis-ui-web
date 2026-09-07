@@ -49,6 +49,10 @@ import FeeDetailAdd from "../features/admin/finance/feesdetail/FeesDetailAdd";
 import FeeDetailList from "../features/admin/finance/feesdetail/FeesDetailList";
 import FeeComponentList from "../features/admin/finance/feecomponent/FeeComponentList";
 import FeeComponentAdd from "../features/admin/finance/feecomponent/FeeComponentAdd";
+import FeeHeadList from "../features/admin/finance/feeshead/FeesHeadList";
+import FeeHeadAdd from "../features/admin/finance/feeshead/FeesHeadAdd";
+import ProgramBatchSemesterList from "../features/admin/finance/programbatchsemester/ProgramBatchSemesterList";
+import ProgramBatchSemesterAdd from "../features/admin/finance/programbatchsemester/ProgramBatchSemesterAdd";
 
 export const routesConfig = [
   {
@@ -471,6 +475,27 @@ export const routesConfig = [
     ]
   },
   {
+    path: '/fee-head',
+    breadcrumb: 'Fee Head',
+    children: [
+      {
+        path: 'list',
+        element: <FeeHeadList />,
+        breadcrumb: 'Fee Head List',
+      },
+      {
+        path: 'add',
+        element: <FeeHeadAdd />,
+        breadcrumb: 'Fee Head Add',
+      },
+      {
+        path: 'edit/:id',
+        element: <FeeHeadAdd />,
+        breadcrumb: 'Fee Head Edit',
+      }
+    ]
+  },
+  {
     path: '/fee-detail',
     breadcrumb: 'Fee Detail',
     children: [
@@ -511,5 +536,27 @@ export const routesConfig = [
         breadcrumb: 'Fee Component Edit',
       }
     ]
-  }
+  },
+  {
+    path: '/program-batch-semester',
+    breadcrumb: 'Program Batch Semester',
+    children: [
+      {
+        path: 'list',
+        element: <ProgramBatchSemesterList />,
+        breadcrumb: 'Program Batch Semester List',
+      },
+      {
+        path: 'add',
+        element: <ProgramBatchSemesterAdd />,
+        breadcrumb: 'Program Batch Semester Add',
+      },
+      {
+        path: 'edit/:id',
+        element: <ProgramBatchSemesterAdd />,
+        breadcrumb: 'Program Batch Semester Edit',
+      }
+    ]
+  },
+
 ];

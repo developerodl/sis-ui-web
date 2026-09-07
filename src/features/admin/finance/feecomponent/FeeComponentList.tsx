@@ -24,7 +24,6 @@ import TablePagination from "../../../../components/tablepagination/tablepaginat
 import { apiRequest } from "../../../../utils/ApiRequest";
 import CustomDialog from "../../../../context/ConfirmDialog";
 
-import { getValue } from "../../../../utils/localStorageUtil";
 
 
 export default function FeeComponentList() {
@@ -60,9 +59,6 @@ export default function FeeComponentList() {
 
   const [selectedComponent, setSelectedComponent] =
     React.useState<any>(null);
-
-  const rollid =
-    Number(getValue("rollid"));
 
 
   /* ---------------------------- FEE COMPONENT LIST ---------------------------- */

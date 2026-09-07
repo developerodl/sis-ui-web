@@ -92,8 +92,10 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     text: 'Finance',
     icon: 'Master',
     subItems: [
+      { text: 'FeeHead', routePath: '/fee-head/list' },
       { text: 'FeeDetail', routePath: '/fee-detail/list' },
       { text: 'FeeComponent', routePath: '/fee-component/list' },
+      { text: 'ProgramBatchSemester', routePath: '/program-batch-semester/list' }
 
     ],
     routePath: '',
