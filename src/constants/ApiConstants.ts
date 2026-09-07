@@ -143,4 +143,7 @@ export const ApiRoutes = {
   PROGRAMBATCHSEMESTERCREATE: "/program-batch-semesters",
   PROGRAMBATCHSEMESTERUPDATE: "/program-batch-semesters",
   PROGRAMBATCHSEMESTERDELETE: "/program-batch-semesters",
+
+  // fee dashboard
+  DASHBOARD_FEES: "/dashboard/fees",
 };

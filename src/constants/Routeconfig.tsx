@@ -45,14 +45,15 @@ import GrievanceViewAdmin from "../features/student/grievances/admin/grievancevi
 import GrievanceAdminList from "../features/student/grievances/admin/Grievancelistadmin";
 import GrievanceFacultyView from "../features/student/grievances/faculty/GrievanceFacultyView";
 import GrievanceFacultyList from "../features/student/grievances/faculty/GrievanceFacultyList";
-import FeeDetailAdd from "../features/admin/finance/feesdetail/FeesDetailAdd";
-import FeeDetailList from "../features/admin/finance/feesdetail/FeesDetailList";
-import FeeComponentList from "../features/admin/finance/feecomponent/FeeComponentList";
-import FeeComponentAdd from "../features/admin/finance/feecomponent/FeeComponentAdd";
-import FeeHeadList from "../features/admin/finance/feeshead/FeesHeadList";
-import FeeHeadAdd from "../features/admin/finance/feeshead/FeesHeadAdd";
-import ProgramBatchSemesterList from "../features/admin/finance/programbatchsemester/ProgramBatchSemesterList";
-import ProgramBatchSemesterAdd from "../features/admin/finance/programbatchsemester/ProgramBatchSemesterAdd";
+import FeeDetailAdd from "../features/admin/fees/feesdetail/FeesDetailAdd";
+import FeeDetailList from "../features/admin/fees/feesdetail/FeesDetailList";
+import FeeComponentList from "../features/admin/fees/feecomponent/FeeComponentList";
+import FeeComponentAdd from "../features/admin/fees/feecomponent/FeeComponentAdd";
+import FeeHeadList from "../features/admin/fees/feeshead/FeesHeadList";
+import FeeHeadAdd from "../features/admin/fees/feeshead/FeesHeadAdd";
+import ProgramBatchSemesterList from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterList";
+import ProgramBatchSemesterAdd from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterAdd";
+import DashboardFees from "../features/admin/fees/feesdashboard/DashboardFees";
 
 export const routesConfig = [
   {
@@ -558,5 +559,10 @@ export const routesConfig = [
       }
     ]
   },
+  {
+    path: '/fee-dashboard',
+    element: <DashboardFees />,
+    breadcrumb: 'Fee Dashboard',
+  }
 
 ];
