@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -28,7 +27,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
@@ -637,19 +635,9 @@ const DashboardFees: React.FC = () => {
           />
         </Box>
 
+        {/* Only 3 cards remain here */}
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Total Students"
-              value={
-                summary?.total_students || 0
-              }
-              icon={
-                <PeopleAltOutlinedIcon />
-              }
-              description="Enrolled + unenrolled students"
-            />
-          </Grid>
+          {/* ENROLLED STUDENTS */}
 
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <SummaryCard
@@ -666,6 +654,8 @@ const DashboardFees: React.FC = () => {
             />
           </Grid>
 
+          {/* UNENROLLED STUDENTS */}
+
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <SummaryCard
               title="Unenrolled Students"
@@ -676,42 +666,12 @@ const DashboardFees: React.FC = () => {
               icon={
                 <PersonOffOutlinedIcon />
               }
-              description="Students not yet enrolled"
+              description="Students not yet enrolled (only paid application fees)"
               iconColor="#ed6c02"
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Semester Fee Paid"
-              value={
-                summary?.semester_fee_paid_amount ||
-                0
-              }
-              icon={
-                <PaymentsOutlinedIcon />
-              }
-              description="Total semester fee collection"
-              iconColor="#2e7d32"
-              currency
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Application Fee"
-              value={
-                summary?.application_fee_amount ||
-                0
-              }
-              icon={
-                <ReceiptLongOutlinedIcon />
-              }
-              description="Total application fee collection"
-              iconColor="#7b1fa2"
-              currency
-            />
-          </Grid>
+          {/* TOTAL PAID */}
 
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <SummaryCard
@@ -896,6 +856,8 @@ const DashboardFees: React.FC = () => {
               <Divider sx={{ my: 2 }} />
 
               <Grid container spacing={2}>
+                {/* FILTERED STUDENTS */}
+
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Box
                     sx={{
@@ -930,6 +892,8 @@ const DashboardFees: React.FC = () => {
                   </Box>
                 </Grid>
 
+                {/* ENROLLED */}
+
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Box
                     sx={{
@@ -963,6 +927,8 @@ const DashboardFees: React.FC = () => {
                     </Typography>
                   </Box>
                 </Grid>
+
+                {/* UNENROLLED */}
 
                 <Grid size={{ xs: 12, sm: 4 }}>
                   <Box
@@ -1001,137 +967,6 @@ const DashboardFees: React.FC = () => {
             </Box>
           </Card>
         )}
-
-      {/* ------------------------------------------------------------------ */}
-      {/* FEE SUMMARY                                                        */}
-      {/* ------------------------------------------------------------------ */}
-
-      <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            mb: 1.5,
-          }}
-        >
-          <Box
-            sx={{
-              width: 4,
-              height: 20,
-              borderRadius: 2,
-              backgroundColor: "#2e7d32",
-            }}
-          />
-
-          <Typography
-            sx={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#263238",
-            }}
-          >
-            Fee Summary
-          </Typography>
-
-          {hasActiveFilters && (
-            <Chip
-              label="Filtered"
-              size="small"
-              sx={{
-                ml: 0.5,
-                height: 23,
-                fontSize: 11,
-                fontWeight: 600,
-                backgroundColor: "#edf7ef",
-                color: "#2e7d32",
-              }}
-            />
-          )}
-        </Box>
-
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Total Fee"
-              value={
-                feeSummary?.total_demand_amount ||
-                0
-              }
-              icon={
-                <CurrencyRupeeOutlinedIcon />
-              }
-              description="Total fee amount"
-              iconColor="#105c8e"
-              currency
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Semester Fee Paid"
-              value={
-                feeSummary?.semester_fee_paid_amount ||
-                0
-              }
-              icon={
-                <PaymentsOutlinedIcon />
-              }
-              description="Semester fee collected"
-              iconColor="#2e7d32"
-              currency
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-            <SummaryCard
-              title="Application Fee"
-              value={
-                feeSummary?.application_fee_paid_amount ||
-                0
-              }
-              icon={
-                <ReceiptLongOutlinedIcon />
-              }
-              description="Application fee collected"
-              iconColor="#7b1fa2"
-              currency
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
-            <SummaryCard
-              title="Total Paid"
-              value={
-                feeSummary?.total_paid_amount ||
-                0
-              }
-              icon={
-                <AccountBalanceWalletOutlinedIcon />
-              }
-              description="Total amount collected"
-              iconColor="#00897b"
-              currency
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
-            <SummaryCard
-              title="Outstanding Amount"
-              value={
-                feeSummary?.outstanding_amount ||
-                0
-              }
-              icon={
-                <MoneyOffCsredOutlinedIcon />
-              }
-              description="Amount yet to be collected"
-              iconColor="#c62828"
-              currency
-            />
-          </Grid>
-        </Grid>
-      </Box>
 
       {/* ------------------------------------------------------------------ */}
       {/* FILTER CARD                                                        */}
@@ -1542,6 +1377,147 @@ const DashboardFees: React.FC = () => {
       </Card>
 
       {/* ------------------------------------------------------------------ */}
+      {/* FEE SUMMARY                                                        */}
+      {/* ------------------------------------------------------------------ */}
+
+      <Box sx={{ mb: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 1.5,
+          }}
+        >
+          <Box
+            sx={{
+              width: 4,
+              height: 20,
+              borderRadius: 2,
+              backgroundColor: "#2e7d32",
+            }}
+          />
+
+          <Typography
+            sx={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: "#263238",
+            }}
+          >
+            Fee Summary - <span style={{ fontWeight: 400,  color: "#5f6b76", }}>Enrolled Students</span>
+          </Typography>
+
+          {hasActiveFilters && (
+            <Chip
+              label="Filtered"
+              size="small"
+              sx={{
+                ml: 0.5,
+                height: 23,
+                fontSize: 11,
+                fontWeight: 600,
+                backgroundColor: "#edf7ef",
+                color: "#2e7d32",
+              }}
+            />
+          )}
+        </Box>
+
+        <Grid container spacing={2}>
+          {/* TOTAL FEE DEMAND */}
+
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <SummaryCard
+              title="Total Fee Demand"
+              value={
+                feeSummary?.total_demand_amount ||
+                0
+              }
+              icon={
+                <CurrencyRupeeOutlinedIcon />
+              }
+              description="Total fee amount"
+              iconColor="#105c8e"
+              currency
+            />
+          </Grid>
+
+          {/* SEMESTER FEE PAID */}
+
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <SummaryCard
+              title="Semester Fee Paid"
+              value={
+                feeSummary?.semester_fee_paid_amount ||
+                0
+              }
+              icon={
+                <PaymentsOutlinedIcon />
+              }
+              description="Semester fee collected"
+              iconColor="#2e7d32"
+              currency
+            />
+          </Grid>
+
+          {/* APPLICATION FEE */}
+
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <SummaryCard
+              title="Application Fee"
+              value={
+                feeSummary?.application_fee_paid_amount ||
+                0
+              }
+              icon={
+                <ReceiptLongOutlinedIcon />
+              }
+              description="Application fee collected"
+              iconColor="#7b1fa2"
+              currency
+            />
+          </Grid>
+
+          {/* TOTAL PAID */}
+
+          <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
+            <SummaryCard
+              title="Total Paid"
+              value={
+                feeSummary?.total_paid_amount ||
+                0
+              }
+              icon={
+                <AccountBalanceWalletOutlinedIcon />
+              }
+              description="Total amount collected"
+              iconColor="#00897b"
+              currency
+            />
+          </Grid>
+
+          {/* OUTSTANDING */}
+
+          <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
+            <SummaryCard
+              title="Outstanding Amount"
+              value={
+                feeSummary?.outstanding_amount ||
+                0
+              }
+              icon={
+                <MoneyOffCsredOutlinedIcon />
+              }
+              description="Amount yet to be collected"
+              iconColor="#c62828"
+              currency
+            />
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* ------------------------------------------------------------------ */}
       {/* STUDENT TABLE                                                      */}
       {/* ------------------------------------------------------------------ */}
 
@@ -1796,6 +1772,8 @@ const DashboardFees: React.FC = () => {
                 >
                   <TableHead>
                     <TableRow>
+                      {/* S.NO */}
+
                       <TableCell
                         sx={{
                           minWidth: 65,
@@ -1810,6 +1788,8 @@ const DashboardFees: React.FC = () => {
                       >
                         S.No
                       </TableCell>
+
+                      {/* STUDENT */}
 
                       <TableCell
                         sx={{
@@ -1826,6 +1806,8 @@ const DashboardFees: React.FC = () => {
                         Student
                       </TableCell>
 
+                      {/* PROGRAM */}
+
                       <TableCell
                         sx={{
                           minWidth: 190,
@@ -1841,6 +1823,8 @@ const DashboardFees: React.FC = () => {
                         Program
                       </TableCell>
 
+                      {/* BATCH */}
+
                       <TableCell
                         sx={{
                           minWidth: 100,
@@ -1853,6 +1837,8 @@ const DashboardFees: React.FC = () => {
                       >
                         Batch
                       </TableCell>
+
+                      {/* SEMESTER */}
 
                       <TableCell
                         sx={{
@@ -1869,6 +1855,8 @@ const DashboardFees: React.FC = () => {
                         Semester
                       </TableCell>
 
+                      {/* ADMISSION YEAR */}
+
                       <TableCell
                         sx={{
                           minWidth: 115,
@@ -1883,6 +1871,8 @@ const DashboardFees: React.FC = () => {
                       >
                         Admission Year
                       </TableCell>
+
+                      {/* TOTAL FEE */}
 
                       <TableCell
                         align="right"
@@ -1900,6 +1890,8 @@ const DashboardFees: React.FC = () => {
                         Total Fee
                       </TableCell>
 
+                      {/* SEMESTER PAID */}
+
                       <TableCell
                         align="right"
                         sx={{
@@ -1915,6 +1907,8 @@ const DashboardFees: React.FC = () => {
                       >
                         Semester Paid
                       </TableCell>
+
+                      {/* APPLICATION FEE */}
 
                       <TableCell
                         align="right"
@@ -1932,6 +1926,8 @@ const DashboardFees: React.FC = () => {
                         Application Fee
                       </TableCell>
 
+                      {/* TOTAL PAID */}
+
                       <TableCell
                         align="right"
                         sx={{
@@ -1947,6 +1943,8 @@ const DashboardFees: React.FC = () => {
                       >
                         Total Paid
                       </TableCell>
+
+                      {/* OUTSTANDING */}
 
                       <TableCell
                         align="right"
