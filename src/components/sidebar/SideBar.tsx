@@ -14,7 +14,7 @@ import { ExpandLess, ExpandMore, } from '@mui/icons-material';
 import logo2 from '/assets/logo2.png';
 import sidebarlogo from '/assets/sidebar-logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ICON_MAP, ADMIN_MENU_ITEMS, STUDENT_MENU_ITEMS, FACULTY_MENU_ITEMS } from '../../constants/MenuItems';
+import { ICON_MAP, ADMIN_MENU_ITEMS, STUDENT_MENU_ITEMS, FACULTY_MENU_ITEMS, DIRECTOR_MENU_ITEMS, REVIEWER_MENU_ITEMS } from '../../constants/MenuItems';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { getValue } from '../../utils/localStorageUtil';
 import Customtext from '../inputs/customtext/Customtext';
@@ -80,6 +80,11 @@ export default function Sidebar({
       setSelectedItem('Profile');
       setSelectedParent('');
       setOpenItems({});
+    }
+    else if (path.startsWith('/fee-dashboard')) {
+      setSelectedItem('Fee Dashboard');
+      setSelectedParent('Fees');
+      setOpenItems((prev) => ({ ...prev, Fees: true }));
     }
     else if (path.startsWith('/fees')) {
       setSelectedItem('Fees Detail');
@@ -204,20 +209,37 @@ export default function Sidebar({
     return isInRange && !isExcluded;
   };
 
-  const filteredMenuItems =
-    rollId == "1"
-      ? ADMIN_MENU_ITEMS :
-      rollId == "2" ?
-        STUDENT_MENU_ITEMS.filter((item) => {
+  // const filteredMenuItems =
+  //   rollId == "1"
+  //     ? ADMIN_MENU_ITEMS :
+  //     rollId == "2" ?
+  //       STUDENT_MENU_ITEMS.filter((item) => {
+  //         if (item.text === "Exam Results") {
+  //           return shouldShowExamResults();
+  //         }
+  //         return true;
+  //       }) :
+  //       rollId == "3" ?
+  //         FACULTY_MENU_ITEMS :
+  //         (rollId == "5" || rollId == "6" || rollId == "7") ?
+  //         [] : [];
+ const filteredMenuItems =
+  rollId == "1"
+    ? ADMIN_MENU_ITEMS
+    : rollId == "2"
+      ? STUDENT_MENU_ITEMS.filter((item) => {
           if (item.text === "Exam Results") {
             return shouldShowExamResults();
           }
           return true;
-        }) :
-        rollId == "3" ?
-          FACULTY_MENU_ITEMS : 
-          (rollId == "5" || rollId == "6" || rollId == "7") ?
-          [] : [];
+        })
+      : rollId == "3"
+        ? FACULTY_MENU_ITEMS
+        : rollId == "7"
+          ? DIRECTOR_MENU_ITEMS
+          : (rollId == "5" || rollId == "6")
+            ? REVIEWER_MENU_ITEMS
+            : [];
 
 
   const drawerContent = (

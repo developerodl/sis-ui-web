@@ -178,7 +178,36 @@ export const STUDENT_MENU_ITEMS: MenuItem[] = [
     routePath: '/passwordmang',
   },
 ];
+export const REVIEWER_MENU_ITEMS: MenuItem[] = [
+  {
+    text: 'Students Mark',
+    icon: 'Marks',
+    subItems: [],
+    routePath: '/marks/add',
+  },
+];
+export const DIRECTOR_MENU_ITEMS: MenuItem[] = [
+  {
+    text: 'Students Mark',
+    icon: 'Marks',
+    subItems: [],
+    routePath: '/marks/add',
+  },
+  {
+    text: 'Fee Dashboard',
+    icon: 'Fees',
+    subItems: [],
+    routePath: '/fee-dashboard',
+  },
+];
 export const FACULTY_MENU_ITEMS: MenuItem[] = [
+
+  {
+    text: 'Students Mark',
+    icon: 'Marks',
+    subItems: [],
+    routePath: '/marks/add',
+  },
   {
     text: 'Profile',
     icon: 'Profile',

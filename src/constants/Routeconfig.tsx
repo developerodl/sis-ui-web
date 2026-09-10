@@ -284,7 +284,7 @@ export const routesConfig = [
       {
         path:'add',
         element: <MarksEntryScreen />,
-        breadcrumb: 'Marks Add',
+        breadcrumb: 'Students Mark',
       },
       {
         path:'edit/:id',
