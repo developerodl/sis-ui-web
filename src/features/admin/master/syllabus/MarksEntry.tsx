@@ -110,8 +110,8 @@ export default function MarksEntryScreen() {
     return status;
   };
   const rollId = getValue("rollid");
-  const isHOD = String(rollId) === "6";
-  const isDirector = String(rollId) === "7";
+  const isHOD = String(rollId) === "4";
+  const isDirector = String(rollId) === "5";
   const isReviewer = isHOD || isDirector;
 
   const [rejectReasonInput, setRejectReasonInput] = useState("");

@@ -117,13 +117,13 @@ function LoginPage() {
 
       /* Role-based navigation */
       const groupId = user.group_id;
-      if (groupId === 6 || groupId === 7) {
+      if (groupId === 4 || groupId === 5) {
         // HOD or Director — go straight to Marks page
         navigate("/marks/add");
       } else if (groupId === 1) {
         // Admin
         navigate("/dashboard");
-      } else if (groupId === 5) {
+      } else if (groupId === 3) {
         // Faculty
         navigate("/marks/add");
       } else {

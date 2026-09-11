@@ -235,9 +235,9 @@ export default function Sidebar({
         })
       : rollId == "3"
         ? FACULTY_MENU_ITEMS
-        : rollId == "7"
+        : rollId == "5"
           ? DIRECTOR_MENU_ITEMS
-          : (rollId == "5" || rollId == "6")
+          : rollId == "4"
             ? REVIEWER_MENU_ITEMS
             : [];
 

@@ -46,7 +46,7 @@ const Breadcrumb = () => {
         // const text = routeMap[to] || 'Dashboard';
         // const text = routeMap[to] || '';
         const text =
-          to === '/marks/add' && (rollid === 5 || rollid === 6 || rollid === 7)
+          to === '/marks/add' && (rollid === 3 || rollid === 4 || rollid === 5)
             ? 'Students Mark'
             : routeMap[to] || '';
         const isLast = index === allPaths.length - 1;
