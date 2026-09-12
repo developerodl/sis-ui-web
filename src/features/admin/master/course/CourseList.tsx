@@ -37,7 +37,9 @@ export default function CourseList() {
   const [programFilter, setProgramFilter] = React.useState("1500038");
   const [selectedCourses, setSelectedCourses] = React.useState<any>(null);
   const [programs, setPrograms] = React.useState<any[]>([]);
-  const rollid = Number(getValue('rollid'));
+  // const rollid = Number(getValue('rollid'));
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+  const isFaculty = role === "faculty" || role === "faculty1";
   const selectedProgramId = programFilter;
   /* ---------------------------- API CALL ---------------------------- */
 
@@ -113,12 +115,14 @@ export default function CourseList() {
 
   React.useEffect(() => {
 
-    if (rollid == 3 && programs.length > 0) {
+    // if (rollid == 3 && programs.length > 0) {
+    if (isFaculty && programs.length > 0) {
       setProgramFilter("1500038");
       setPage(0);
     }
 
-  }, [rollid, programs]);
+  // }, [rollid, programs]);
+  }, [isFaculty, programs]);
 
   const programOptions = React.useMemo(
     () =>
@@ -281,8 +285,10 @@ export default function CourseList() {
               },
               options: programOptions,
 
+              // disabled:
+              //   rollid === 3,
               disabled:
-                rollid === 3,
+                  isFaculty,
 
               sx: {
                 width: 250,

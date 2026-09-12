@@ -66,7 +66,7 @@ export default function Navbar({ onHamburgerClick }: NavbarProps) {
   const clearLocalStorage = () => {
     removeSingleValue('ACCESS_TOKEN_KEY');
     removeSingleValue('email');
-    removeSingleValue('rollid');
+    removeSingleValue('role_name');
     removeSingleValue('username');
     removeSingleValue('student_id');
     removeSingleValue('gender');
@@ -76,7 +76,8 @@ export default function Navbar({ onHamburgerClick }: NavbarProps) {
 
   const username = getValue('username');
   const email = getValue('email');
-  const rollid = Number(getValue('rollid'));
+  // const rollid = Number(getValue('rollid'));
+  const role = String(getValue('role_name') || "").trim().toLowerCase();
   const gender = getValue('gender');
   const userimage = gender == "Female" ? femaleimage : maleimage;
 
@@ -109,7 +110,8 @@ export default function Navbar({ onHamburgerClick }: NavbarProps) {
             </IconButton>
 
             {/* Search Box */}
-            {rollid === 1 && (
+            {/* {rollid === 1 && ( */}
+            {role === "admin" && (
               <Box className="flex-grow md:w-80">
                 <TextField
                   placeholder="Search..."

@@ -21,7 +21,8 @@ const generateRouteMap = (routes: any[], parentPath = ''): Record<string, string
 const routeMap = generateRouteMap(routesConfig);
 
 const Breadcrumb = () => {
-  const rollid = Number(getValue("rollid"));
+  //const rollid = Number(getValue("rollid"));
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter(Boolean);
   const breadcrumbPaths: string[] = [];
@@ -36,8 +37,9 @@ const Breadcrumb = () => {
   });
 
   // Conditionally include '/dashboard' based on rollid
-  const allPaths = rollid === 1 ? ['/dashboard', ...breadcrumbPaths] : breadcrumbPaths;
-
+  //const allPaths = rollid === 1 ? ['/dashboard', ...breadcrumbPaths] : breadcrumbPaths;
+  // Conditionally include '/dashboard' for Admin
+  const allPaths = role === "admin" ? ['/dashboard', ...breadcrumbPaths] : breadcrumbPaths;
   return (
     <Box sx={{
       display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, p: 2
@@ -46,7 +48,14 @@ const Breadcrumb = () => {
         // const text = routeMap[to] || 'Dashboard';
         // const text = routeMap[to] || '';
         const text =
-          to === '/marks/add' && (rollid === 3 || rollid === 4 || rollid === 5)
+           to === '/marks/add' &&
+           (
+            role === "faculty" ||
+            role === "faculty1" ||
+            role === "hod" ||
+            role === "h.o.d" ||
+            role === "director"
+           )
             ? 'Students Mark'
             : routeMap[to] || '';
         const isLast = index === allPaths.length - 1;

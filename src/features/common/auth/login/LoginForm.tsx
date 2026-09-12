@@ -101,6 +101,7 @@ function LoginPage() {
       setValue("username", user.username);
       setValue("email", user.email);
       setValue("rollid", user.group_id);
+      setValue("role_name", user.group_name);
       setValue("student_id", user.student_id);
       setValue("gender", user?.gender);
       setValue(
@@ -116,18 +117,18 @@ function LoginPage() {
       );
 
       /* Role-based navigation */
-      const groupId = user.group_id;
-      if (groupId === 4 || groupId === 5) {
-        // HOD or Director — go straight to Marks page
-        navigate("/marks/add");
-      } else if (groupId === 1) {
-        // Admin
+      const role = String(user.group_name || "").trim().toLowerCase();
+      if (role === "admin") {
         navigate("/dashboard");
-      } else if (groupId === 3) {
-        // Faculty
+      } else if (
+        role === "faculty" ||
+        role === "faculty1" ||
+        role === "hod" ||
+        role === "h.o.d" ||
+        role === "director"
+      ) {
         navigate("/marks/add");
       } else {
-        // Student or anything else
         navigate("/dashboard/student");
       }
 

@@ -8,19 +8,21 @@ interface PublicRouteProps {
 
 const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const token = getValue("ACCESS_TOKEN_KEY");
-  const rollid = Number(getValue("rollid"));
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
   const student_id = Number(getValue("student_id"));
 
   // If the user is logged in, redirect based on their role
   if (token) {
-    if (rollid == 1) {
-      return <Navigate to="/students/list" />;
+    if (role === "admin") {
+       return <Navigate to="/students/list" />;
     }
-    if (rollid == 2 && student_id) {
-      return <Navigate to={`/students/detail`} />;
+
+    if (role === "student" && student_id) {
+       return <Navigate to="/students/detail" />;
     }
-     if (rollid == 3) {
-      return <Navigate to={`/facultylogin/grievance/list`} />;
+
+    if (role === "faculty" || role === "faculty1") {
+       return <Navigate to="/facultylogin/grievance/list" />;
     }
     // return <Navigate to="/unauthorized" />;
   }

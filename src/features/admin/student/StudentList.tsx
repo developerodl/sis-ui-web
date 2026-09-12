@@ -40,7 +40,8 @@ export default function StudentTable() {
   const { loading } = useLoader();
   const { clearError } = useGlobalError();
 
-  const rollid = Number(getValue('rollid'));
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+  const isFaculty = role === "faculty" || role === "faculty1";
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);
@@ -66,12 +67,12 @@ export default function StudentTable() {
 
   React.useEffect(() => {
 
-    if (rollid == 3 && programs.length > 0) {
+      if (isFaculty && programs.length > 0) {
       setProgramFilter("1500038");
       setPage(0);
     }
 
-  }, [rollid, programs]);
+  }, [isFaculty, programs]);
 
   /* -------------------- Convert Programs to Select Options -------------------- */
 
@@ -476,7 +477,7 @@ export default function StudentTable() {
               options: programOptions,
 
               disabled:
-                rollid === 3,
+                isFaculty,
 
               sx: {
                 width: 250,

@@ -5,10 +5,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { getValue } from "../../../utils/localStorageUtil";
 
 export default function ExamResults() {
-    const rollid = Number(getValue("rollid"));
+    const role = String(getValue("role_name") || "").trim().toLowerCase();
     const registrationNo = getValue("username"); // ✅ keep string
 
-    if (rollid !== 2) return null;
+    if (role !== "student") return null;
 
     const getResultPdfPath = (registrationNo?: string) => {
         if (!registrationNo) return null;

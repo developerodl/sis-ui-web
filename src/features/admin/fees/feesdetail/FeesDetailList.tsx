@@ -53,8 +53,10 @@ export default function FeeDetailList() {
   const [selectedFeeDetail, setSelectedFeeDetail] =
     React.useState<any>(null);
 
-  const rollid = Number(getValue("rollid"));
+  // const rollid = Number(getValue("rollid"));
 
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+  const isFaculty = role === "faculty" || role === "faculty1";
   /* ---------------------------- GET FEE DETAILS ---------------------------- */
 
   const fetchFeeDetails = async () => {
@@ -161,14 +163,19 @@ export default function FeeDetailList() {
   /* ---------------------------- PROGRAM FILTER ---------------------------- */
 
   React.useEffect(() => {
-    if (
-      rollid === 3 &&
-      programs.length > 0
-    ) {
+    // if (
+    //   rollid === 3 &&
+    //   programs.length > 0
+    // ) {
+      if (
+    isFaculty &&
+    programs.length > 0
+  ) {
       setProgramFilter("1500038");
       setPage(0);
     }
-  }, [rollid, programs]);
+  // }, [rollid, programs]);
+  }, [isFaculty, programs]);
 
   const programOptions = React.useMemo(
     () =>
@@ -422,7 +429,8 @@ export default function FeeDetailList() {
 
               options: programOptions,
 
-              disabled: rollid === 3,
+              // disabled: rollid === 3,
+              disabled: isFaculty,
 
               sx: {
                 width: 250,

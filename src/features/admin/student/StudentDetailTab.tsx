@@ -30,7 +30,10 @@ export default function StudentDetailTab({
   setActiveTab,
 }: StudentDetailTabsProps) {
   const theme = useTheme();
-  const rollid = Number(getValue('rollid'));
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+
+  const isStudent = role === "student";
+  const isFaculty = role === "faculty" || role === "faculty1";
   const { loading } = useLoader();
   // const [marksData, setMarksData] = useState<any>(null);
 
@@ -746,12 +749,18 @@ export default function StudentDetailTab({
   /* -------------------- Role-based Tabs -------------------- */
 
 
+  // const tabs =
+  //   rollid === 3
+  //     ? ['Basic Info'] // ✅ ONLY this tab
+  //     : rollid === 2
+  //       ? studenttabs
+  //       : admintabs;
   const tabs =
-    rollid === 3
-      ? ['Basic Info'] // ✅ ONLY this tab
-      : rollid === 2
-        ? studenttabs
-        : admintabs;
+  isFaculty
+    ? ['Basic Info']
+    : isStudent
+      ? studenttabs
+      : admintabs;
 
   // const tabContents =
   //   rollid === 3
@@ -774,28 +783,49 @@ export default function StudentDetailTab({
   //           HallTicketTab,
   //           ...(isEligibleForResults ? [examResultsTab] : []),
   //         ];
+  // const tabContents =
+  //   rollid === 3
+  //     ? [
+  //       basicInfoTab,
+  //     ]
+  //     : rollid === 2
+  //       ? [
+  //         basicInfoTab,
+  //         ...(hideDebTab ? [] : [debTab]),
+  //         IDCardTab,
+  //         HallTicketTab,
+  //         // ...(isHallTicketEligible ? [HallTicketTab] : []),
+  //       ]
+  //       : [
+  //         basicInfoTab,
+  //         academicTab,
+  //         ...(hideDebTab ? [] : [debTab]),
+  //         documentsTab,
+  //         IDCardTab,
+  //         HallTicketTab,
+  //         // ...(isHallTicketEligible ? [HallTicketTab] : []),
+  //       ];
+
   const tabContents =
-    rollid === 3
+  isFaculty
+    ? [
+      basicInfoTab,
+    ]
+    : isStudent
       ? [
         basicInfoTab,
+        ...(hideDebTab ? [] : [debTab]),
+        IDCardTab,
+        HallTicketTab,
       ]
-      : rollid === 2
-        ? [
-          basicInfoTab,
-          ...(hideDebTab ? [] : [debTab]),
-          IDCardTab,
-          HallTicketTab,
-          // ...(isHallTicketEligible ? [HallTicketTab] : []),
-        ]
-        : [
-          basicInfoTab,
-          academicTab,
-          ...(hideDebTab ? [] : [debTab]),
-          documentsTab,
-          IDCardTab,
-          HallTicketTab,
-          // ...(isHallTicketEligible ? [HallTicketTab] : []),
-        ];
+      : [
+        basicInfoTab,
+        academicTab,
+        ...(hideDebTab ? [] : [debTab]),
+        documentsTab,
+        IDCardTab,
+        HallTicketTab,
+      ];
   // const tabContents =
   //   rollid === 3
   //     ? [

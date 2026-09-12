@@ -87,6 +87,7 @@ export default function MarksEntryScreen() {
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const [batches, setBatches] = useState<Option[]>([]);
+  const [academicYears, setAcademicYears] = useState<Option[]>([]);
   const [semesters, setSemesters] = useState<Option[]>([]);
   const [courses, setCourses] = useState<Option[]>([]);
   const [schemes, setSchemes] = useState<Scheme[]>([]);
@@ -97,6 +98,7 @@ export default function MarksEntryScreen() {
   const [filters, setFilters] = useState({
     programId: "",
     batch: "",
+    academicYear: "",
     semesterNo: "",
     courseId: "",
     markType: "",
@@ -109,9 +111,11 @@ export default function MarksEntryScreen() {
     if (status === "Pending") return "Not Approved";
     return status;
   };
-  const rollId = getValue("rollid");
-  const isHOD = String(rollId) === "4";
-  const isDirector = String(rollId) === "5";
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+
+  const isHOD = role === "hod" || role === "h.o.d";
+  const isDirector = role === "director";
+  // const isFaculty = role === "faculty" || role === "faculty1";
   const isReviewer = isHOD || isDirector;
 
   const [rejectReasonInput, setRejectReasonInput] = useState("");
@@ -134,6 +138,33 @@ export default function MarksEntryScreen() {
       .get(ApiRoutes.SCHEMES)
       .then((res) => setSchemes(res.data || []))
       .catch(() => showAlert("Failed to load schemes", "error"));
+
+    // apiClient
+    //   .get(ApiRoutes.ACADEMICYEARLIST)
+    //   .then((res) => {
+    //     const list = res.data || [];
+
+    //     setAcademicYears(
+    //       list.map((year: any) => ({
+    //         value: String(year.year_code),
+    //         label: String(year.year_code),
+    //       }))
+    //     );
+    //   })
+    //   .catch(() => showAlert("Failed to load academic year list", "error"));
+     apiClient
+      .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
+      .then((res) => {
+        const list = res.data || [];
+
+        setAcademicYears(
+          list.map((year: string) => ({
+            value: year,
+            label: year,
+          }))
+        );
+      })
+
   }, []);
 
   /* ---------------- LOAD SEMESTERS ---------------- */
@@ -222,9 +253,26 @@ export default function MarksEntryScreen() {
       ? activeScheme?.external_max
       : undefined;
 
+  // const isMarkValid = (marks: string): boolean => {
+  //   if (marks === "" || maxMark === undefined || maxMark === null) return true;
+  //   return Number(marks) <= maxMark;
+  // };
   const isMarkValid = (marks: string): boolean => {
-    if (marks === "" || maxMark === undefined || maxMark === null) return true;
-    return Number(marks) <= maxMark;
+    if (marks === "") return true;
+
+    const value = Number(marks);
+
+    if (Number.isNaN(value)) return false;
+
+    // Marks cannot be negative
+    if (value < 0) return false;
+
+    // Marks cannot exceed maximum mark
+    if (maxMark !== undefined && maxMark !== null && value > maxMark) {
+      return false;
+    }
+
+    return true;
   };
 
   const computePassStatus = (marks: string): "pass" | "fail" | null => {
@@ -233,7 +281,7 @@ export default function MarksEntryScreen() {
   };
 
   const isViewEnabled = Boolean(
-    filters.programId && filters.batch && filters.semesterNo && filters.courseId && filters.markType
+    filters.programId && filters.batch && filters.academicYear && filters.semesterNo && filters.courseId && filters.markType
   );
 
   const handleViewStudents = async () => {
@@ -242,6 +290,7 @@ export default function MarksEntryScreen() {
         params: {
           program_id: filters.programId,
           batch: filters.batch,
+          academic_year: filters.academicYear,
           semester: `semester_${filters.semesterNo}`,
           course_name: selectedCourseLabel,
           mark_type: filters.markType,
@@ -301,7 +350,7 @@ export default function MarksEntryScreen() {
       (s) => marksInput[s.id] && marksInput[s.id] !== "" && !isMarkValid(marksInput[s.id])
     );
     if (invalidEntry) {
-      showAlert(`Marks cannot exceed ${maxMark} for ${invalidEntry.name}`, "error");
+      showAlert(`Marks must be between 0 and ${maxMark} for ${invalidEntry.name}`,"error");
       return;
     }
     const invalidAttendanceEntry = students.find(
@@ -597,6 +646,23 @@ export default function MarksEntryScreen() {
 
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth>
+                <InputLabel>Academic Year</InputLabel>
+                <Select
+                  value={filters.academicYear}
+                  label="Academic Year"
+                  onChange={(e) => handleChange("academicYear", e.target.value)}
+                >
+                  {academicYears.map((year) => (
+                    <MenuItem key={year.value} value={year.value}>
+                      {year.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>
+              <FormControl fullWidth>
                 <InputLabel>Semester</InputLabel>
                 <Select
                   value={filters.semesterNo}
@@ -763,7 +829,7 @@ export default function MarksEntryScreen() {
                               />
                             </TableCell>
                             <TableCell>
-                              <TextField
+                              {/* <TextField
                                 size="small"
                                 type="number"
                                 disabled={rowLocked}
@@ -775,7 +841,37 @@ export default function MarksEntryScreen() {
                                     ? `Max allowed: ${maxMark}`
                                     : ""
                                 }
-                              />
+                              /> */}
+                              <TextField
+                                  size="small"
+                                  type="number"
+                                  disabled={rowLocked}
+                                  value={markValue}
+                                  inputProps={{
+                                    min: 0,
+                                    max: maxMark ?? undefined,
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    if (value !== "" && Number(value) < 0) {
+                                      return;
+                                    }
+
+                                    handleMarkChange(s.id, value);
+                                  }}
+                                  error={markValue !== "" && !isMarkValid(markValue)}
+                                  helperText={
+                                    markValue !== "" && !isMarkValid(markValue)
+                                      ? `Marks must be between 0 and ${maxMark}`
+                                      : ""
+                                  }
+                                />
                             </TableCell>
                             <TableCell>
                               <Stack direction="row" spacing={0.5} alignItems="center">

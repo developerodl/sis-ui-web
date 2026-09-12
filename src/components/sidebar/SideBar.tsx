@@ -40,7 +40,8 @@ export default function Sidebar({
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [selectedItem, setSelectedItem] = useState('Dashboard');
   const [selectedParent, setSelectedParent] = useState('');
-  const rollId = getValue("rollid");
+  // const rollId = getValue("rollid");
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
   // const isHOD = String(rollId) === "6";
   // const isDirector = String(rollId) === "7";
   // const isReviewer = isHOD || isDirector;
@@ -224,20 +225,20 @@ export default function Sidebar({
   //         (rollId == "5" || rollId == "6" || rollId == "7") ?
   //         [] : [];
  const filteredMenuItems =
-  rollId == "1"
+  role === "admin"
     ? ADMIN_MENU_ITEMS
-    : rollId == "2"
+    : role === "student"
       ? STUDENT_MENU_ITEMS.filter((item) => {
           if (item.text === "Exam Results") {
             return shouldShowExamResults();
           }
           return true;
         })
-      : rollId == "3"
+      : role === "faculty" || role === "faculty1"
         ? FACULTY_MENU_ITEMS
-        : rollId == "5"
+        : role === "director"
           ? DIRECTOR_MENU_ITEMS
-          : rollId == "4"
+          : role === "hod" || role === "h.o.d"
             ? REVIEWER_MENU_ITEMS
             : [];
 
