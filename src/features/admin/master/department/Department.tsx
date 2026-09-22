@@ -36,6 +36,7 @@ export default function DepartmentList() {
 
     const [openAddDepartment, setOpenAddDepartment] = React.useState(false);
     const [departmentName, setDepartmentName] = React.useState("");
+    const [departmentCode, setDepartmentCode] = React.useState("");
     const [isEditMode, setIsEditMode] = React.useState(false);
     const [editingDepartmentId, setEditingDepartmentId] = React.useState<number | null>(null);
 
@@ -70,6 +71,7 @@ export default function DepartmentList() {
             filteredRoles,
             [
                 { header: "S.No", key: "sno" },
+                { header: "Department Code", key: "department_code" },
                 { header: "Department Name", key: "name" },
             ],
             "Department",
@@ -82,6 +84,10 @@ export default function DepartmentList() {
             showAlert("Department name is required.", "error");
             return;
         }
+        if (!isEditMode && !departmentCode.trim()) {
+            showAlert("Department code is required.", "error");
+            return;
+        }
 
         const apiConfig = isEditMode
             ? {
@@ -92,7 +98,10 @@ export default function DepartmentList() {
             : {
                 url: ApiRoutes.DEPARTMENTADD,
                 method: "post" as const,
-                data: { name: departmentName },
+                data: {
+                    name: departmentName.trim(),
+                    department_code: departmentCode.trim(),
+                },
             };
 
         try {
@@ -108,19 +117,21 @@ export default function DepartmentList() {
             handleCloseDepartmentDialog();
             fetchDepartments();
         } catch (err: any) {
-            showAlert(
+            const errorMessage =
+                err.response?.data?.detail ||
                 err.response?.data?.message ||
-                "Something went wrong. Please try again.",
-                "error"
-            );
+                "Something went wrong. Please try again.";
+
+            showAlert(errorMessage, "error");
         }
-    };
+            };
 
 
     const handleEditDepartment = (row: any) => {
         setIsEditMode(true);
         setEditingDepartmentId(row.id);
         setDepartmentName(row.name);
+        setDepartmentCode(row.department_code || "");
         setOpenAddDepartment(true);
     };
 
@@ -160,6 +171,7 @@ export default function DepartmentList() {
     const handleCloseDepartmentDialog = () => {
         setOpenAddDepartment(false);
         setDepartmentName("");
+        setDepartmentCode("");
         setIsEditMode(false);
         setEditingDepartmentId(null);
     };
@@ -209,6 +221,7 @@ export default function DepartmentList() {
                 ) : (
                     <ReusableTable
                         columns={[
+                            { key: "department_code", label: "Department Code", width: 150 },
                             { key: "name", label: "Department Name", width: 180 },
                         ]}
                         data={filteredRoles}
@@ -243,6 +256,16 @@ export default function DepartmentList() {
             <Dialog open={openAddDepartment} onClose={handleCloseDepartmentDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>{isEditMode ? "Edit Department" : "Add Department"}</DialogTitle>
                 <DialogContent dividers>
+
+                    <TextField
+                        fullWidth
+                        label="Department Code"
+                        value={departmentCode}
+                        onChange={(e) => setDepartmentCode(e.target.value.toUpperCase())}
+                        disabled={isEditMode}
+                        autoFocus={!isEditMode}
+                        sx={{ mb: 2 }}
+                    />
                     <TextField
                         fullWidth
                         label="Department Name"
@@ -253,7 +276,7 @@ export default function DepartmentList() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDepartmentDialog}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSaveDepartment} disabled={!departmentName.trim()}>
+                    <Button variant="contained" onClick={handleSaveDepartment} disabled={!departmentName.trim() || (!isEditMode && !departmentCode.trim())}>
                         {isEditMode ? "Update" : "Save"}
                     </Button>
                 </DialogActions>

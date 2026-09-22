@@ -31,6 +31,8 @@ export default function StudentTable() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchText, setSearchText] = React.useState('');
   const [programFilter, setProgramFilter] = React.useState('');
+  const [batchFilter, setBatchFilter] = React.useState('');
+  const [academicYearFilter, setAcademicYearFilter] = React.useState('');
 
   const [programs, setPrograms] = React.useState<any[]>([]);
   const [openUploadDialog, setOpenUploadDialog] = React.useState(false);
@@ -84,6 +86,42 @@ export default function StudentTable() {
       })),
     [programs]
   );
+
+  const batchOptions = React.useMemo(() => {
+    const batches = students
+      .filter((s) =>
+        programFilter === '' ||
+        String(s.program_id) === String(programFilter)
+      )
+      .map((s) => s.batch)
+      .filter(Boolean);
+
+    return [...new Set(batches)].map((batch) => ({
+      label: batch,
+      value: batch,
+    }));
+  }, [students, programFilter]);
+
+  /* -------------------- Academic Year Options -------------------- */
+
+  const academicYearOptions = React.useMemo(() => {
+    const years = students
+      .filter((s) =>
+        (programFilter === '' ||
+          String(s.program_id) === String(programFilter)) &&
+        (batchFilter === '' ||
+          String(s.batch).toLowerCase() === String(batchFilter).toLowerCase())
+      )
+      .map((s) => s.admission_year)
+      .filter(Boolean);
+
+    return [...new Set(years)]
+      .sort()
+      .map((year) => ({
+        label: year,
+        value: year,
+      }));
+  }, [students, programFilter, batchFilter]);
 
   /* -------------------- Fetch Students -------------------- */
 
@@ -199,7 +237,13 @@ export default function StudentTable() {
         combinedText.includes(searchText.toLowerCase()) &&
 
         (programFilter === '' ||
-          String(s.program_id) == String(programFilter))
+          String(s.program_id) == String(programFilter)) &&
+
+        (batchFilter === '' ||
+          String(s.batch).toLowerCase() === String(batchFilter).toLowerCase()) &&
+          
+        (academicYearFilter === '' ||
+          String(s.admission_year) === String(academicYearFilter))
 
       );
 
@@ -212,7 +256,7 @@ export default function StudentTable() {
 
     return filtered;
 
-  }, [students, searchText, programFilter, urlname]);
+  }, [students, searchText, programFilter, batchFilter, academicYearFilter, urlname]);
 
   /* -------------------- Export Excel -------------------- */
 
@@ -451,7 +495,6 @@ export default function StudentTable() {
       >
 
         <TableToolbar
-
           filters={[
 
             {
@@ -460,9 +503,11 @@ export default function StudentTable() {
               type: "text",
               value: searchText,
               onChange: setSearchText,
-              placeholder:
-                "Search all fields",
+              placeholder: "Search all fields",
               visible: true,
+              sx: {
+                width: 190,
+              },
             },
 
             {
@@ -470,17 +515,22 @@ export default function StudentTable() {
               label: "Select Program",
               type: "select",
               value: programFilter,
+
               onChange: (val) => {
                 setProgramFilter(val);
+
+                // Reset batch when program changes
+                setBatchFilter('');
+
                 setPage(0);
               },
+
               options: programOptions,
 
-              disabled:
-                isFaculty,
+              disabled: isFaculty,
 
               sx: {
-                width: 250,
+                width: 180,
               },
 
               menuProps: {
@@ -491,11 +541,62 @@ export default function StudentTable() {
                   },
                 },
               },
+            },
 
-            }
+            {
+              key: "batch",
+              label: "Select Batch",
+              type: "select",
+              value: batchFilter,
+
+              onChange: (val) => {
+                setBatchFilter(val);
+                setPage(0);
+              },
+
+              options: batchOptions,
+
+              sx: {
+                width: 120,
+              },
+
+              menuProps: {
+                PaperProps: {
+                  sx: {
+                    maxHeight: 250,
+                    overflowY: "auto",
+                  },
+                },
+              },
+            },
+            {
+              key: "academicYear",
+              label: "Academic Year",
+              type: "select",
+              value: academicYearFilter,
+
+              onChange: (val) => {
+                setAcademicYearFilter(val);
+                setPage(0);
+              },
+
+              options: academicYearOptions,
+
+              sx: {
+                width: 140,
+              },
+
+              menuProps: {
+                PaperProps: {
+                  sx: {
+                    maxHeight: 250,
+                    overflowY: "auto",
+                  },
+                },
+              },
+            },
 
           ]}
-
           actions={[
 
             {

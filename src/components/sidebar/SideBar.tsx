@@ -14,7 +14,7 @@ import { ExpandLess, ExpandMore, } from '@mui/icons-material';
 import logo2 from '/assets/logo2.png';
 import sidebarlogo from '/assets/sidebar-logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ICON_MAP, ADMIN_MENU_ITEMS, STUDENT_MENU_ITEMS, FACULTY_MENU_ITEMS, DIRECTOR_MENU_ITEMS, REVIEWER_MENU_ITEMS } from '../../constants/MenuItems';
+import { ICON_MAP, ADMIN_MENU_ITEMS, STUDENT_MENU_ITEMS, FACULTY_MENU_ITEMS, DIRECTOR_MENU_ITEMS, HOD_MENU_ITEMS,} from '../../constants/MenuItems';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { getValue } from '../../utils/localStorageUtil';
 import Customtext from '../inputs/customtext/Customtext';
@@ -239,7 +239,7 @@ export default function Sidebar({
         : role === "director"
           ? DIRECTOR_MENU_ITEMS
           : role === "hod" || role === "h.o.d"
-            ? REVIEWER_MENU_ITEMS
+            ? HOD_MENU_ITEMS
             : [];
 
 

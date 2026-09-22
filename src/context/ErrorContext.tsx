@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo,} from "react";
 
 /* --------------------------------------------------
    1️⃣ Error Types
@@ -31,39 +31,53 @@ interface ErrorContextType {
 const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
 
 /* --------------------------------------------------
-   4️⃣ Provider
+   4️⃣ ProviderFVZ
 -------------------------------------------------- */
+
 export const ErrorProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [error, setError] = useState<ErrorState>({ type: "NONE" });
 
-  const setNoData = () => setError({ type: "NO_DATA" });
+  const setNoData = useCallback(() => {
+    setError({ type: "NO_DATA" });
+  }, []);
 
-  const setServerError = (message?: string) =>
+  const setServerError = useCallback((message?: string) => {
     setError({ type: "SERVER_ERROR", message });
+  }, []);
 
-  const setConnectionLost = () =>
+  const setConnectionLost = useCallback(() => {
     setError({ type: "CONNECTION_LOST" });
+  }, []);
 
-  const clearError = () =>
+  const clearError = useCallback(() => {
     setError({ type: "NONE" });
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      error,
+      setNoData,
+      setServerError,
+      setConnectionLost,
+      clearError,
+    }),
+    [
+      error,
+      setNoData,
+      setServerError,
+      setConnectionLost,
+      clearError,
+    ]
+  );
 
   return (
-    <ErrorContext.Provider
-      value={{
-        error,
-        setNoData,
-        setServerError,
-        setConnectionLost,
-        clearError,
-      }}
-    >
+    <ErrorContext.Provider value={contextValue}>
       {children}
     </ErrorContext.Provider>
   );
 };
-
 /* --------------------------------------------------
    5️⃣ Hook
 -------------------------------------------------- */

@@ -54,6 +54,7 @@ import FeeHeadAdd from "../features/admin/fees/feeshead/FeesHeadAdd";
 import ProgramBatchSemesterList from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterList";
 import ProgramBatchSemesterAdd from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterAdd";
 import DashboardFees from "../features/admin/fees/feesdashboard/DashboardFees";
+import FacultyAssign from '../features/hod/faculty/FacultyAssign';
 
 export const routesConfig = [
   {
@@ -399,6 +400,11 @@ export const routesConfig = [
     element: <StudentMarksEntry />,
     breadcrumb: 'Marks Entry',
   },
+  {
+    path: '/hod/faculty-assign',
+    element: <FacultyAssign />,
+    breadcrumb: 'Faculty Assign',
+  },  
   {
     path: '/payment-control',
     children: [

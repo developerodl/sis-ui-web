@@ -1,6 +1,6 @@
 // export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
-// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
-export const BASE_URL = "http://127.0.0.1:8000/";
+export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
   LOGIN: '/auth/login',
@@ -37,6 +37,9 @@ export const ApiRoutes = {
   ROLESADD: 'admin/roles/add',
   DELETEROLE: 'admin/delete',
   ROLESUPDATE: 'admin/update',
+  HODDEPARTMENTLIST: 'hod/departments',
+  HODFACULTYLIST: 'hod/faculty',
+  HODASSIGNMENTS: 'hod/assignments',
   GETDEPARTMENTS: 'department/list',
   DEPARTMENTADD: 'department/add',
   DEPARTMENTUPDATE: 'department/update',

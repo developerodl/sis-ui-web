@@ -116,20 +116,37 @@ function LoginPage() {
         "success"
       );
 
+      // /* Role-based navigation */
+      // const role = String(user.group_name || "").trim().toLowerCase();
+      // if (role === "admin") {
+      //   navigate("/dashboard");
+      // } else if (
+      //   role === "faculty" ||
+      //   role === "faculty1" ||
+      //   role === "hod" ||
+      //   role === "h.o.d" ||
+      //   role === "director"
+      // ) {
+      //   navigate("/marks/add");
+      // } else {
+      //   navigate("/dashboard/student");
+      // }
+
       /* Role-based navigation */
       const role = String(user.group_name || "").trim().toLowerCase();
+
       if (role === "admin") {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
+      } else if (role === "hod" || role === "h.o.d") {
+        navigate("/hod/faculty-assign", { replace: true });
       } else if (
         role === "faculty" ||
         role === "faculty1" ||
-        role === "hod" ||
-        role === "h.o.d" ||
         role === "director"
       ) {
-        navigate("/marks/add");
+        navigate("/marks/add", { replace: true });
       } else {
-        navigate("/dashboard/student");
+        navigate("/dashboard/student", { replace: true });
       }
 
       /* Role-based navigation */

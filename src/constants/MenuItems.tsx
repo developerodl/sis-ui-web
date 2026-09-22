@@ -53,6 +53,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     icon: 'Faculty',
     subItems: [
       { text: 'Faculty List', routePath: '/faculty' },
+      { text: 'Faculty Assign', routePath: '/hod/faculty-assign' },
     ],
     routePath: '',
   },
@@ -198,6 +199,20 @@ export const DIRECTOR_MENU_ITEMS: MenuItem[] = [
     icon: 'Fees',
     subItems: [],
     routePath: '/fee-dashboard',
+  },
+];
+export const HOD_MENU_ITEMS: MenuItem[] = [
+  {
+    text: 'Students Mark',
+    icon: 'Marks',
+    subItems: [],
+    routePath: '/marks/add',
+  },
+  {
+    text: 'Faculty Assign',
+    icon: 'Faculty',
+    subItems: [],
+    routePath: '/hod/faculty-assign',
   },
 ];
 export const FACULTY_MENU_ITEMS: MenuItem[] = [
