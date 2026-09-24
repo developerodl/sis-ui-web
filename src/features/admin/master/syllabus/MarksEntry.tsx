@@ -39,6 +39,17 @@ interface Program {
   programe: string;
   short_name: string | null;
 }
+interface FacultyAssignment {
+  assignment_id: number;
+  program_id: number;
+  program_name: string;
+  course_id: number;
+  course_name: string;
+  semester_id: number;
+  semester_no: number;
+  semester_name: string;
+  batch: string;
+}
 
 interface Option {
   value: string;
@@ -91,6 +102,9 @@ export default function MarksEntryScreen() {
   const [semesters, setSemesters] = useState<Option[]>([]);
   const [courses, setCourses] = useState<Option[]>([]);
   const [schemes, setSchemes] = useState<Scheme[]>([]);
+  const [facultyAssignments, setFacultyAssignments] = useState<
+    FacultyAssignment[]
+  >([]);
 
   const [viewClicked, setViewClicked] = useState(false);
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -112,10 +126,9 @@ export default function MarksEntryScreen() {
     return status;
   };
   const role = String(getValue("role_name") || "").trim().toLowerCase();
-
+  const isFaculty = role === "faculty" || role === "faculty1";
   const isHOD = role === "hod" || role === "h.o.d";
   const isDirector = role === "director";
-  // const isFaculty = role === "faculty" || role === "faculty1";
   const isReviewer = isHOD || isDirector;
 
   const [rejectReasonInput, setRejectReasonInput] = useState("");
@@ -127,32 +140,162 @@ export default function MarksEntryScreen() {
 
 
   /* ---------------- LOAD PROGRAMS + SCHEMES ---------------- */
+  // useEffect(() => {
+  //   clearError();
+  //   apiClient
+  //     .get(ApiRoutes.GETPROGRAMLIST)
+  //     .then((res) => setPrograms(res.data || []))
+  //     .catch(() => showAlert("Failed to load program list", "error"));
+
+  //   apiClient
+  //     .get(ApiRoutes.SCHEMES)
+  //     .then((res) => setSchemes(res.data || []))
+  //     .catch(() => showAlert("Failed to load schemes", "error"));
+
+  //   // apiClient
+  //   //   .get(ApiRoutes.ACADEMICYEARLIST)
+  //   //   .then((res) => {
+  //   //     const list = res.data || [];
+
+  //   //     setAcademicYears(
+  //   //       list.map((year: any) => ({
+  //   //         value: String(year.year_code),
+  //   //         label: String(year.year_code),
+  //   //       }))
+  //   //     );
+  //   //   })
+  //   //   .catch(() => showAlert("Failed to load academic year list", "error"));
+  //    apiClient
+  //     .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
+  //     .then((res) => {
+  //       const list = res.data || [];
+
+  //       setAcademicYears(
+  //         list.map((year: string) => ({
+  //           value: year,
+  //           label: year,
+  //         }))
+  //       );
+  //     })
+
+  // }, []);
+
+  // useEffect(() => {
+  //   clearError();
+
+  //   const loadInitialData = async () => {
+  //     try {
+  //       // Faculty should load ONLY their assignments.
+  //       if (isFaculty) {
+  //         const assignmentResponse = await apiClient.get(
+  //           ApiRoutes.FACULTYASSIGNMENTS
+  //         );
+
+  //         const assignments =
+  //           assignmentResponse.data?.data ||
+  //           assignmentResponse.data ||
+  //           [];
+
+  //         setFacultyAssignments(assignments);
+
+  //         // Do not load the complete program list for faculty.
+  //         setPrograms([]);
+  //         setSemesters([]);
+  //         setCourses([]);
+  //         setBatches([]);
+
+  //         return;
+  //       }
+
+  //       // HOD / Director / Admin existing behavior
+  //       apiClient
+  //         .get(ApiRoutes.GETPROGRAMLIST)
+  //         .then((res) => setPrograms(res.data || []))
+  //         .catch(() =>
+  //           showAlert("Failed to load program list", "error")
+  //         );
+
+  //       apiClient
+  //         .get(ApiRoutes.SCHEMES)
+  //         .then((res) => setSchemes(res.data || []))
+  //         .catch(() =>
+  //           showAlert("Failed to load schemes", "error")
+  //         );
+
+  //     } catch (error) {
+  //       showAlert(
+  //         "Failed to load faculty assignments",
+  //         "error"
+  //       );
+  //     }
+  //   };
+
+  //   loadInitialData();
+
+  //   apiClient
+  //     .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
+  //     .then((res) => {
+  //       const list = res.data || [];
+
+  //       setAcademicYears(
+  //         list.map((year: string) => ({
+  //           value: year,
+  //           label: year,
+  //         }))
+  //       );
+  //     })
+  //     .catch(() =>
+  //       showAlert("Failed to load academic year list", "error")
+  //     );
+  // }, []);
   useEffect(() => {
     clearError();
-    apiClient
-      .get(ApiRoutes.GETPROGRAMLIST)
-      .then((res) => setPrograms(res.data || []))
-      .catch(() => showAlert("Failed to load program list", "error"));
+
+    const loadInitialData = async () => {
+      try {
+        if (isFaculty) {
+          const assignmentResponse = await apiClient.get(
+            ApiRoutes.FACULTYASSIGNMENTS
+          );
+
+          const assignments =
+            assignmentResponse.data?.data ||
+            assignmentResponse.data ||
+            [];
+
+          setFacultyAssignments(assignments);
+
+          setPrograms([]);
+          setSemesters([]);
+          setCourses([]);
+          setBatches([]);
+        } else {
+          const programResponse = await apiClient.get(
+            ApiRoutes.GETPROGRAMLIST
+          );
+
+          setPrograms(programResponse.data || []);
+        }
+
+        // BOTH faculty and HOD/Admin need schemes
+        const schemeResponse = await apiClient.get(
+          ApiRoutes.SCHEMES
+        );
+
+        setSchemes(schemeResponse.data || []);
+      } catch (error) {
+        showAlert(
+          isFaculty
+            ? "Failed to load faculty assignments"
+            : "Failed to load program list",
+          "error"
+        );
+      }
+    };
+
+    loadInitialData();
 
     apiClient
-      .get(ApiRoutes.SCHEMES)
-      .then((res) => setSchemes(res.data || []))
-      .catch(() => showAlert("Failed to load schemes", "error"));
-
-    // apiClient
-    //   .get(ApiRoutes.ACADEMICYEARLIST)
-    //   .then((res) => {
-    //     const list = res.data || [];
-
-    //     setAcademicYears(
-    //       list.map((year: any) => ({
-    //         value: String(year.year_code),
-    //         label: String(year.year_code),
-    //       }))
-    //     );
-    //   })
-    //   .catch(() => showAlert("Failed to load academic year list", "error"));
-     apiClient
       .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
       .then((res) => {
         const list = res.data || [];
@@ -164,8 +307,33 @@ export default function MarksEntryScreen() {
           }))
         );
       })
-
+      .catch(() =>
+        showAlert(
+          "Failed to load academic year list",
+          "error"
+        )
+      );
   }, []);
+  
+  /* ---------------- LOAD SEMESTERS ---------------- */
+  // useEffect(() => {
+  //   if (!filters.programId) {
+  //     setSemesters([]);
+  //     return;
+  //   }
+  //   apiClient
+  //     .get(`${ApiRoutes.PROGRAMFETCH}/${filters.programId}/semesters`)
+  //     .then((res) => {
+  //       const list = res.data?.semesters || [];
+  //       setSemesters(
+  //         list.map((s: any) => ({
+  //           value: String(s.semester_no),
+  //           label: s.semester_name,
+  //         }))
+  //       );
+  //     })
+  //     .catch(() => showAlert("Failed to load semesters", "error"));
+  // }, [filters.programId]);
 
   /* ---------------- LOAD SEMESTERS ---------------- */
   useEffect(() => {
@@ -173,10 +341,39 @@ export default function MarksEntryScreen() {
       setSemesters([]);
       return;
     }
+
+    // Faculty: show only assigned semesters
+    if (isFaculty) {
+      const facultySemesters = facultyAssignments
+        .filter(
+          (assignment) =>
+            assignment.program_id === Number(filters.programId)
+        )
+        .map((assignment) => ({
+          value: String(assignment.semester_no),
+          label:
+            assignment.semester_name ||
+            `Semester ${assignment.semester_no}`,
+        }))
+        .filter(
+          (semester, index, array) =>
+            array.findIndex(
+              (item) => item.value === semester.value
+            ) === index
+        );
+
+      setSemesters(facultySemesters);
+      return;
+    }
+
+    // HOD / Director / Admin
     apiClient
-      .get(`${ApiRoutes.PROGRAMFETCH}/${filters.programId}/semesters`)
+      .get(
+        `${ApiRoutes.PROGRAMFETCH}/${filters.programId}/semesters`
+      )
       .then((res) => {
         const list = res.data?.semesters || [];
+
         setSemesters(
           list.map((s: any) => ({
             value: String(s.semester_no),
@@ -184,8 +381,32 @@ export default function MarksEntryScreen() {
           }))
         );
       })
-      .catch(() => showAlert("Failed to load semesters", "error"));
-  }, [filters.programId]);
+      .catch(() =>
+        showAlert("Failed to load semesters", "error")
+      );
+  }, [filters.programId, facultyAssignments, isFaculty]);
+
+  /* ---------------- LOAD COURSES ---------------- */
+  // useEffect(() => {
+  //   if (!filters.programId || !filters.semesterNo) {
+  //     setCourses([]);
+  //     return;
+  //   }
+  //   apiClient
+  //     .get(
+  //       `${ApiRoutes.PROGRAMFETCH}/${filters.programId}/courses?semester_no=${filters.semesterNo}`
+  //     )
+  //     .then((res) => {
+  //       const list = res.data || [];
+  //       setCourses(
+  //         list.map((c: any) => ({
+  //           value: String(c.id),
+  //           label: c.course_title,
+  //         }))
+  //       );
+  //     })
+  //     .catch(() => showAlert("Failed to load courses", "error"));
+  // }, [filters.programId, filters.semesterNo]);
 
   /* ---------------- LOAD COURSES ---------------- */
   useEffect(() => {
@@ -193,12 +414,38 @@ export default function MarksEntryScreen() {
       setCourses([]);
       return;
     }
+
+    // Faculty: show only assigned courses
+    if (isFaculty) {
+      const facultyCourses = facultyAssignments
+        .filter(
+          (assignment) =>
+            assignment.program_id === Number(filters.programId) &&
+            assignment.semester_no === Number(filters.semesterNo)
+        )
+        .map((assignment) => ({
+          value: String(assignment.course_id),
+          label: assignment.course_name,
+        }))
+        .filter(
+          (course, index, array) =>
+            array.findIndex(
+              (item) => item.value === course.value
+            ) === index
+        );
+
+      setCourses(facultyCourses);
+      return;
+    }
+
+    // HOD / Director / Admin
     apiClient
       .get(
         `${ApiRoutes.PROGRAMFETCH}/${filters.programId}/courses?semester_no=${filters.semesterNo}`
       )
       .then((res) => {
         const list = res.data || [];
+
         setCourses(
           list.map((c: any) => ({
             value: String(c.id),
@@ -206,10 +453,17 @@ export default function MarksEntryScreen() {
           }))
         );
       })
-      .catch(() => showAlert("Failed to load courses", "error"));
-  }, [filters.programId, filters.semesterNo]);
-
-  useEffect(() => {
+      .catch(() =>
+        showAlert("Failed to load courses", "error")
+      );
+  }, [
+    filters.programId,
+    filters.semesterNo,
+    facultyAssignments,
+    isFaculty,
+  ]);
+  
+useEffect(() => {
     if (!filters.programId) {
       setBatches([]);
       return;
@@ -222,6 +476,68 @@ export default function MarksEntryScreen() {
       })
       .catch(() => showAlert("Failed to load batches", "error"));
   }, [filters.programId]);
+
+  /* ---------------- LOAD BATCHES ---------------- */
+  useEffect(() => {
+    if (!filters.programId) {
+      setBatches([]);
+      return;
+    }
+
+    // Faculty: show only assigned batches
+    if (isFaculty) {
+      if (!filters.semesterNo || !filters.courseId) {
+        setBatches([]);
+        return;
+      }
+
+      const facultyBatches = facultyAssignments
+        .filter(
+          (assignment) =>
+            assignment.program_id === Number(filters.programId) &&
+            assignment.semester_no === Number(filters.semesterNo) &&
+            assignment.course_id === Number(filters.courseId)
+        )
+        .map((assignment) => ({
+          value: assignment.batch,
+          label: assignment.batch,
+        }))
+        .filter(
+          (batch, index, array) =>
+            array.findIndex(
+              (item) => item.value === batch.value
+            ) === index
+        );
+
+      setBatches(facultyBatches);
+      return;
+    }
+
+    // HOD / Director / Admin
+    apiClient
+      .get(
+        `${ApiRoutes.STUDENTBATCHES}?program_id=${filters.programId}`
+      )
+      .then((res) => {
+        const list: string[] = res.data || [];
+
+        setBatches(
+          list.map((b) => ({
+            value: b,
+            label: b,
+          }))
+        );
+      })
+      .catch(() =>
+        showAlert("Failed to load batches", "error")
+      );
+  }, [
+    filters.programId,
+    filters.semesterNo,
+    filters.courseId,
+    facultyAssignments,
+    isFaculty,
+  ]);
 
   /* ---------------- HANDLERS ---------------- */
   const handleChange = (key: string, value: string) => {
@@ -252,6 +568,12 @@ export default function MarksEntryScreen() {
       : filters.markType === "external"
       ? activeScheme?.external_max
       : undefined;
+
+  const isMarkSchemeConfigured =
+  minMark !== undefined &&
+  minMark !== null &&
+  maxMark !== undefined &&
+  maxMark !== null;
 
   // const isMarkValid = (marks: string): boolean => {
   //   if (marks === "" || maxMark === undefined || maxMark === null) return true;
@@ -346,6 +668,13 @@ export default function MarksEntryScreen() {
   // const isLocked = students.length > 0 && students[0]?.status === "submitted";
 
   const saveMarks = async (status: "draft" | "approved" | "submitted") => {
+    if (!isMarkSchemeConfigured) {
+      showAlert(
+        "No minimum/maximum mark scheme configured. Please check with your team or administrator.",
+        "error"
+      );
+      return;
+    }
     const invalidEntry = students.find(
       (s) => marksInput[s.id] && marksInput[s.id] !== "" && !isMarkValid(marksInput[s.id])
     );
@@ -409,6 +738,7 @@ export default function MarksEntryScreen() {
         data: {
           program_id: Number(filters.programId),
           batch: filters.batch,
+          academic_year: filters.academicYear,
           semester: `semester_${filters.semesterNo}`,
           course_name: selectedCourseLabel,
           mark_type: filters.markType,
@@ -619,11 +949,36 @@ export default function MarksEntryScreen() {
                   label="Program"
                   onChange={(e) => handleChange("programId", e.target.value)}
                 >
-                  {programs.map((p) => (
+                  {/* {programs.map((p) => (
                     <MenuItem key={p.id} value={String(p.id)}>
                       {p.short_name ?? p.programe}
                     </MenuItem>
-                  ))}
+                  ))} */}
+                  {isFaculty
+                    ? facultyAssignments
+                        .filter(
+                          (assignment, index, array) =>
+                            array.findIndex(
+                              (item) =>
+                                item.program_id === assignment.program_id
+                            ) === index
+                        )
+                        .map((assignment) => (
+                          <MenuItem
+                            key={assignment.program_id}
+                            value={String(assignment.program_id)}
+                          >
+                            {assignment.program_name}
+                          </MenuItem>
+                        ))
+                    : programs.map((p) => (
+                        <MenuItem
+                          key={p.id}
+                          value={String(p.id)}
+                        >
+                          {p.short_name ?? p.programe}
+                        </MenuItem>
+                      ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -747,11 +1102,29 @@ export default function MarksEntryScreen() {
                 ? <>Minimum pass mark: <b>{minMark}</b></>
                 : "No minimum mark configured in Scheme for this selection."}
             </Alert> */}
-            <Alert severity="info" sx={{ mb: 2, fontSize: "1.1rem", "& .MuiAlert-message": { fontSize: "1.1rem" } }}>
-              {minMark !== undefined && minMark !== null ? (
-                <>Minimum pass mark: <b>{minMark}</b> &nbsp;|&nbsp; Maximum mark: <b>{maxMark ?? "-"}</b></>
+            <Alert
+              severity={isMarkSchemeConfigured ? "info" : "warning"}
+              sx={{
+                mb: 2,
+                fontSize: "1.1rem",
+                "& .MuiAlert-message": {
+                  fontSize: "1.1rem",
+                },
+              }}
+            >
+              {isMarkSchemeConfigured ? (
+                <>
+                  Minimum pass mark: <b>{minMark}</b>
+                  &nbsp;|&nbsp;
+                  Maximum mark: <b>{maxMark}</b>
+                </>
               ) : (
-                "No minimum/maximum mark configured in Scheme for this selection."
+                <>
+                  <b>No minimum/maximum mark scheme configured.</b>
+                  <br />
+                  Please check with your team or administrator to configure the mark
+                  scheme before entering marks.
+                </>
               )}
             </Alert>
             {!isDirector && (() => {
@@ -821,7 +1194,7 @@ export default function MarksEntryScreen() {
                               <TextField
                                 size="small"
                                 type="number"
-                                disabled={rowLocked}
+                                disabled={rowLocked || !isMarkSchemeConfigured}
                                 value={attendanceValue}
                                 onChange={(e) => handleAttendanceChange(s.id, e.target.value)}
                                 error={attendanceValue !== "" && !attendanceValid}

@@ -60,6 +60,22 @@ interface Course {
   semester_id: number;
 }
 
+interface FacultyAssignment {
+  id: number;
+  staff_id: number;
+  faculty_name: string;
+  department_name: string;
+  program_id: number;
+  program_name: string;
+  course_id: number;
+  course_name: string;
+  semester_id: number;
+  semester_name: string;
+  batch: string;
+  admission_year: string | null;
+  status: string;
+}
+
 
 function getArray<T>(response: any): T[] {
   if (Array.isArray(response)) return response;
@@ -92,7 +108,7 @@ export default function FacultyAssign() {
   const [programs, setPrograms] = React.useState<Program[]>([]);
   const [semesters, setSemesters] = React.useState<Semester[]>([]);
   const [courses, setCourses] = React.useState<Course[]>([]);
-
+  const [academicYears, setAcademicYears] = React.useState<string[]>([]);
   const [selectedFaculty, setSelectedFaculty] =
     React.useState<number | "">("");
   const [selectedProgram, setSelectedProgram] =
@@ -102,11 +118,18 @@ export default function FacultyAssign() {
   const [selectedCourse, setSelectedCourse] =
     React.useState<number | "">("");
   const [selectedBatch, setSelectedBatch] = React.useState("");
+  const [selectedAdmissionYear, setSelectedAdmissionYear] =
+    React.useState("");
 
   const [configLoading, setConfigLoading] = React.useState(false);
   const [assigning, setAssigning] = React.useState(false);
   const [assignMessage, setAssignMessage] = React.useState("");
   const [assignError, setAssignError] = React.useState("");
+  const [assignments, setAssignments] =
+  React.useState<FacultyAssignment[]>([]);
+
+const [assignmentsLoading, setAssignmentsLoading] =
+  React.useState(false);
 
   // Load departments and programs
   React.useEffect(() => {
@@ -117,7 +140,7 @@ export default function FacultyAssign() {
       setErrorMessage("");
 
       try {
-        const [departmentResponse, programResponse] =
+        const [departmentResponse, programResponse, academicYearResponse] =
           await Promise.all([
             apiRequest({
               url: ApiRoutes.HODDEPARTMENTLIST,
@@ -127,12 +150,23 @@ export default function FacultyAssign() {
               url: ApiRoutes.GETPROGRAMLIST,
               method: "get",
             }),
+            apiRequest({
+              url: `${ApiRoutes.STUDENTMARKSENTRY}/academic-years`,
+              method: "get",
+            }),
           ]);
 
         if (!active) return;
 
         setDepartments(getArray<Department>(departmentResponse));
         setPrograms(getArray<Program>(programResponse));
+        setAcademicYears(
+          Array.isArray(academicYearResponse?.data)
+            ? academicYearResponse.data
+            : Array.isArray(academicYearResponse)
+              ? academicYearResponse
+              : []
+        );
       } catch (error: any) {
         if (active) {
           setErrorMessage(
@@ -195,6 +229,47 @@ export default function FacultyAssign() {
     };
   }, [selectedDepartment]);
 
+  React.useEffect(() => {
+    let active = true;
+
+    async function loadAssignments() {
+      setAssignmentsLoading(true);
+
+      try {
+        const response = await apiRequest({
+          url: ApiRoutes.HODASSIGNMENTS,
+          method: "get",
+        });
+
+        const data = getArray<FacultyAssignment>(response);
+
+        if (active) {
+          setAssignments(data);
+        }
+      } catch (error: any) {
+        if (active) {
+          setAssignments([]);
+          setAssignError(
+            error?.response?.data?.detail ||
+              error?.response?.data?.message ||
+              error?.message ||
+              "Failed to load faculty assignments."
+          );
+        }
+      } finally {
+        if (active) {
+          setAssignmentsLoading(false);
+        }
+      }
+    }
+
+    loadAssignments();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   // Load semesters and courses when program changes
   // Load semesters and courses when program changes
   React.useEffect(() => {
@@ -205,7 +280,6 @@ export default function FacultyAssign() {
     setSemesters([]);
     setCourses([]);
     setAssignError("");
-    setAssignMessage("");
 
     if (selectedProgram === "") {
       setConfigLoading(false);
@@ -286,8 +360,11 @@ export default function FacultyAssign() {
   //     course.semester_id === Number(selectedSemester)
   // );
   // Filter courses by selected semester
-const filteredCourses = courses;
-
+const filteredCourses = courses.filter(
+  (course) =>
+    selectedSemester !== "" &&
+    Number(course.semester_id) === Number(selectedSemester)
+);
 console.log("Selected semester:", selectedSemester);
 console.log("All courses:", courses);
 console.log("Filtered courses:", filteredCourses);
@@ -326,7 +403,8 @@ console.log("Filtered courses:", filteredCourses);
       selectedProgram === "" ||
       selectedSemester === "" ||
       selectedCourse === "" ||
-      !selectedBatch
+      !selectedBatch ||
+      !selectedAdmissionYear
     ) {
       setAssignError("Please select all assignment fields.");
       return;
@@ -344,11 +422,29 @@ console.log("Filtered courses:", filteredCourses);
           course_id: Number(selectedCourse),
           semester_id: Number(selectedSemester),
           batch: selectedBatch,
+          admission_year: selectedAdmissionYear,
         },
       });
 
+      const assignmentResponse = await apiRequest({
+        url: ApiRoutes.HODASSIGNMENTS,
+        method: "get",
+      });
+
+      setAssignments(
+        getArray<FacultyAssignment>(assignmentResponse)
+      );
+
+      const assignedFaculty = formattedData.find(
+        (faculty) => faculty.id === Number(selectedFaculty)
+      );
+
       setAssignMessage(
-        response?.message || "Faculty assigned successfully."
+        `${response?.message || "Faculty assigned successfully."} ${
+          assignedFaculty?.full_name
+            ? `to ${assignedFaculty.full_name}.`
+            : ""
+        }`
       );
 
       // Clear assignment-specific selections after success
@@ -357,6 +453,7 @@ console.log("Filtered courses:", filteredCourses);
       setSelectedSemester("");
       setSelectedCourse("");
       setSelectedBatch("");
+      setSelectedAdmissionYear("");
     } catch (error: any) {
       setAssignError(
         error?.response?.data?.detail ||
@@ -381,7 +478,7 @@ console.log("Filtered courses:", filteredCourses);
     >
       {/* EXISTING FACULTY LIST */}
       <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-        Faculty Assign
+        Faculty List
       </Typography>
 
       <Box sx={{ mb: 3, maxWidth: 450 }}>
@@ -492,10 +589,10 @@ console.log("Filtered courses:", filteredCourses);
         }}
       >
         <Typography
-          variant="h6"
+          variant="h5"
           sx={{ mb: 1, fontWeight: 600 }}
         >
-          Assign Program, Semester and Course
+          Faculty Assign
         </Typography>
 
         <Typography
@@ -508,7 +605,23 @@ console.log("Filtered courses:", filteredCourses);
         </Typography>
 
         {assignMessage && (
-          <Alert severity="success" sx={{ mb: 2 }}>
+          <Alert
+            severity="success"
+            sx={{
+              mb: 2,
+              py: 1.5,
+              px: 2,
+              fontSize: "18px",
+              fontWeight: 600,
+              "& .MuiAlert-icon": {
+                fontSize: "28px",
+              },
+              "& .MuiAlert-message": {
+                fontSize: "18px",
+                fontWeight: 600,
+              },
+            }}
+          >
             {assignMessage}
           </Alert>
         )}
@@ -654,8 +767,8 @@ console.log("Filtered courses:", filteredCourses);
 
               {semesters.map((semester) => (
                 <MenuItem
-                  key={semester.id}
-                  value={semester.id}
+                  key={semester.semester_no}
+                  value={semester.semester_no}
                 >
                   {semester.semester_name ||
                     `Semester ${semester.semester_no}`}
@@ -719,6 +832,32 @@ console.log("Filtered courses:", filteredCourses);
               <MenuItem value="July">July</MenuItem>
             </Select>
           </FormControl>
+          {/* Admission Year */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="assign-admission-year-label">
+              Admission Year
+            </InputLabel>
+
+            <Select
+              labelId="assign-admission-year-label"
+              value={selectedAdmissionYear}
+              label="Admission Year"
+              onChange={(event) =>
+                setSelectedAdmissionYear(String(event.target.value))
+              }
+            >
+              <MenuItem value="">
+                <em>Select Admission Year</em>
+              </MenuItem>
+
+              {academicYears.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
         </Box>
 
         {configLoading && (
@@ -739,6 +878,68 @@ console.log("Filtered courses:", filteredCourses);
         >
           {assigning ? "Assigning..." : "Assign Faculty"}
         </Button>
+        <Box
+          sx={{
+            mt: 5,
+            pt: 3,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ mb: 2, fontWeight: 600 }}
+          >
+            Assigned Faculty List
+          </Typography>
+
+          {assignmentsLoading ? (
+            <TableSkeleton />
+          ) : assignments.length === 0 ? (
+            <NoDataFoundUI />
+          ) : (
+            <ReusableTable
+              columns={[
+                {
+                  key: "faculty_name",
+                  label: "Faculty Name",
+                },
+                {
+                  key: "department_name",
+                  label: "Department",
+                },
+                {
+                  key: "program_name",
+                  label: "Program",
+                },
+                {
+                  key: "course_name",
+                  label: "Course",
+                },
+                {
+                  key: "semester_name",
+                  label: "Semester",
+                },
+                {
+                  key: "batch",
+                  label: "Batch",
+                },
+                {
+                  key: "admission_year",
+                  label: "Admission Year",
+                },
+                {
+                  key: "status",
+                  label: "Status",
+                },
+              ]}
+              data={assignments}
+              page={0}
+              rowsPerPage={assignments.length}
+              actions={[]}
+            />
+          )}
+        </Box>
       </Box>
     </CardComponent>
   );
