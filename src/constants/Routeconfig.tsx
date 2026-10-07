@@ -55,6 +55,7 @@ import ProgramBatchSemesterList from "../features/admin/fees/programbatchsemeste
 import ProgramBatchSemesterAdd from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterAdd";
 import DashboardFees from "../features/admin/fees/feesdashboard/DashboardFees";
 import FacultyAssign from '../features/hod/faculty/FacultyAssign';
+import ExternalStaffDashboard from "../features/externalStaff/dashboard/ExternalStaffDashboard";
 
 export const routesConfig = [
   {
@@ -69,6 +70,11 @@ export const routesConfig = [
         element: <DashboardStudent />, // student view
       },
     ],
+  },
+  {
+    path: '/external-staff',
+    element: <ExternalStaffDashboard />,
+    breadcrumb: 'External Staff',
   },
   {
     path: '/students',

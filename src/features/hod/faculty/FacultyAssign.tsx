@@ -270,7 +270,36 @@ const [assignmentsLoading, setAssignmentsLoading] =
     };
   }, []);
 
-  // Load semesters and courses when program changes
+  const handleDeleteAssignment = async (assignmentId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this faculty assignment?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await apiRequest({
+        url: `${ApiRoutes.HODASSIGNMENTS}/${assignmentId}`,
+        method: "delete",
+      });
+
+      setAssignments((prev) =>
+        prev.filter((assignment) => assignment.id !== assignmentId)
+      );
+
+      setAssignError("");
+
+      window.alert("Faculty assignment deleted successfully.");
+    } catch (error: any) {
+      window.alert(
+        error?.response?.data?.detail ||
+          "Failed to delete faculty assignment."
+      );
+    }
+  };
+
   // Load semesters and courses when program changes
   React.useEffect(() => {
     let active = true;
@@ -936,7 +965,13 @@ console.log("Filtered courses:", filteredCourses);
               data={assignments}
               page={0}
               rowsPerPage={assignments.length}
-              actions={[]}
+              actions={[
+                {
+                  label: "Delete",
+                  onClick: (row: FacultyAssignment) =>
+                    handleDeleteAssignment(row.id),
+                },
+              ]}
             />
           )}
         </Box>

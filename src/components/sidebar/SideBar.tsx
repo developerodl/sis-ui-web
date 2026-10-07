@@ -224,6 +224,15 @@ export default function Sidebar({
   //         FACULTY_MENU_ITEMS :
   //         (rollId == "5" || rollId == "6" || rollId == "7") ?
   //         [] : [];
+
+  const EXTERNAL_STAFF_MENU_ITEMS = [
+    {
+      text: "Students Mark",
+      icon: "StudentsMark",
+      routePath: "/marks/add",
+      subItems: [],
+    },
+  ];
  const filteredMenuItems =
   role === "admin"
     ? ADMIN_MENU_ITEMS
@@ -240,6 +249,8 @@ export default function Sidebar({
           ? DIRECTOR_MENU_ITEMS
           : role === "hod" || role === "h.o.d"
             ? HOD_MENU_ITEMS
+            : role === "external_staff" || role === "external staff"
+              ? EXTERNAL_STAFF_MENU_ITEMS
             : [];
 
 
@@ -274,7 +285,8 @@ export default function Sidebar({
       >
 
         {(filteredMenuItems).map((item) => {
-          const hasChildren = item.subItems.length > 0;
+          // const hasChildren = item.subItems.length > 0;
+          const hasChildren = (item.subItems?.length ?? 0) > 0;
           const isOpen = openItems[item.text] || false;
           const isActive = selectedItem === item.text || selectedParent === item.text;
 

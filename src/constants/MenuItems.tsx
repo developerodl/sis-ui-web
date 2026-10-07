@@ -269,6 +269,13 @@ export const FACULTY_MENU_ITEMS: MenuItem[] = [
   // },
 
 ];
+export const externalStaffMenuItems = [
+  {
+    text: 'Students Mark',
+    icon: 'StudentsMark',
+    routePath: '/marks/add',
+  },
+];
 
 export const ICON_MAP: Record<string, JSX.Element> = {
   Dashboard: <DashboardIcon />,

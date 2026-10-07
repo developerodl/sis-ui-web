@@ -49,6 +49,7 @@ interface FacultyAssignment {
   semester_no: number;
   semester_name: string;
   batch: string;
+  mark_type?: string;
 }
 
 interface Option {
@@ -127,6 +128,10 @@ export default function MarksEntryScreen() {
   };
   const role = String(getValue("role_name") || "").trim().toLowerCase();
   const isFaculty = role === "faculty" || role === "faculty1";
+  const 
+  isExternalStaff =
+    role === "external staff" || role === "external_staff";
+  const isMarkEntryStaff = isFaculty || isExternalStaff;
   const isHOD = role === "hod" || role === "h.o.d";
   const isDirector = role === "director";
   const isReviewer = isHOD || isDirector;
@@ -136,6 +141,14 @@ export default function MarksEntryScreen() {
 
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
+
+  {isMarkEntryStaff && (
+  <Alert severity="info" sx={{ mb: 2 }}>
+    Marks can be entered only for courses assigned to your account by the
+    Admin/HR. If no course, semester, batch, or mark type is available,
+    please contact the Admin/HR to complete the assignment.
+  </Alert>
+)}
 
 
 
@@ -253,19 +266,47 @@ export default function MarksEntryScreen() {
 
     const loadInitialData = async () => {
       try {
-        if (isFaculty) {
+        if (isMarkEntryStaff) {
           const assignmentResponse = await apiClient.get(
             ApiRoutes.FACULTYASSIGNMENTS
           );
 
-          const assignments =
-            assignmentResponse.data?.data ||
-            assignmentResponse.data ||
-            [];
+          // const assignments =
+          //   assignmentResponse.data?.data ||
+          //   assignmentResponse.data ||
+          //   [];
+
+          // setFacultyAssignments(assignments);
+          const assignments = Array.isArray(assignmentResponse.data?.data)
+            ? assignmentResponse.data.data
+            : Array.isArray(assignmentResponse.data)
+            ? assignmentResponse.data
+            : [];
+
+          console.log("External/Faculty assignment response:", assignmentResponse.data);
+          console.log("External/Faculty assignments:", assignments);
 
           setFacultyAssignments(assignments);
 
-          setPrograms([]);
+          // Build Program dropdown from assigned courses
+          const assignedPrograms = assignments
+            .map((assignment: FacultyAssignment) => ({
+              value: String(assignment.program_id),
+              label: assignment.program_name,
+            }))
+            .filter(
+              (
+                program: { value: string; label: string },
+                index: number,
+                array: { value: string; label: string }[]
+              ) =>
+                array.findIndex(
+                  (item) => item.value === program.value
+                ) === index
+            );
+
+          setPrograms(assignedPrograms);
+
           setSemesters([]);
           setCourses([]);
           setBatches([]);
@@ -285,7 +326,7 @@ export default function MarksEntryScreen() {
         setSchemes(schemeResponse.data || []);
       } catch (error) {
         showAlert(
-          isFaculty
+          isMarkEntryStaff
             ? "Failed to load faculty assignments"
             : "Failed to load program list",
           "error"
@@ -343,7 +384,7 @@ export default function MarksEntryScreen() {
     }
 
     // Faculty: show only assigned semesters
-    if (isFaculty) {
+    if (isMarkEntryStaff) {
       const facultySemesters = facultyAssignments
         .filter(
           (assignment) =>
@@ -384,7 +425,7 @@ export default function MarksEntryScreen() {
       .catch(() =>
         showAlert("Failed to load semesters", "error")
       );
-  }, [filters.programId, facultyAssignments, isFaculty]);
+  }, [filters.programId, facultyAssignments, isMarkEntryStaff]);
 
   /* ---------------- LOAD COURSES ---------------- */
   // useEffect(() => {
@@ -416,7 +457,7 @@ export default function MarksEntryScreen() {
     }
 
     // Faculty: show only assigned courses
-    if (isFaculty) {
+    if (isMarkEntryStaff) {
       const facultyCourses = facultyAssignments
         .filter(
           (assignment) =>
@@ -460,7 +501,7 @@ export default function MarksEntryScreen() {
     filters.programId,
     filters.semesterNo,
     facultyAssignments,
-    isFaculty,
+    isMarkEntryStaff,
   ]);
   
 useEffect(() => {
@@ -484,8 +525,8 @@ useEffect(() => {
       return;
     }
 
-    // Faculty: show only assigned batches
-    if (isFaculty) {
+// Faculty and External Staff: show only assigned courses
+    if (isMarkEntryStaff) {
       if (!filters.semesterNo || !filters.courseId) {
         setBatches([]);
         return;
@@ -536,7 +577,7 @@ useEffect(() => {
     filters.semesterNo,
     filters.courseId,
     facultyAssignments,
-    isFaculty,
+    isMarkEntryStaff,
   ]);
 
   /* ---------------- HANDLERS ---------------- */
@@ -954,7 +995,7 @@ useEffect(() => {
                       {p.short_name ?? p.programe}
                     </MenuItem>
                   ))} */}
-                  {isFaculty
+                  {isMarkEntryStaff
                     ? facultyAssignments
                         .filter(
                           (assignment, index, array) =>

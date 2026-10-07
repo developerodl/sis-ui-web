@@ -145,6 +145,11 @@ function LoginPage() {
         role === "director"
       ) {
         navigate("/marks/add", { replace: true });
+      } else if (
+        role === "external staff" ||
+        role === "external_staff"
+      ) {
+        navigate("/marks/add", { replace: true });
       } else {
         navigate("/dashboard/student", { replace: true });
       }

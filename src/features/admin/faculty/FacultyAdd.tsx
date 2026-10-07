@@ -214,6 +214,8 @@ export default function FacultyAdd() {
     reset,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors, isDirty },
   } = useForm<FacultyFormValues>({
     resolver: yupResolver(schema),
@@ -324,8 +326,26 @@ export default function FacultyAdd() {
       navigate("/faculty"); // <-- replace with your actual faculty page route
 
     } catch (err: any) {
-      showAlert(err?.detail || "Save failed", "error");
-    }
+  const errorMessage =
+    err?.message?.message ||
+    err?.detail?.message ||
+    (typeof err?.message === "string" ? err.message : null) ||
+    (typeof err?.detail === "string" ? err.detail : null) ||
+    "Save failed";
+
+  if (
+    errorMessage === "Email already exists. Please use another email."
+  ) {
+    setError("email", {
+      type: "manual",
+      message: errorMessage,
+    });
+
+    return;
+  }
+
+  showAlert(errorMessage, "error");
+}
   };
 
 
@@ -400,7 +420,13 @@ export default function FacultyAdd() {
                         render={({ field }) => (
                           <CustomInputText
                             label="Email"
-                            field={field}
+                            field={{
+                              ...field,
+                              onChange: (e: any) => {
+                                clearErrors("email");
+                                field.onChange(e);
+                              },
+                            }}
                             error={!!errors.email}
                             helperText={errors.email?.message}
                           />
