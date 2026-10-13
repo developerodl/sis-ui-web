@@ -341,6 +341,7 @@ export default function StudentTable() {
       [
         { header: 'S.No', key: 'sno' },
         { header: 'Register No', key: 'registration_no' },
+        { header: 'Application No', key: 'application_no' },
         {
           header: 'Name',
           key: 'full_name',
