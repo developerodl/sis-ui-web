@@ -225,6 +225,7 @@ export default function StudentTable() {
 
       const combinedText = `
       ${s.registration_no}
+      ${s.application_no}
       ${fullName}
       ${s.program_id}
       ${s.mobile_number}
@@ -270,6 +271,8 @@ export default function StudentTable() {
         { header: 'Student ID', key: 'id' },
 
         { header: 'Registration No', key: 'registration_no' },
+
+        { header: 'Application No', key: 'application_no' },
 
         {
           header: 'Full Name',
@@ -652,6 +655,13 @@ export default function StudentTable() {
                         "registration_no",
                       label:
                         "Registration No"
+                    },
+
+                    {
+                      key:
+                        "application_no",
+                      label:
+                        "Application No"
                     },
 
                     {
