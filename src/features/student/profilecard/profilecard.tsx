@@ -301,6 +301,10 @@ const StudentHorizontalIDCard = () => {
           <Box component="span">
             Pg Certificate in Organisational Behaviour Analysis
           </Box>
+        ) :student?.program_id == "1500165" ? (
+          <Box component="span">
+            Pg Certificate in DATA ANALYTICS
+          </Box>
         ) :
           (
             "-"
