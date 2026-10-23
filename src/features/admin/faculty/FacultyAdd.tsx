@@ -316,36 +316,87 @@ export default function FacultyAdd() {
 
       if (id) {
         await apiRequest({ url: `${ApiRoutes.FACULTYUPDATE}/${id}`, method: "put", data: payload });
-        showAlert("Faculty updated successfully", "success");
+        const selectedRole = roleOptions.find(
+          (option: any) => Number(option.id) === Number(formData.role)
+        );
+
+        const roleName = String(selectedRole?.name ?? "Faculty");
+
+        showAlert(`${roleName} updated successfully`, "success");
+      
       } else {
-        await apiRequest({ url: ApiRoutes.FACULTYADD, method: "post", data: payload });
-        showAlert("Faculty created successfully", "success");
+        await apiRequest({
+          url: ApiRoutes.FACULTYADD,
+          method: "post",
+          data: payload,
+        });
+
+        const selectedRole = roleOptions.find(
+          (option: any) =>
+            Number(option.id) === Number(formData.role)
+        );
+
+        const roleName = String(
+          selectedRole?.name ?? "Faculty"
+        );
+
+        showAlert(`${roleName} created successfully.`, "success");
       }
       clearError();
       // Navigate to faculty list page after success
-      navigate("/faculty"); // <-- replace with your actual faculty page route
-
+      navigate("/faculty"); // <-- replace with your actual faculty page route 
+    
     } catch (err: any) {
-  const errorMessage =
-    err?.message?.message ||
-    err?.detail?.message ||
-    (typeof err?.message === "string" ? err.message : null) ||
-    (typeof err?.detail === "string" ? err.detail : null) ||
-    "Save failed";
+      const responseData = err?.response?.data;
+      const detail =
+        responseData?.detail ??
+        err?.detail ??
+        err?.message?.detail ??
+        err?.message;
 
-  if (
-    errorMessage === "Email already exists. Please use another email."
-  ) {
-    setError("email", {
-      type: "manual",
-      message: errorMessage,
-    });
+      const duplicateFields = detail?.fields;
 
-    return;
-  }
+      if (
+        duplicateFields &&
+        typeof duplicateFields === "object"
+      ) {
+        (["employee_id", "email", "phone"] as const).forEach(
+          (field) => {
+            if (duplicateFields[field]) {
+              setError(field, {
+                type: "server",
+                message: String(duplicateFields[field]),
+              });
+            } else {
+              clearErrors(field);
+            }
+          }
+        );
+        return;
+      }
 
-  showAlert(errorMessage, "error");
-}
+      const message =
+        typeof detail === "string"
+          ? detail
+          : detail?.message ?? "Save failed";
+
+      const field = detail?.field as
+        | "employee_id"
+        | "email"
+        | "phone"
+        | undefined;
+
+      if (field && detail?.message) {
+        setError(field, {
+          type: "server",
+          message: String(detail.message),
+        });
+        return;
+      }
+
+      showAlert(String(message), "error");
+    }
+
   };
 
 
