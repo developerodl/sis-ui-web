@@ -56,6 +56,7 @@ import ProgramBatchSemesterAdd from "../features/admin/fees/programbatchsemester
 import DashboardFees from "../features/admin/fees/feesdashboard/DashboardFees";
 import FacultyAssign from '../features/hod/faculty/FacultyAssign';
 import ExternalStaffDashboard from "../features/externalStaff/dashboard/ExternalStaffDashboard";
+import StudentRegistration from "../features/admin/razorpay/SeminarRegistration";
 
 export const routesConfig = [
   {
@@ -95,6 +96,11 @@ export const routesConfig = [
         element: <FeesList />,
         breadcrumb: 'Fees List',
       },
+      {
+        path: 'razorpay',
+        element: <StudentRegistration />,
+        breadcrumb: 'Razorpay',
+      }
     ],
   },
   {

@@ -1,5 +1,5 @@
-// export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
-export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
+export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+// export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
 // export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
@@ -150,4 +150,9 @@ export const ApiRoutes = {
 
   // fee dashboard
   DASHBOARD_FEES: "/dashboard/fees",
+
+
+  // razorpay
+  SEMINAR_REGISTER : "/razorpay/registrations",
+  SEMINAR_VERIFY_PAYMENT : "/razorpay/registrations/verify"
 };
