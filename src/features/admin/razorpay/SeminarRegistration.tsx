@@ -128,9 +128,9 @@ const SeminarRegistration: React.FC = () => {
     useState<PaymentStatus>(null);
 
   const [statusMessage, setStatusMessage] = useState("");
-  const [registrationId, setRegistrationId] = useState<number | null>(
-    null
-  );
+  // const [registrationId, setRegistrationId] = useState<number | null>(
+  //   null
+  // );
 
   const handleChange = (
     event: React.ChangeEvent<
@@ -172,7 +172,7 @@ const SeminarRegistration: React.FC = () => {
 
       const registration = createResponse.data;
 
-      setRegistrationId(registration.registration_id);
+      // setRegistrationId(registration.registration_id);
 
       const options: RazorpayOptions = {
         key: registration.key_id,
@@ -264,7 +264,7 @@ const SeminarRegistration: React.FC = () => {
   const handleBackToForm = () => {
     setPaymentStatus(null);
     setStatusMessage("");
-    setRegistrationId(null);
+    // setRegistrationId(null);
     setMessage("");
     setError("");
   };
