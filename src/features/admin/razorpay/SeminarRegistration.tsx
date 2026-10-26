@@ -373,7 +373,7 @@ const SeminarRegistration: React.FC = () => {
                 </p>
 
                 <a
-                  href="YOUR_WHATSAPP_GROUP_LINK"
+                  href="https://chat.whatsapp.com/JmOwhpKeVHFHogIti5vAbP?s=cl&p=a&mlu=4&ilr=4"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
@@ -890,7 +890,16 @@ const SeminarRegistration: React.FC = () => {
                     href="tel:+919789989360"
                     className="text-sm font-semibold text-[#b5122c] transition-colors hover:text-[#7f1022] hover:underline"
                   >
-                    +91 97899 89360
+                    +91 63830 99399
+                  </a>
+
+                   <span className="text-gray-400">|</span>
+
+                  <a
+                    href="tel:+919789989360"
+                    className="text-sm font-semibold text-[#b5122c] transition-colors hover:text-[#7f1022] hover:underline"
+                  >
+                    +91 99404 90207
                   </a>
                 </div>
               </div>
