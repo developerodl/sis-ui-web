@@ -721,7 +721,7 @@ const SeminarRegistration: React.FC = () => {
 
                   <div>
                     <p className="mb-1 text-sm font-medium text-[#29456c]">
-                      Fee
+                      Registration Fee
                     </p>
                     <p className="text-base font-extrabold text-[#b5122c] sm:text-lg">
                       ₹250
@@ -737,7 +737,7 @@ const SeminarRegistration: React.FC = () => {
               disabled={loading}
               className="w-full rounded-md bg-[#105c8e] px-4 py-3 font-medium text-white transition hover:bg-[#0b4a73] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "Please wait..." : "Pay"}
+              {loading ? "Please wait..." : "Pay Now"}
             </button>
           </form>
         </div>
