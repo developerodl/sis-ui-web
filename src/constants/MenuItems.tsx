@@ -45,7 +45,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     subItems: [
       { text: 'Students List', routePath: '/students/list' },
       // { text: 'Fees List', routePath: '/students/feeslist' },
-      { text: 'Razorpay', routePath: '/students/razorpay' },
+      // { text: 'Razorpay', routePath: '/students/razorpay' },
     ],
     routePath: '',
   },
