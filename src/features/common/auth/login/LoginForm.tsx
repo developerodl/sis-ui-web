@@ -18,7 +18,7 @@ import { useAlert } from "../../../../context/AlertContext";
 import { jwtDecode } from "jwt-decode";
 import { setValue } from "../../../../utils/localStorageUtil";
 import bgimage from "/assets/images/bgimage.png";
-import { encryptPassword } from "../../../../utils/encryption";
+// import { encryptPassword } from "../../../../utils/encryption";
 import { apiRequest } from "../../../../utils/ApiRequest";
 import { ApiRoutes } from "../../../../constants/ApiConstants";
 import logo2 from "/assets/logo2.png";
@@ -74,16 +74,16 @@ function LoginPage() {
     try {
       setLoading(true);
 
-      const encryptedPassword =
-        encryptPassword(data.password);
+      // const encryptedPassword =
+      //   encryptPassword(data.password);
 
       const result = await apiRequest({
         url: ApiRoutes.LOGIN,
         method: "post",
         data: {
           username: data.username,
-          password: encryptedPassword,
-          is_encrypted: true,
+          password: data.password,
+          is_encrypted: false,
         },
       });
 
