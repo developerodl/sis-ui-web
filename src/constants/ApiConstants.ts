@@ -67,23 +67,25 @@ export const ApiRoutes = {
   GETPEDNINGPAYMENT: 'student',
   PAYMENTCONTROLLIST: 'programe/pending-payment-workflow/list',
   PAYMENTCONTROL: 'programe',
+  PAYMENTCONTROLDELETE: (scopeId: number | string) =>
+  `programe/pending-payment-workflow/${scopeId}`,
 
   /* Batch Master */
 
   /* Dropdown APIs */
 
-  ACADEMICYEARLIST: 'academic-year/list',
-  GETACADEMICYEARBYID: 'academic-year',
-  ACADEMICUPDATE: 'academic-year/update',
-  ACADEMICADD: 'academic-year/add',
-  ACADEMICDELETE: 'academic-year/delete',
+  ACADEMICYEARLIST: 'academic-years',
+  GETACADEMICYEARBYID: 'academic-years',
+  ACADEMICUPDATE: 'academic-years',
+  ACADEMICADD: 'academic-years',
+  ACADEMICDELETE: 'academic-years',
 
 
-  BATCHLIST: 'batch/list',
-  GETBATCHBYID: 'batch',
-  BATCHUPDATE: 'batch/update',
-  BATCHADD: 'batch/add',
-  BATCHDELETE: 'batch/delete',
+  BATCHLIST: 'batches',
+  GETBATCHBYID: 'batches',
+  BATCHUPDATE: 'batches',
+  BATCHADD: 'batches',
+  BATCHDELETE: 'batches',
 
 
   GRIEVANCEADD: 'grievance/add',

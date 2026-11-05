@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import apiClient from "../../../services/ApiClient";
-import bannerImage from "/assets/banner.png";
+import bannerImage from "/assets/new-banner.png";
 
 const REGISTER_URL = "/seminar-students";
 const VERIFY_URL = "/seminar-students/verify";

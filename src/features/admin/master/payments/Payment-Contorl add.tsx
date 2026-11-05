@@ -1,8 +1,10 @@
+
 import { useEffect, useState } from "react";
 import {
   Box,
   Grid,
   Button,
+  TextField,
 } from "@mui/material";
 
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -33,6 +35,8 @@ interface FormValues {
   batch: string;
   admission_year: string;
   semester: string;
+  start_date: string;
+  end_date: string;
   enabled: boolean;
 }
 
@@ -43,36 +47,56 @@ const defaultValues: FormValues = {
   batch: "",
   admission_year: "",
   semester: "",
+  start_date: "",
+  end_date: "",
   enabled: true,
 };
 
+/* ---------------- STATIC DROPDOWN LISTS ---------------- */
+
+const BATCH_LIST = [
+  { label: "January", value: "January" },
+  { label: "July", value: "July" },
+];
+
+const SEMESTER_LIST = [
+  { label: "SEMESTER 1", value: "Semester 1" },
+  { label: "SEMESTER 2", value: "Semester 2" },
+  { label: "SEMESTER 3", value: "Semester 3" },
+  { label: "SEMESTER 4", value: "Semester 4" },
+  { label: "SEMESTER 5", value: "Semester 5" },
+  { label: "SEMESTER 6", value: "Semester 6" },
+  { label: "SEMESTER 7", value: "Semester 7" },
+  { label: "SEMESTER 8", value: "Semester 8" },
+];
+
 /* ---------------- VALIDATION ---------------- */
 
-const schema: Yup.ObjectSchema<FormValues> =
-  Yup.object({
-    program_id:
-      Yup.string().required(
-        "Program is required"
-      ),
+const schema: Yup.ObjectSchema<FormValues> = Yup.object({
+  program_id: Yup.string().required("Program is required"),
 
-    batch:
-      Yup.string().required(
-        "Batch is required"
-      ),
+  batch: Yup.string().required("Batch is required"),
 
-    admission_year:
-      Yup.string().required(
-        "Admission year is required"
-      ),
+  admission_year: Yup.string().required("Admission year is required"),
 
-    semester:
-      Yup.string().required(
-        "Semester is required"
-      ),
+  semester: Yup.string().required("Semester is required"),
 
-    enabled:
-      Yup.boolean().required(),
-  });
+  start_date: Yup.string().required("Start date is required"),
+
+  end_date: Yup.string()
+    .required("End date is required")
+    .test(
+      "end-date-validation",
+      "End date must be after or equal to start date",
+      function (value) {
+        const { start_date } = this.parent;
+        if (!value || !start_date) return true;
+        return value >= start_date;
+      }
+    ),
+
+  enabled: Yup.boolean().required(),
+});
 
 /* ---------------- COMPONENT ---------------- */
 
@@ -87,50 +111,24 @@ export default function PaymentWorkflowAdd() {
 
   const rowData = location.state;
 
-  const { showAlert, showConfirm } =
-    useAlert();
+  const { showAlert, showConfirm } = useAlert();
 
-  const { clearError } =
-    useGlobalError();
+  const { clearError } = useGlobalError();
 
   const [initialData, setInitialData] =
-    useState<FormValues>(
-      defaultValues
-    );
+    useState<FormValues>(defaultValues);
 
-  const [programOptions, setProgramOptions] =
-    useState<any[]>([]);
+  const [programOptions, setProgramOptions] = useState<any[]>([]);
 
-  const [batchOptions, setBatchOptions] =
-    useState<any[]>([]);
-
-  const [yearOptions, setYearOptions] =
-    useState<any[]>([]);
-
-  const [semesterOptions, setSemesterOptions] =
-    useState<any[]>([]);
-
-  const SEMESTER_LIST = [
-    { label: "SEMESTER 1", value: 'Semester 1' },
-    { label: "SEMESTER 2", value: 'Semester 2' },
-    { label: "SEMESTER 3", value: 'Semester 3' },
-    { label: "SEMESTER 4", value: 'Semester 4' },
-    { label: "SEMESTER 5", value: 'Semester 5' },
-    { label: "SEMESTER 6", value: 'Semester 6' },
-    { label: "SEMESTER 7", value: 'Semester 7' },
-    { label: "SEMESTER 8", value: 'Semester 8' }
-  ];
+  const [yearOptions, setYearOptions] = useState<any[]>([]);
 
   const {
     handleSubmit,
     control,
     reset,
-    formState: {
-      isDirty,
-    },
+    formState: { isDirty, errors },
   } = useForm<FormValues>({
-    resolver:
-      yupResolver(schema),
+    resolver: yupResolver(schema),
     defaultValues,
   });
 
@@ -146,82 +144,37 @@ export default function PaymentWorkflowAdd() {
     }
   }, [rowData]);
 
-  const loadDropdowns =
-    async () => {
-      try {
-        const [
-          programRes,
-          batchRes,
-          yearRes,
-        ] = await Promise.all([
-          apiRequest({
-            url:
-              ApiRoutes.GETPROGRAMLIST,
-            method: "get",
-          }),
+  const loadDropdowns = async () => {
+    try {
+      const [programRes, yearRes] = await Promise.all([
+        apiRequest({
+          url: ApiRoutes.GETPROGRAMLIST,
+          method: "get",
+        }),
 
-          apiRequest({
-            url:
-              ApiRoutes.BATCHLIST,
-            method: "get",
-          }),
+        apiRequest({
+          url: ApiRoutes.ACADEMICYEARLIST,
+          method: "get",
+        }),
+      ]);
 
-          apiRequest({
-            url:
-              ApiRoutes.ACADEMICYEARLIST,
-            method: "get",
-          }),
-        ]);
+      setProgramOptions(
+        (programRes || []).map((p: any) => ({
+          label: p.programe,
+          value: String(p.id),
+        }))
+      );
 
-        setProgramOptions(
-          (programRes || []).map(
-            (p: any) => ({
-              label:
-                p.programe,
-              value: p.id,
-            })
-          )
-        );
-
-        setBatchOptions(
-          (batchRes || []).map(
-            (b: any) => ({
-              label:
-                b.batch_name,
-              value:
-                b.batch_name,
-            })
-          )
-        );
-
-        setYearOptions(
-          (yearRes || []).map(
-            (y: any) => ({
-              label:
-                y.year_code,
-              value:
-                y.year_code,
-            })
-          )
-        );
-
-        setSemesterOptions(
-          (SEMESTER_LIST || []).map(
-            (s: any) => ({
-              label:
-                s.label,
-              value:
-                s.value,
-            })
-          )
-        );
-      } catch {
-        showAlert(
-          "Failed to load dropdown data",
-          "error"
-        );
-      }
-    };
+      setYearOptions(
+        (yearRes || []).map((y: any) => ({
+          label: y.year_code,
+          value: y.year_code,
+        }))
+      );
+    } catch {
+      showAlert("Failed to load dropdown data", "error");
+    }
+  };
 
   /* ---------------- FETCH EDIT DATA ---------------- */
 
@@ -246,34 +199,47 @@ export default function PaymentWorkflowAdd() {
         },
       });
 
-      const data =
-        res || defaultValues;
+      const data: FormValues = {
+        program_id: String(program_id),
+        batch: res.batch || batch || "",
+        admission_year: res.admission_year || admission_year || "",
+        semester: res.semester || semester || "",
+        start_date: res.start_date
+          ? String(res.start_date).substring(0, 10)
+          : "",
+        end_date: res.end_date
+          ? String(res.end_date).substring(0, 10)
+          : "",
+        enabled: res.enabled ?? true,
+      };
 
       setInitialData(data);
 
       reset(data);
     } catch {
-      showAlert(
-        "Failed to load workflow data",
-        "error"
-      );
+      showAlert("Failed to load workflow data", "error");
     }
   };
 
   /* ---------------- SUBMIT ---------------- */
 
-  const onSubmit = async (values: any) => {
+  /* ---------------- SUBMIT ---------------- */
+
+  const onSubmit = async (values: FormValues) => {
     try {
-      const programId =
-        rowData?.program_id || values.program_id;
+      const programId = isEditMode
+        ? rowData?.program_id || values.program_id
+        : values.program_id;
 
       await apiRequest({
         url: `${ApiRoutes.PAYMENTCONTROL}/${programId}/pending-payment-workflow`,
-        method: "put",
+        method: isEditMode ? "put" : "post",
         data: {
           batch: values.batch,
           admission_year: values.admission_year,
           semester: values.semester,
+          start_date: values.start_date,
+          end_date: values.end_date,
           enabled: values.enabled,
         },
       });
@@ -286,15 +252,15 @@ export default function PaymentWorkflowAdd() {
       );
 
       navigate("/payment-control/list");
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Failed to save workflow";
 
-    } catch (error) {
-      showAlert(
-        "Failed to save workflow",
-        "error"
-      );
+      showAlert(errorMessage, "error");
     }
   };
-
 
   /* ---------------- RESET ---------------- */
 
@@ -308,16 +274,11 @@ export default function PaymentWorkflowAdd() {
     if (isDirty) {
       showConfirm(
         "You have unsaved changes. Are you sure you want to leave?",
-        () =>
-          navigate(
-            "/payment-control/list"
-          ),
+        () => navigate("/payment-control/list"),
         () => { }
       );
     } else {
-      navigate(
-        "/payment-control/list"
-      );
+      navigate("/payment-control/list");
     }
   };
 
@@ -326,29 +287,19 @@ export default function PaymentWorkflowAdd() {
   return (
     <Box p={3}>
       <CardComponent sx={{ p: 4 }}>
-        <form
-          onSubmit={handleSubmit(
-            onSubmit
-          )}
-        >
-          <Grid
-            container
-            spacing={3}
-          >
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+
             {/* Program */}
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
                 name="program_id"
                 control={control}
-                render={({
-                  field,
-                }) => (
+                render={({ field }) => (
                   <CustomSelect
                     label="Program"
-                    options={
-                      programOptions
-                    }
+                    options={programOptions}
                     field={field}
                   />
                 )}
@@ -361,14 +312,10 @@ export default function PaymentWorkflowAdd() {
               <Controller
                 name="batch"
                 control={control}
-                render={({
-                  field,
-                }) => (
+                render={({ field }) => (
                   <CustomSelect
                     label="Batch"
-                    options={
-                      batchOptions
-                    }
+                    options={BATCH_LIST}
                     field={field}
                   />
                 )}
@@ -381,14 +328,10 @@ export default function PaymentWorkflowAdd() {
               <Controller
                 name="admission_year"
                 control={control}
-                render={({
-                  field,
-                }) => (
+                render={({ field }) => (
                   <CustomSelect
                     label="Admission Year"
-                    options={
-                      yearOptions
-                    }
+                    options={yearOptions}
                     field={field}
                   />
                 )}
@@ -401,15 +344,54 @@ export default function PaymentWorkflowAdd() {
               <Controller
                 name="semester"
                 control={control}
-                render={({
-                  field,
-                }) => (
+                render={({ field }) => (
                   <CustomSelect
                     label="Semester"
-                    options={
-                      semesterOptions
-                    }
+                    options={SEMESTER_LIST}
                     field={field}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Start Date */}
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="start_date"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    type="date"
+                    label="Start Date"
+                    InputLabelProps={{ shrink: true }}
+                    error={!!errors.start_date}
+                    helperText={errors.start_date?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* End Date */}
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="end_date"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    type="date"
+                    label="End Date"
+                    InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: undefined,
+                    }}
+                    error={!!errors.end_date}
+                    helperText={errors.end_date?.message}
                   />
                 )}
               />
@@ -421,9 +403,7 @@ export default function PaymentWorkflowAdd() {
               <Controller
                 name="enabled"
                 control={control}
-                render={({
-                  field,
-                }) => (
+                render={({ field }) => (
                   <CustomCheckboxInput
                     label="Enable Workflow"
                     field={field}
@@ -431,6 +411,7 @@ export default function PaymentWorkflowAdd() {
                 )}
               />
             </Grid>
+
           </Grid>
 
           {/* Buttons */}
@@ -443,18 +424,14 @@ export default function PaymentWorkflowAdd() {
           >
             <Button
               variant="outlined"
-              onClick={
-                handleBack
-              }
+              onClick={handleBack}
             >
               Back
             </Button>
 
             <Button
               variant="outlined"
-              onClick={
-                handleReset
-              }
+              onClick={handleReset}
             >
               Reset
             </Button>
@@ -463,9 +440,7 @@ export default function PaymentWorkflowAdd() {
               type="submit"
               variant="contained"
             >
-              {id
-                ? "Update"
-                : "Save"}
+              {id ? "Update" : "Save"}
             </Button>
           </Box>
         </form>
