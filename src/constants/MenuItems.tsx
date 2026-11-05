@@ -16,7 +16,8 @@ import {
   ReportProblem as ReportProblemIcon,
   Widgets as MasterIcon,
   Assessment as MarksIcon,
-  AdminPanelSettings as RoleIcon
+  AdminPanelSettings as RoleIcon,
+  EventNote as SeminarIcon,
 } from '@mui/icons-material';
 
 
@@ -87,14 +88,14 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       { text: 'Payment Control', routePath: '/payment-control/list' },
       // { text: 'Batches', routePath: '/batch/list' },
       // { text: 'Years', routePath: '/year/list' },
-      {text: 'schemes', routePath: '/schemes/add' },
+      { text: 'schemes', routePath: '/schemes/add' },
       { text: 'marks', routePath: '/marks/add' }
     ],
     routePath: '',
   },
   {
     text: 'Fees',
-    icon: 'Master',
+    icon: 'Fees',
     subItems: [
       { text: 'Fee Dashboard', routePath: '/fee-dashboard' },
       { text: 'FeeHead', routePath: '/fee-head/list' },
@@ -105,7 +106,15 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     ],
     routePath: '',
   },
-  
+  {
+    text: 'Seminars',
+    icon: 'Seminar',
+    subItems: [
+      { text: 'Students List', routePath: '/seminar-list' }
+    ],
+    routePath: '',
+  }
+
   // {
   //   text: 'Marks',
   //   icon: 'Marks',
@@ -302,5 +311,6 @@ export const ICON_MAP: Record<string, JSX.Element> = {
   Password: <LockIcon />,
   Master: <MasterIcon />,
   Marks: <MarksIcon />,
-  Role: <RoleIcon />
+  Role: <RoleIcon />,
+  Seminar: <SeminarIcon />
 };

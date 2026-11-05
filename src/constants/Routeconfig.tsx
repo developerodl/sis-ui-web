@@ -59,6 +59,7 @@ import ExternalStaffDashboard from "../features/externalStaff/dashboard/External
 import AnswerSheetUpload from "../features/admin/student/AnswerSheetUpload";
 import AnswerSheetList from "../features/admin/student/AnswerSheetList";
 import StudentRegistration from "../features/admin/razorpay/SeminarRegistration";
+import SeminarRegistrationList from "../features/admin/seminar/SeminarRegistrationList";
 
 export const routesConfig = [
   {
@@ -593,6 +594,11 @@ export const routesConfig = [
     path: '/fee-dashboard',
     element: <DashboardFees />,
     breadcrumb: 'Fee Dashboard',
+  },
+    {
+    path: '/seminar-list',
+    element: <SeminarRegistrationList />,
+    breadcrumb: 'Students List',
   }
 
 ];

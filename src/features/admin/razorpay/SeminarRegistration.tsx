@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import apiClient from "../../../services/ApiClient";
 import bannerImage from "/assets/banner.png";
 
-const REGISTER_URL = "/razorpay/registrations";
-const VERIFY_URL = "/razorpay/registrations/verify";
+const REGISTER_URL = "/seminar-students";
+const VERIFY_URL = "/seminar-students/verify";
 
 const categories = [
   "Existing SRIHER CDOE Learner",
