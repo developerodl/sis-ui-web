@@ -65,6 +65,7 @@ interface StudentRow {
   admission_year: string | null;
   final_marks: number | null;
   pass_status: string | null;
+  is_answer_sheet_evaluated?: boolean;
   attendance_percentage: number | null;
   faculty_status: string;
   hod_status: string;
@@ -660,8 +661,25 @@ useEffect(() => {
         },
       });
 
+      // const rows: StudentRow[] = res.data || [];
+      // setStudents(rows);
       const rows: StudentRow[] = res.data || [];
+
       setStudents(rows);
+
+      // Notify when students have completed Answer Sheet Evaluation.
+      const hasEvaluatedStudents =
+        filters.markType.toLowerCase() === "external" &&
+        rows.some(
+          (student) => student.is_answer_sheet_evaluated === true
+        );
+
+      if (hasEvaluatedStudents) {
+        showAlert(
+          "Some students have already completed Answer Sheet Evaluation. Their External marks cannot be edited or submitted again.",
+          "info"
+        );
+      }
 
       const prefill: Record<number, string> = {};
       const attendancePrefill: Record<number, string> = {};
@@ -759,7 +777,16 @@ useEffect(() => {
     //     },
     //   });
     const marksPayload = students
-      .filter((s) => s.faculty_status !== "Submitted" && marksInput[s.id] !== undefined && marksInput[s.id] !== "")
+      .filter(
+        (s) =>
+          s.faculty_status !== "Submitted" &&
+          !(
+            filters.markType === "external" &&
+            s.is_answer_sheet_evaluated === true
+          ) &&
+          marksInput[s.id] !== undefined &&
+          marksInput[s.id] !== ""
+      )
       .map((s) => ({
         student_id: s.id,
         final_marks: Number(marksInput[s.id]),
@@ -854,6 +881,10 @@ useEffect(() => {
   };
 
   const handleDirectorApprove = async () => {
+    if (isDirectorAlreadyApproved) {
+    return;
+  }
+  
     try {
       await apiRequest({
         url: ApiRoutes.DIRECTORAPPROVE,
@@ -879,6 +910,29 @@ useEffect(() => {
     : isHOD
     ? students.filter((s) => s.faculty_status === "Submitted")
     : students;
+
+  const isDirectorAlreadyApproved =
+  isDirector &&
+  visibleStudents.length > 0 &&
+  visibleStudents.every(
+    (student) =>
+      student.director_status?.trim().toLowerCase() === "approved"
+  );
+
+  const hodDecisionStudents = students.filter(
+  (s) =>
+    s.hod_status?.trim().toLowerCase() === "approved" ||
+    s.hod_status?.trim().toLowerCase() === "rejected" ||
+    s.faculty_status?.trim().toLowerCase() === "submitted"
+);
+
+  const isHodAlreadyApproved =
+    isHOD &&
+    hodDecisionStudents.length > 0 &&
+    hodDecisionStudents.every(
+      (student) =>
+        student.hod_status?.trim().toLowerCase() === "approved"
+    );
   const paginatedStudents = visibleStudents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleExportExcel = () => {
@@ -965,6 +1019,14 @@ useEffect(() => {
       `Marks_${selectedCourseLabel}_${filters.markType}`
     );
   };
+  const hasEditableMarks = students.some(
+                          (s) =>
+                            s.faculty_status !== "Submitted" &&
+                            !(
+                              filters.markType.toLowerCase() === "external" &&
+                              s.is_answer_sheet_evaluated === true
+                            )
+                        );
 
   /* ---------------- UI ---------------- */
   return (
@@ -1168,6 +1230,15 @@ useEffect(() => {
                 </>
               )}
             </Alert>
+            {/* Answer Sheet Evaluation notification */}
+            {filters.markType.toLowerCase() === "external" &&
+              students.some((s) => s.is_answer_sheet_evaluated === true) && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Some students have already completed Answer Sheet Evaluation.
+                  Their External marks are automatically updated and cannot be
+                  edited or submitted again from this page.
+                </Alert>
+              )}
             {!isDirector && (() => {
               const rejectedEntry = visibleStudents.find((s) => s.hod_status === "Rejected" && s.reject_reason);
               return rejectedEntry ? (
@@ -1220,6 +1291,11 @@ useEffect(() => {
                         const passStatus = computePassStatus(markValue);
                         // const rowLocked = s.status === "submitted";
                         const rowLocked = s.faculty_status === "Submitted" || isReviewer;
+                        const isEvaluationLocked =
+                          filters.markType.toLowerCase() === "external" &&
+                          s.is_answer_sheet_evaluated === true;
+
+                        const isInputDisabled = rowLocked || isEvaluationLocked;
 
                         return (
                           <TableRow key={s.id}>
@@ -1235,7 +1311,8 @@ useEffect(() => {
                               <TextField
                                 size="small"
                                 type="number"
-                                disabled={rowLocked || !isMarkSchemeConfigured}
+                                // disabled={rowLocked || !isMarkSchemeConfigured}
+                                disabled={isInputDisabled}
                                 value={attendanceValue}
                                 onChange={(e) => handleAttendanceChange(s.id, e.target.value)}
                                 error={attendanceValue !== "" && !attendanceValid}
@@ -1259,7 +1336,7 @@ useEffect(() => {
                               <TextField
                                   size="small"
                                   type="number"
-                                  disabled={rowLocked}
+                                  disabled={isInputDisabled}
                                   value={markValue}
                                   inputProps={{
                                     min: 0,
@@ -1354,7 +1431,7 @@ useEffect(() => {
                   />
                 </TableContainer>
 
-                {!isReviewer && (
+                {!isReviewer && hasEditableMarks && (
                   <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
                     <Button variant="contained" onClick={handleSave}>
                       Save
@@ -1367,40 +1444,81 @@ useEffect(() => {
 
                 {isHOD && (
                   <Box mt={3}>
-                    {showRejectBox && (
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={2}
-                        label="Rejection Reason"
-                        value={rejectReasonInput}
-                        onChange={(e) => setRejectReasonInput(e.target.value)}
-                        sx={{ mb: 2 }}
-                      />
+                    {isHodAlreadyApproved ? (
+                      <Alert severity="success" sx={{ mt: 2 }}>
+                        Already approved and sent to Director.
+                      </Alert>
+                    ) : (
+                      <>
+                        {showRejectBox && (
+                          <TextField
+                            fullWidth
+                            multiline
+                            rows={2}
+                            label="Rejection Reason"
+                            value={rejectReasonInput}
+                            onChange={(e) => setRejectReasonInput(e.target.value)}
+                            sx={{ mb: 2 }}
+                          />
+                        )}
+
+                        <Stack
+                          direction="row"
+                          spacing={2}
+                          justifyContent="flex-end"
+                        >
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={handleHodApprove}
+                          >
+                            Approve
+                          </Button>
+
+                          {!showRejectBox ? (
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              onClick={() => setShowRejectBox(true)}
+                            >
+                              Reject
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              onClick={handleHodReject}
+                            >
+                              Confirm Reject
+                            </Button>
+                          )}
+                        </Stack>
+                      </>
                     )}
-                    <Stack direction="row" spacing={2} justifyContent="flex-end">
-                      <Button variant="contained" color="success" onClick={handleHodApprove}>
-                        Approve
-                      </Button>
-                      {!showRejectBox ? (
-                        <Button variant="outlined" color="error" onClick={() => setShowRejectBox(true)}>
-                          Reject
-                        </Button>
-                      ) : (
-                        <Button variant="contained" color="error" onClick={handleHodReject}>
-                          Confirm Reject
-                        </Button>
-                      )}
-                    </Stack>
                   </Box>
                 )}
 
                 {isDirector && (
-                  <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
-                    <Button variant="contained" color="success" onClick={handleDirectorApprove}>
-                      Approve
-                    </Button>
-                  </Stack>
+                  <Box mt={3}>
+                    {isDirectorAlreadyApproved && (
+                      <Alert severity="success" sx={{ mb: 2 }}>
+                        Already approved by Director.
+                      </Alert>
+                    )}
+
+                    <Stack direction="row" justifyContent="flex-end">
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={handleDirectorApprove}
+                        disabled={
+                          isDirectorAlreadyApproved || visibleStudents.length === 0
+                        }
+                      >
+                        {isDirectorAlreadyApproved ? "Approved" : "Approve"}
+                      </Button>
+                    </Stack>
+                  </Box>
                 )}
               </>
             )}

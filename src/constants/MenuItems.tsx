@@ -45,6 +45,8 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     subItems: [
       { text: 'Students List', routePath: '/students/list' },
       // { text: 'Fees List', routePath: '/students/feeslist' },
+      { text: 'Answer Sheet Upload', routePath: '/answer-sheets/upload' },
+      { text: 'Answer Sheet List', routePath: '/answer-sheets/list' },
     ],
     routePath: '',
   },

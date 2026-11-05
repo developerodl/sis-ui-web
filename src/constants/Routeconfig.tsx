@@ -56,6 +56,8 @@ import ProgramBatchSemesterAdd from "../features/admin/fees/programbatchsemester
 import DashboardFees from "../features/admin/fees/feesdashboard/DashboardFees";
 import FacultyAssign from '../features/hod/faculty/FacultyAssign';
 import ExternalStaffDashboard from "../features/externalStaff/dashboard/ExternalStaffDashboard";
+import AnswerSheetUpload from "../features/admin/student/AnswerSheetUpload";
+import AnswerSheetList from "../features/admin/student/AnswerSheetList";
 
 export const routesConfig = [
   {
@@ -96,6 +98,16 @@ export const routesConfig = [
         breadcrumb: 'Fees List',
       },
     ],
+  },
+  {
+    path: "/answer-sheets/upload",
+    element: <AnswerSheetUpload />,
+    breadcrumb: "Answer Sheet Upload",
+  },
+  {
+    path: "/answer-sheets/list",
+    element: <AnswerSheetList />,
+    breadcrumb: "Answer Sheet List",
   },
   {
     path: '/faculty',

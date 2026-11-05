@@ -1,0 +1,253 @@
+
+import { useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  TextField,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { apiRequest } from "../../../utils/ApiRequest";
+import { useAlert } from "../../../context/AlertContext";
+
+type UploadResult = {
+  id: number;
+  student_id: number;
+  registration_no: string;
+  s3_key: string;
+  status: string;
+};
+
+type UploadForm = {
+  registration_no: string;
+  program_id: string;
+  semester_id: string;
+  batch_id: string;
+  course_id: string;
+  academic_year_id: string;
+};
+
+const initialForm: UploadForm = {
+  registration_no: "",
+  program_id: "",
+  semester_id: "",
+  batch_id: "",
+  course_id: "",
+  academic_year_id: "",
+};
+
+export default function AnswerSheetUpload() {
+  const [form, setForm] = useState(initialForm);
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<UploadResult | null>(null);
+  const [error, setError] = useState("");
+  const { showAlert } = useAlert();
+
+  const updateField = (field: keyof UploadForm, value: string) => {
+    setForm((previous) => ({ ...previous, [field]: value }));
+    setResult(null);
+    setError("");
+  };
+
+  const handleUpload = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setResult(null);
+
+    if (!file) {
+      setError("Please select the student's answer-sheet PDF.");
+      return;
+    }
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Only PDF files are allowed.");
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      setError("The PDF must be 20 MB or smaller.");
+      return;
+    }
+
+    const requiredFields = Object.entries(form);
+    const missing = requiredFields.find(([, value]) => !value.trim());
+
+    if (missing) {
+      setError("Please fill in all student and exam fields.");
+      return;
+    }
+
+    const numericFields = [
+      "program_id",
+      "semester_id",
+      "batch_id",
+      "course_id",
+      "academic_year_id",
+    ] as const;
+
+    for (const field of numericFields) {
+      if (!Number.isInteger(Number(form[field])) || Number(form[field]) <= 0) {
+        setError(`${field} must be a positive integer ID.`);
+        return;
+      }
+    }
+
+    const body = new FormData();
+    body.append("registration_no", form.registration_no.trim());
+    body.append("program_id", form.program_id);
+    body.append("semester_id", form.semester_id);
+    body.append("batch_id", form.batch_id);
+    body.append("course_id", form.course_id);
+    body.append("academic_year_id", form.academic_year_id);
+    body.append("file", file);
+
+    setLoading(true);
+
+    try {
+      const response = await apiRequest({
+        url: "/mark-evaluation/uploads",
+        method: "post",
+        data: body,
+        headers: {
+            "Content-Type": undefined,
+        },
+      });
+
+      setResult(response as UploadResult);
+      setFile(null);
+      showAlert("Answer sheet uploaded successfully.");
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        err?.detail ||
+        err?.data?.message ||
+        "Upload failed. Verify the student, exam configuration, and server logs.";
+
+      setError(typeof message === "string" ? message : "Upload failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const numberFields: {
+    field: keyof UploadForm;
+    label: string;
+  }[] = [
+    { field: "program_id", label: "Program ID" },
+    { field: "semester_id", label: "Semester ID" },
+    { field: "batch_id", label: "Batch ID" },
+    { field: "course_id", label: "Course ID" },
+    { field: "academic_year_id", label: "Academic Year ID" },
+  ];
+
+  return (
+    <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 900, mx: "auto" }}>
+      <Typography variant="h4" fontWeight={700} mb={1}>
+        Answer Sheet Upload
+      </Typography>
+      <Typography color="text.secondary" mb={3}>
+        Upload a student's handwritten answer sheet as a PDF.
+      </Typography>
+
+      <Paper component="form" onSubmit={handleUpload} sx={{ p: { xs: 2, md: 4 } }}>
+        <Typography variant="h6" mb={2}>
+          Student and examination details
+        </Typography>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 2,
+          }}
+        >
+          <TextField
+            label="Registration Number"
+            required
+            value={form.registration_no}
+            onChange={(e) => updateField("registration_no", e.target.value)}
+            placeholder="e.g. O0525001"
+          />
+
+          {numberFields.map(({ field, label }) => (
+            <TextField
+              key={field}
+              label={label}
+              required
+              type="number"
+              inputProps={{ min: 1, step: 1 }}
+              value={form[field]}
+              onChange={(e) => updateField(field, e.target.value)}
+            />
+          ))}
+        </Box>
+
+        <Box mt={4}>
+          <Typography variant="h6" mb={1}>
+            Answer-sheet PDF
+          </Typography>
+
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            disabled={loading}
+          >
+            Choose PDF
+            <input
+              hidden
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(e) => {
+                setFile(e.target.files?.[0] ?? null);
+                setResult(null);
+                setError("");
+              }}
+            />
+          </Button>
+
+          <Typography variant="body2" mt={1} color="text.secondary">
+            {file
+              ? `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`
+              : "PDF only · Maximum 20 MB"}
+          </Typography>
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {result && (
+          <Alert severity="success" sx={{ mt: 3 }}>
+            <Typography fontWeight={700}>Upload successful</Typography>
+            Submission ID: {result.id}
+            <br />
+            Registration number: {result.registration_no}
+            <br />
+            Status: {result.status}
+          </Alert>
+        )}
+
+        <Box mt={3}>
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={
+              loading ? <CircularProgress size={18} color="inherit" /> : <CloudUploadIcon />
+            }
+            disabled={loading}
+          >
+            {loading ? "Uploading..." : "Upload Answer Sheet"}
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
+  );
+}
