@@ -8,6 +8,7 @@ import { routesConfig } from "../constants/Routeconfig";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ResetPassword from "../features/common/auth/forgot-password/Reset-password";
 import ForgotPassword from "../features/common/auth/forgot-password/Forgot-password";
+import SeminarRegistration from "../features/admin/razorpay/SeminarRegistration";
 
 // Utility function to render nested routes
 export const renderRoutes = (routes: any[]) =>
@@ -44,6 +45,16 @@ const AppRoutes = () => {
         element={
           <PublicRoute>
             <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+
+      {/* SEMINAR REGISTRATION — NO SIDEBAR */}
+      <Route
+        path="/seminar-registration"
+        element={
+          <PublicRoute>
+            <SeminarRegistration />
           </PublicRoute>
         }
       />

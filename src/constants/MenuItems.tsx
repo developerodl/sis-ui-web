@@ -47,6 +47,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       // { text: 'Fees List', routePath: '/students/feeslist' },
       { text: 'Answer Sheet Upload', routePath: '/answer-sheets/upload' },
       { text: 'Answer Sheet List', routePath: '/answer-sheets/list' },
+      // { text: 'Razorpay', routePath: '/students/razorpay' },
     ],
     routePath: '',
   },
@@ -103,7 +104,8 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
 
     ],
     routePath: '',
-  }
+  },
+  
   // {
   //   text: 'Marks',
   //   icon: 'Marks',

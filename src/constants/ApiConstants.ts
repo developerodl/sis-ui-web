@@ -150,4 +150,9 @@ export const ApiRoutes = {
 
   // fee dashboard
   DASHBOARD_FEES: "/dashboard/fees",
+
+
+  // razorpay
+  SEMINAR_REGISTER : "/razorpay/registrations",
+  SEMINAR_VERIFY_PAYMENT : "/razorpay/registrations/verify"
 };
