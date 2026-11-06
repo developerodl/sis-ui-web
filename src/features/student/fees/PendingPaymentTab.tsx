@@ -139,6 +139,7 @@ export default function PendingPaymentTab({
 
       // Hosted checkout URL support
       const checkoutUrl =
+        payment?.payment_link ||
         payment?.payment_url ||
         payment?.checkout_url ||
         payment?.redirect_url;
