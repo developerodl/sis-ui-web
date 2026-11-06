@@ -47,10 +47,18 @@ export default function PaymentControlList() {
                 method: "get",
             });
 
-            setWorkflowList(
-                Array.isArray(response)
-                    ? response
-                    : response?.data || []
+            const data = Array.isArray(response)
+                ? response
+                : response?.data || [];
+
+            setWorkflowList(data);
+
+            // Keep current page within available pages
+            setPage((currentPage) =>
+                Math.min(
+                    currentPage,
+                    Math.max(0, Math.ceil(data.length / rowsPerPage) - 1)
+                )
             );
         } catch (error) {
             console.error("Failed to fetch workflow list", error);
@@ -61,13 +69,13 @@ export default function PaymentControlList() {
     // Search filter
     const filteredData = workflowList.filter((row) => {
         const text = `
-            ${row.program_id}
-            ${row.batch}
-            ${row.admission_year}
-            ${row.semester}
-            ${row.start_date || ""}
-            ${row.end_date || ""}
-            ${row.enabled}
+            ${row.program_id ?? ""}
+            ${row.batch ?? ""}
+            ${row.admission_year ?? ""}
+            ${row.semester ?? ""}
+            ${row.fees_start_date ?? ""}
+            ${row.fees_end_date ?? ""}
+            ${row.enabled ?? ""}
         `.toLowerCase();
 
         return text.includes(searchText.toLowerCase());
@@ -82,8 +90,8 @@ export default function PaymentControlList() {
                 { header: "Batch", key: "batch" },
                 { header: "Admission Year", key: "admission_year" },
                 { header: "Semester", key: "semester" },
-                { header: "Start Date", key: "start_date" },
-                { header: "End Date", key: "end_date" },
+                { header: "Fees Start Date", key: "fees_start_date" },
+                { header: "Fees End Date", key: "fees_end_date" },
                 { header: "Status", key: "enabled" },
             ],
             "Pending Payment Workflow",
@@ -120,18 +128,6 @@ export default function PaymentControlList() {
 
             handleCloseDelete();
             await fetchWorkflowList();
-
-            setPage((currentPage) =>
-                Math.min(
-                    currentPage,
-                    Math.max(
-                        0,
-                        Math.ceil(
-                            (filteredData.length - 1) / rowsPerPage
-                        ) - 1
-                    )
-                )
-            );
         } catch (err: any) {
             showAlert(
                 err.response?.data?.detail ||
@@ -214,12 +210,12 @@ export default function PaymentControlList() {
                                     label: "Semester",
                                 },
                                 {
-                                    key: "start_date",
-                                    label: "Start Date",
+                                    key: "fees_start_date",
+                                    label: "Fees Start Date",
                                 },
                                 {
-                                    key: "end_date",
-                                    label: "End Date",
+                                    key: "fees_end_date",
+                                    label: "Fees End Date",
                                 },
                                 {
                                     key: "enabled",
@@ -284,21 +280,13 @@ export default function PaymentControlList() {
                     <>
                         Are you sure you want to delete this payment workflow
                         for{" "}
-                        <strong>
-                            {selectedWorkflow?.program_id}
-                        </strong>
+                        <strong>{selectedWorkflow?.program_id}</strong>
                         {" - "}
-                        <strong>
-                            {selectedWorkflow?.batch}
-                        </strong>
+                        <strong>{selectedWorkflow?.batch}</strong>
                         {" - "}
-                        <strong>
-                            {selectedWorkflow?.admission_year}
-                        </strong>
+                        <strong>{selectedWorkflow?.admission_year}</strong>
                         {" - "}
-                        <strong>
-                            {selectedWorkflow?.semester}
-                        </strong>
+                        <strong>{selectedWorkflow?.semester}</strong>
                         ?
                     </>
                 }

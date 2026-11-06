@@ -35,8 +35,8 @@ interface FormValues {
   batch: string;
   admission_year: string;
   semester: string;
-  start_date: string;
-  end_date: string;
+  fees_start_date: string;
+  fees_end_date: string;
   enabled: boolean;
 }
 
@@ -47,8 +47,8 @@ const defaultValues: FormValues = {
   batch: "",
   admission_year: "",
   semester: "",
-  start_date: "",
-  end_date: "",
+  fees_start_date: "",
+  fees_end_date: "",
   enabled: true,
 };
 
@@ -81,17 +81,21 @@ const schema: Yup.ObjectSchema<FormValues> = Yup.object({
 
   semester: Yup.string().required("Semester is required"),
 
-  start_date: Yup.string().required("Start date is required"),
+  fees_start_date: Yup.string().required(
+    "Fees start date is required"
+  ),
 
-  end_date: Yup.string()
-    .required("End date is required")
+  fees_end_date: Yup.string()
+    .required("Fees end date is required")
     .test(
       "end-date-validation",
-      "End date must be after or equal to start date",
+      "Fees end date must be after or equal to fees start date",
       function (value) {
-        const { start_date } = this.parent;
-        if (!value || !start_date) return true;
-        return value >= start_date;
+        const { fees_start_date } = this.parent;
+
+        if (!value || !fees_start_date) return true;
+
+        return value >= fees_start_date;
       }
     ),
 
@@ -204,12 +208,15 @@ export default function PaymentWorkflowAdd() {
         batch: res.batch || batch || "",
         admission_year: res.admission_year || admission_year || "",
         semester: res.semester || semester || "",
-        start_date: res.start_date
-          ? String(res.start_date).substring(0, 10)
+
+        fees_start_date: res.fees_start_date
+          ? String(res.fees_start_date).substring(0, 10)
           : "",
-        end_date: res.end_date
-          ? String(res.end_date).substring(0, 10)
+
+        fees_end_date: res.fees_end_date
+          ? String(res.fees_end_date).substring(0, 10)
           : "",
+
         enabled: res.enabled ?? true,
       };
 
@@ -220,8 +227,6 @@ export default function PaymentWorkflowAdd() {
       showAlert("Failed to load workflow data", "error");
     }
   };
-
-  /* ---------------- SUBMIT ---------------- */
 
   /* ---------------- SUBMIT ---------------- */
 
@@ -238,8 +243,8 @@ export default function PaymentWorkflowAdd() {
           batch: values.batch,
           admission_year: values.admission_year,
           semester: values.semester,
-          start_date: values.start_date,
-          end_date: values.end_date,
+          fees_start_date: values.fees_start_date,
+          fees_end_date: values.fees_end_date,
           enabled: values.enabled,
         },
       });
@@ -275,7 +280,7 @@ export default function PaymentWorkflowAdd() {
       showConfirm(
         "You have unsaved changes. Are you sure you want to leave?",
         () => navigate("/payment-control/list"),
-        () => { }
+        () => {}
       );
     } else {
       navigate("/payment-control/list");
@@ -354,44 +359,44 @@ export default function PaymentWorkflowAdd() {
               />
             </Grid>
 
-            {/* Start Date */}
+            {/* Fees Start Date */}
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
-                name="start_date"
+                name="fees_start_date"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     fullWidth
                     type="date"
-                    label="Start Date"
+                    label="Fees Start Date"
                     InputLabelProps={{ shrink: true }}
-                    error={!!errors.start_date}
-                    helperText={errors.start_date?.message}
+                    error={!!errors.fees_start_date}
+                    helperText={errors.fees_start_date?.message}
                   />
                 )}
               />
             </Grid>
 
-            {/* End Date */}
+            {/* Fees End Date */}
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
-                name="end_date"
+                name="fees_end_date"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     fullWidth
                     type="date"
-                    label="End Date"
+                    label="Fees End Date"
                     InputLabelProps={{ shrink: true }}
                     inputProps={{
                       min: undefined,
                     }}
-                    error={!!errors.end_date}
-                    helperText={errors.end_date?.message}
+                    error={!!errors.fees_end_date}
+                    helperText={errors.fees_end_date?.message}
                   />
                 )}
               />
@@ -440,7 +445,7 @@ export default function PaymentWorkflowAdd() {
               type="submit"
               variant="contained"
             >
-              {id ? "Update" : "Save"}
+              {isEditMode ? "Update" : "Save"}
             </Button>
           </Box>
         </form>

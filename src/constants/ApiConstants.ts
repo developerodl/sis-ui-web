@@ -65,6 +65,7 @@ export const ApiRoutes = {
   RESETPASSWORD: 'user/reset-password',
   GET_STUDENT_DUE: 'students/',
   GETPEDNINGPAYMENT: 'student',
+  PAYPENDINGSTUDENT: 'student',
   PAYMENTCONTROLLIST: 'programe/pending-payment-workflow/list',
   PAYMENTCONTROL: 'programe',
   PAYMENTCONTROLDELETE: (scopeId: number | string) =>
