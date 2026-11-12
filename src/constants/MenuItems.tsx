@@ -78,6 +78,7 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       { text: 'Roles', routePath: '/role-list' },
       { text: 'Departments', routePath: '/department-list' },
       { text: 'Programs', routePath: '/programs' },
+      { text: 'Program Batch Semester', routePath: '/program-batch-semester/list' },
       // { text: 'Schemes', routePath: '/schemes/list' },
       // { text: 'Semesters', routePath: '/semesters/list' },
       { text: 'Courses', routePath: '/courses/list' },
@@ -101,20 +102,18 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       { text: 'FeeHead', routePath: '/fee-head/list' },
       { text: 'FeeDetail', routePath: '/fee-detail/list' },
       { text: 'FeeComponent', routePath: '/fee-component/list' },
-      { text: 'ProgramBatchSemester', routePath: '/program-batch-semester/list' }
 
     ],
     routePath: '',
   },
   {
-    text: 'Seminars',
+    text: 'Seminar',
     icon: 'Seminar',
-    subItems: [
-      { text: 'Students List', routePath: '/seminar-list' }
-    ],
+     subItems: [
+      { text: 'Seminar List', routePath: '/seminar-registration-list' },
+     ],
     routePath: '',
-  }
-
+  },
   // {
   //   text: 'Marks',
   //   icon: 'Marks',

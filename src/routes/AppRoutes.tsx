@@ -49,22 +49,21 @@ const AppRoutes = () => {
         }
       />
 
-      {/* SEMINAR REGISTRATION — NO SIDEBAR */}
-      <Route
-        path="/seminar-registration"
-        element={
-          <PublicRoute>
-            <SeminarRegistration />
-          </PublicRoute>
-        }
-      />
-
       {/* RESET PASSWORD — NO SIDEBAR */}
       <Route
         path="/reset-password"
         element={
           <PublicRoute>
             <ResetPassword />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/seminar-registration"
+        element={
+          <PublicRoute>
+            <SeminarRegistration />
           </PublicRoute>
         }
       />

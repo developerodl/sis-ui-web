@@ -58,7 +58,6 @@ import FacultyAssign from '../features/hod/faculty/FacultyAssign';
 import ExternalStaffDashboard from "../features/externalStaff/dashboard/ExternalStaffDashboard";
 import AnswerSheetUpload from "../features/admin/student/AnswerSheetUpload";
 import AnswerSheetList from "../features/admin/student/AnswerSheetList";
-import StudentRegistration from "../features/admin/razorpay/SeminarRegistration";
 import SeminarRegistrationList from "../features/admin/seminar/SeminarRegistrationList";
 
 export const routesConfig = [
@@ -99,11 +98,6 @@ export const routesConfig = [
         element: <FeesList />,
         breadcrumb: 'Fees List',
       },
-      {
-        path: 'razorpay',
-        element: <StudentRegistration />,
-        breadcrumb: 'Razorpay',
-      }
     ],
   },
   {
@@ -303,17 +297,17 @@ export const routesConfig = [
     //breadcrumb: 'Marks',
     children: [
       {
-        path:'list',
+        path: 'list',
         element: <MarksEntryScreen />,
         breadcrumb: 'Marks List',
       },
       {
-        path:'add',
+        path: 'add',
         element: <MarksEntryScreen />,
         breadcrumb: 'Students Mark',
       },
       {
-        path:'edit/:id',
+        path: 'edit/:id',
         element: <MarksEntryScreen />,
         breadcrumb: 'Marks Edit',
       },
@@ -429,7 +423,7 @@ export const routesConfig = [
     path: '/hod/faculty-assign',
     element: <FacultyAssign />,
     breadcrumb: 'Faculty Assign',
-  },  
+  },
   {
     path: '/payment-control',
     children: [
@@ -492,9 +486,9 @@ export const routesConfig = [
     ],
   },
   {
-    path:'facultylogin',
+    path: 'facultylogin',
     children: [
-       {
+      {
         path: 'grievance/list',
         element: <GrievanceFacultyList />,
         breadcrumb: 'Grievance List',
@@ -559,7 +553,7 @@ export const routesConfig = [
       },
       {
         path: 'add',
-        element: <FeeComponentAdd/>,
+        element: <FeeComponentAdd />,
         breadcrumb: 'Fee Component Add',
       },
       {
@@ -595,10 +589,9 @@ export const routesConfig = [
     element: <DashboardFees />,
     breadcrumb: 'Fee Dashboard',
   },
-    {
-    path: '/seminar-list',
+  {
+    path: '/seminar-registration-list',
     element: <SeminarRegistrationList />,
-    breadcrumb: 'Students List',
-  }
-
+    breadcrumb: 'Seminar Registration List',
+  },
 ];

@@ -40,6 +40,8 @@ interface ProgramBatchSemester {
 
   batch: string;
 
+  admission_year: string;
+
   semester: string;
 
   Duefrmdate: string | null;
@@ -95,6 +97,8 @@ export default function ProgramBatchSemesterList() {
 
   const [programFilter, setProgramFilter] =
     React.useState("");
+
+  const hasAppliedDefaultProgram = React.useRef(false);
 
   const [page, setPage] =
     React.useState(0);
@@ -189,6 +193,16 @@ export default function ProgramBatchSemesterList() {
     fetchPrograms();
   }, []);
 
+  // Open on the requested program when it has records. Waiting for both API
+  // responses avoids a transient empty table while the lists load in parallel.
+  React.useEffect(() => {
+    if (hasAppliedDefaultProgram.current || !data.length || !programs.length) return;
+    hasAppliedDefaultProgram.current = true;
+    if (data.some((item) => String(item.program_id) === "1500038")) {
+      setProgramFilter("1500038");
+    }
+  }, [data, programs]);
+
   /* ---------------------------------------------------------------------- */
   /*                            PROGRAM MAP                                 */
   /* ---------------------------------------------------------------------- */
@@ -263,6 +277,7 @@ export default function ProgramBatchSemesterList() {
         ${item.program_code || ""}
         ${item.program_id || ""}
         ${item.batch || ""}
+        ${item.admission_year || ""}
         ${item.semester || ""}
         ${item.Duefrmdate || ""}
         ${item.Duetodate || ""}
@@ -354,22 +369,15 @@ export default function ProgramBatchSemesterList() {
         (item, index) => ({
           sno: index + 1,
 
-          program_name:
-            item.program_name || "",
+          program_name: item.program_name || item.program_id || "",
+          semester: item.semester || "",
+          batch: item.batch || "",
+          admission_year: item.admission_year || "",
 
-          program_code:
-            item.program_code || "",
-
-          batch:
-            item.batch || "",
-
-          semester:
-            item.semester || "",
-
-          Duefrmdate:
+          fees_due_start:
             item.Duefrmdate || "",
 
-          Duetodate:
+          fees_due_end:
             item.Duetodate || "",
 
           course_start_date:
@@ -392,34 +400,19 @@ export default function ProgramBatchSemesterList() {
           key: "sno",
         },
 
+        { header: "Program", key: "program_name" },
+        { header: "Semester", key: "semester" },
+        { header: "Batch", key: "batch" },
+        { header: "Admission Year", key: "admission_year" },
+
         {
-          header: "Program",
-          key: "program_name",
+          header: "Fees Due Start",
+          key: "fees_due_start",
         },
 
         {
-          header: "Program Code",
-          key: "program_code",
-        },
-
-        {
-          header: "Batch",
-          key: "batch",
-        },
-
-        {
-          header: "Semester",
-          key: "semester",
-        },
-
-        {
-          header: "Due From",
-          key: "Duefrmdate",
-        },
-
-        {
-          header: "Due To",
-          key: "Duetodate",
+          header: "Fees Due End",
+          key: "fees_due_end",
         },
 
         {
@@ -455,109 +448,20 @@ export default function ProgramBatchSemesterList() {
   const columns = [
     {
       key: "program_name",
-
       label: "Program",
-
-      render: (
-        row: ProgramBatchSemester & {
-          program_name?: string;
-          program_code?: string;
-        }
-      ) =>
-        `${row.program_name || row.program_id || ""}${
-          row.program_code
-            ? ` - (${row.program_code})`
-            : ""
-        }`,
+      width: 220,
+      render: (row: ProgramBatchSemester & { program_name?: string; program_code?: string }) =>
+        `${row.program_name || row.program_id || ""}${row.program_code ? ` (${row.program_code})` : ""}`,
     },
-
-    {
-      key: "batch",
-
-      label: "Batch",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.batch || "-",
-    },
-
-    {
-      key: "semester",
-
-      label: "Semester",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.semester || "-",
-    },
-
-    {
-      key: "Duefrmdate",
-
-      label: "Due From",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.Duefrmdate || "-",
-    },
-
-    {
-      key: "Duetodate",
-
-      label: "Due To",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.Duetodate || "-",
-    },
-
-    {
-      key: "course_start_date",
-
-      label: "Course Start",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.course_start_date || "-",
-    },
-
-    {
-      key: "course_end_date",
-
-      label: "Course End",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.course_end_date || "-",
-    },
-
-    {
-      key: "exam_start_date",
-
-      label: "Exam Start",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.exam_start_date || "-",
-    },
-
-    {
-      key: "exam_end_date",
-
-      label: "Exam End",
-
-      render: (
-        row: ProgramBatchSemester
-      ) =>
-        row.exam_end_date || "-",
-    },
+    { key: "semester", label: "Semester", width: 130, render: (row: ProgramBatchSemester) => row.semester || "—" },
+    { key: "batch", label: "Batch", width: 180, render: (row: ProgramBatchSemester) => row.batch || "—" },
+    { key: "admission_year", label: "Admission Year", width: 140, render: (row: ProgramBatchSemester) => row.admission_year || "—" },
+    { key: "course_start_date", label: "Course Start", width: 150, render: (row: ProgramBatchSemester) => row.course_start_date || "—" },
+    { key: "course_end_date", label: "Course End", width: 150, render: (row: ProgramBatchSemester) => row.course_end_date || "—" },
+    { key: "exam_start_date", label: "Exam Start", width: 150, render: (row: ProgramBatchSemester) => row.exam_start_date || "—" },
+    { key: "exam_end_date", label: "Exam End", width: 150, render: (row: ProgramBatchSemester) => row.exam_end_date || "—" },
+    { key: "Duefrmdate", label: "Fees Due Start", width: 150, render: (row: ProgramBatchSemester) => row.Duefrmdate || "—" },
+    { key: "Duetodate", label: "Fees Due End", width: 150, render: (row: ProgramBatchSemester) => row.Duetodate || "—" },
   ];
 
   /* ---------------------------------------------------------------------- */
@@ -578,11 +482,21 @@ export default function ProgramBatchSemesterList() {
 
           mx: "auto",
 
-          p: 3,
+          p: { xs: 2, sm: 3 },
 
           mt: 3,
+          borderRadius: 3,
+          boxShadow: "0 8px 28px rgba(15, 23, 42, 0.08)",
         }}
       >
+        <Box sx={{ mb: 2.5 }}>
+          <Box sx={{ fontSize: { xs: 20, sm: 24 }, fontWeight: 700, color: "text.primary" }}>
+            Program Batch Semester
+          </Box>
+          <Box sx={{ mt: 0.5, color: "text.secondary", fontSize: 14 }}>
+            Manage course, exam, and fee due dates for each semester.
+          </Box>
+        </Box>
         {/* Toolbar */}
 
         <TableToolbar
@@ -603,7 +517,7 @@ export default function ProgramBatchSemesterList() {
               },
 
               placeholder:
-                "Search program, batch, semester",
+                "Search dates, batch, semester",
 
               visible: true,
             },
@@ -611,7 +525,7 @@ export default function ProgramBatchSemesterList() {
             {
               key: "program",
 
-              label: "Select Program",
+              label: "Program",
 
               type: "select",
 
@@ -624,6 +538,8 @@ export default function ProgramBatchSemesterList() {
               },
 
               options: programOptions,
+
+              placeholder: "All programs",
 
               sx: {
                 width: 250,
@@ -680,6 +596,7 @@ export default function ProgramBatchSemesterList() {
             data={filteredData}
             page={page}
             rowsPerPage={rowsPerPage}
+            showSno={false}
             actions={[
               {
                 label: "Edit",

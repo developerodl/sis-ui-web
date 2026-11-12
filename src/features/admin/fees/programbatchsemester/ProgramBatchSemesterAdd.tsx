@@ -23,6 +23,7 @@ import dayjs from "dayjs";
 import CardComponent from "../../../../components/card/Card";
 import CustomSelect from "../../../../components/inputs/customtext/CustomSelect";
 import CustomDateInput from "../../../../components/inputs/customtext/CustomDateInput";
+import CustomInputText from "../../../../components/inputs/customtext/CustomInputText";
 
 import apiClient from "../../../../services/ApiClient";
 import { ApiRoutes } from "../../../../constants/ApiConstants";
@@ -39,6 +40,7 @@ import { useGlobalError } from "../../../../context/ErrorContext";
 interface FormValues {
     program_id: string;
     batch: string;
+    admission_year: string;
     semester: string;
 
     Duefrmdate: Date | null;
@@ -58,6 +60,7 @@ interface FormValues {
 const defaultValues: FormValues = {
     program_id: "",
     batch: "",
+    admission_year: "",
     semester: "",
 
     Duefrmdate: null,
@@ -69,127 +72,6 @@ const defaultValues: FormValues = {
     exam_start_date: null,
     exam_end_date: null,
 };
-
-/* -------------------------------------------------------------------------- */
-/*                              BATCH OPTIONS                                 */
-/* -------------------------------------------------------------------------- */
-
-const batchOptions = [
-    {
-        label: "Batch I - january-1",
-        value: "Batch I - january-1",
-    },
-    {
-        label: "Batch I - january-2",
-        value: "Batch I - january-2",
-    },
-    {
-        label: "Batch I - july-1",
-        value: "Batch I - july-1",
-    },
-    {
-        label: "Batch I - july-2",
-        value: "Batch I - july-2",
-    },
-    {
-        label: "Batch I - july-3",
-        value: "Batch I - july-3",
-    },
-    {
-        label: "Batch I - july-4",
-        value: "Batch I - july-4",
-    },
-    {
-        label: "Batch I - july-5",
-        value: "Batch I - july-5",
-    },
-    {
-        label: "Batch I - july-6",
-        value: "Batch I - july-6",
-    },
-    {
-        label: "Batch I - july-7",
-        value: "Batch I - july-7",
-    },
-    {
-        label: "Batch I - july-8",
-        value: "Batch I - july-8",
-    },
-
-    {
-        label: "Batch II - january-1",
-        value: "Batch II - january-1",
-    },
-    {
-        label: "Batch II - january-2",
-        value: "Batch II - january-2",
-    },
-    {
-        label: "Batch II - january-3",
-        value: "Batch II - january-3",
-    },
-    {
-        label: "Batch II - january-4",
-        value: "Batch II - january-4",
-    },
-    {
-        label: "Batch II - january-5",
-        value: "Batch II - january-5",
-    },
-    {
-        label: "Batch II - january-6",
-        value: "Batch II - january-6",
-    },
-    {
-        label: "Batch II - january-7",
-        value: "Batch II - january-7",
-    },
-    {
-        label: "Batch II - january-8",
-        value: "Batch II - january-8",
-    },
-    {
-        label: "Batch II - july-1",
-        value: "Batch II - july-1",
-    },
-    {
-        label: "Batch II - july-2",
-        value: "Batch II - july-2",
-    },
-
-    {
-        label: "Batch III - july-1",
-        value: "Batch III - july-1",
-    },
-    {
-        label: "Batch III - july-2",
-        value: "Batch III - july-2",
-    },
-    {
-        label: "Batch III - july-3",
-        value: "Batch III - july-3",
-    },
-    {
-        label: "Batch III - july-4",
-        value: "Batch III - july-4",
-    },
-    {
-        label: "Batch III - july-5",
-        value: "Batch III - july-5",
-    },
-    {
-        label: "Batch III - july-6",
-        value: "Batch III - july-6",
-    },
-    {
-        label: "Batch III - july-7",
-        value: "Batch III - july-7",
-    },
-    {
-        label: "Batch III - july-8",
-        value: "Batch III - july-8",
-    },
-];
 
 /* -------------------------------------------------------------------------- */
 /*                            SEMESTER OPTIONS                                */
@@ -243,25 +125,25 @@ const schema: Yup.ObjectSchema<FormValues> =
             .trim()
             .required("Batch is required"),
 
+        admission_year: Yup.string()
+            .trim()
+            .required("Admission year is required"),
+
         semester: Yup.string()
             .trim()
             .required("Semester is required"),
 
-        Duefrmdate: Yup.date()
-            .nullable()
-            .required("Due From Date is required"),
+        Duefrmdate: Yup.date().nullable().defined(),
 
-        Duetodate: Yup.date()
-            .nullable()
-            .required("Due To Date is required"),
+        Duetodate: Yup.date().nullable().defined(),
 
         course_start_date: Yup.date()
             .nullable()
-            .required("Course Start Date is required"),
+            .defined(),
 
         course_end_date: Yup.date()
             .nullable()
-            .required("Course End Date is required")
+            .defined()
             .test(
                 "course-end-after-start",
                 "Course End Date must be after Course Start Date",
@@ -286,11 +168,11 @@ const schema: Yup.ObjectSchema<FormValues> =
 
         exam_start_date: Yup.date()
             .nullable()
-            .required("Exam Start Date is required"),
+            .defined(),
 
         exam_end_date: Yup.date()
             .nullable()
-            .required("Exam End Date is required")
+            .defined()
             .test(
                 "exam-end-after-start",
                 "Exam End Date must be after Exam Start Date",
@@ -542,6 +424,9 @@ export default function ProgramBatchSemesterAdd() {
                     batch:
                         data.batch ?? "",
 
+                    admission_year:
+                        data.admission_year ?? "",
+
                     semester:
                         data.semester ?? "",
 
@@ -666,6 +551,8 @@ export default function ProgramBatchSemesterAdd() {
                 ),
 
                 batch: data.batch.trim(),
+
+                admission_year: data.admission_year.trim(),
 
                 semester: data.semester.trim(),
 
@@ -834,17 +721,30 @@ export default function ProgramBatchSemesterAdd() {
                                 render={({
                                     field,
                                 }) => (
-                                    <CustomSelect
+                                    <CustomInputText
                                         label="Batch"
                                         field={field}
-                                        options={
-                                            batchOptions
-                                        }
+                                        error={!!errors.batch}
                                         helperText={
                                             errors
                                                 .batch
                                                 ?.message
                                         }
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="admission_year"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomInputText
+                                        label="Admission Year"
+                                        field={field}
+                                        error={!!errors.admission_year}
+                                        helperText={errors.admission_year?.message}
                                     />
                                 )}
                             />

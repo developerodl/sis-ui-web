@@ -32,6 +32,7 @@ interface RegistrationForm {
   seminar_track: string;
   presenting_paper: boolean;
   city_district: string;
+  information_consent: boolean;
 }
 
 interface RegistrationResponse {
@@ -89,6 +90,7 @@ const initialForm: RegistrationForm = {
   seminar_track: "",
   presenting_paper: false,
   city_district: "",
+  information_consent: false,
 };
 
 const loadRazorpay = (): Promise<boolean> =>
@@ -138,10 +140,13 @@ const SeminarRegistration: React.FC = () => {
     >
   ) => {
     const { name, value } = event.target;
+    const nextValue = event.target instanceof HTMLInputElement && event.target.type === "checkbox"
+      ? event.target.checked
+      : value;
 
     setForm((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: nextValue,
     }));
   };
 
@@ -756,7 +761,6 @@ const SeminarRegistration: React.FC = () => {
               />
             </div>
 
-
             {/* Event Details */}
             <div className="relative mb-10 mt-10 rounded-2xl border border-[#ead5a5] bg-gradient-to-br from-[#fffaf0] via-white to-[#fffaf0] px-4 pb-4 pt-10 shadow-[0_4px_18px_rgba(67,38,17,0.06)] sm:px-6 sm:pb-5 sm:pt-11">
               {/* Section Heading */}
@@ -905,6 +909,20 @@ const SeminarRegistration: React.FC = () => {
               </div>
             </div>
 
+
+            {/* Information Consent */}
+            <label className="flex items-start gap-3 py-2 text-sm leading-6 text-gray-700">
+              <input
+                id="information_consent"
+                name="information_consent"
+                type="checkbox"
+                checked={form.information_consent}
+                onChange={handleChange}
+                required
+                className="mt-1 h-4 w-4 shrink-0 accent-[#105c8e]"
+              />
+              <span style={{ paddingLeft: '6px' }}>I agree to receive information by signing up on Sri Ramachandra Online *</span>
+            </label>
 
             {/* Pay Button */}
             <button
