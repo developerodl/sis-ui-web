@@ -37,6 +37,7 @@ interface ProgramBatchSemester {
   id: number;
 
   program_id: number;
+  program_name?: string;
 
   batch: string;
 
@@ -55,6 +56,13 @@ interface ProgramBatchSemester {
   exam_start_date: string | null;
 
   exam_end_date: string | null;
+
+  amount?: number | null;
+  total_fee?: number | null;
+
+  pending_payment_workflow_enabled: boolean;
+
+  fee_details: unknown;
 }
 
 interface Program {
@@ -127,11 +135,30 @@ export default function ProgramBatchSemesterList() {
         res.data
       );
 
-      const data = Array.isArray(res.data)
-        ? res.data
-        : res.data?.data || [];
+      const responseData = res.data?.data ?? res.data;
+      // The API returns program records containing a nested batches array.
+      // Keep supporting the previous flat shape while flattening the new one.
+      const programs = Array.isArray(responseData)
+        ? responseData
+        : responseData?.programs
+          ? responseData.programs
+          : responseData && Array.isArray(responseData.batches)
+            ? [responseData]
+            : [];
+      const flattened = programs.flatMap((program: any) =>
+        (Array.isArray(program.batches) ? program.batches : []).map((batch: any) => ({
+          ...batch,
+          program_id: batch.program_id ?? program.program_id ?? program.id,
+          program_name: batch.program_name ?? program.program_name,
+          amount: batch.amount ?? batch.total_fee ?? null,
+        }))
+      );
 
-      setData(data);
+      // Older responses are already flat and have no `batches` property.
+      const isGroupedResponse = programs.some((program: any) =>
+        Array.isArray(program?.batches)
+      );
+      setData(isGroupedResponse ? flattened : programs);
     } catch (error) {
       console.error(
         "Failed to load program batch semesters:",
@@ -230,6 +257,7 @@ export default function ProgramBatchSemesterList() {
         ...item,
 
         program_name:
+          item.program_name ||
           program?.programe ||
           program?.program_name ||
           "",
@@ -285,6 +313,9 @@ export default function ProgramBatchSemesterList() {
         ${item.course_end_date || ""}
         ${item.exam_start_date || ""}
         ${item.exam_end_date || ""}
+        ${item.amount ?? ""}
+        ${item.pending_payment_workflow_enabled ? "enabled" : "disabled"}
+        ${item.fee_details == null ? "" : JSON.stringify(item.fee_details)}
       `.toLowerCase();
 
       const matchesSearch =
@@ -391,6 +422,12 @@ export default function ProgramBatchSemesterList() {
 
           exam_end_date:
             item.exam_end_date || "",
+
+          amount: item.amount ?? item.total_fee ?? "",
+
+          pending_payment_workflow_enabled: item.pending_payment_workflow_enabled ? "Enabled" : "Disabled",
+
+          fee_details: item.fee_details == null ? "" : JSON.stringify(item.fee_details),
         })
       ),
 
@@ -404,6 +441,7 @@ export default function ProgramBatchSemesterList() {
         { header: "Semester", key: "semester" },
         { header: "Batch", key: "batch" },
         { header: "Admission Year", key: "admission_year" },
+        { header: "Amount", key: "amount" },
 
         {
           header: "Fees Due Start",
@@ -434,6 +472,8 @@ export default function ProgramBatchSemesterList() {
           header: "Exam End Date",
           key: "exam_end_date",
         },
+        { header: "Pending Payment Workflow", key: "pending_payment_workflow_enabled" },
+        { header: "Fee Details", key: "fee_details" },
       ],
 
       "Program Batch Semester",
@@ -456,12 +496,15 @@ export default function ProgramBatchSemesterList() {
     { key: "semester", label: "Semester", width: 130, render: (row: ProgramBatchSemester) => row.semester || "—" },
     { key: "batch", label: "Batch", width: 180, render: (row: ProgramBatchSemester) => row.batch || "—" },
     { key: "admission_year", label: "Admission Year", width: 140, render: (row: ProgramBatchSemester) => row.admission_year || "—" },
+    { key: "amount", label: "Amount", width: 120, render: (row: ProgramBatchSemester) => row.amount ?? row.total_fee ?? "—" },
     { key: "course_start_date", label: "Course Start", width: 150, render: (row: ProgramBatchSemester) => row.course_start_date || "—" },
     { key: "course_end_date", label: "Course End", width: 150, render: (row: ProgramBatchSemester) => row.course_end_date || "—" },
     { key: "exam_start_date", label: "Exam Start", width: 150, render: (row: ProgramBatchSemester) => row.exam_start_date || "—" },
     { key: "exam_end_date", label: "Exam End", width: 150, render: (row: ProgramBatchSemester) => row.exam_end_date || "—" },
     { key: "Duefrmdate", label: "Fees Due Start", width: 150, render: (row: ProgramBatchSemester) => row.Duefrmdate || "—" },
     { key: "Duetodate", label: "Fees Due End", width: 150, render: (row: ProgramBatchSemester) => row.Duetodate || "—" },
+    { key: "pending_payment_workflow_enabled", label: "Pending Payment Workflow", width: 210, render: (row: ProgramBatchSemester) => row.pending_payment_workflow_enabled ? "Enabled" : "Disabled" },
+    { key: "fee_details", label: "Fee Details", width: 140, render: (row: ProgramBatchSemester) => row.fee_details == null ? "—" : "Configured" },
   ];
 
   /* ---------------------------------------------------------------------- */

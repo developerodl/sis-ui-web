@@ -86,7 +86,6 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
       { text: 'Exams', routePath: '/exam/list' },
       { text: 'Exam Timetable', routePath: '/exam-timetables/list' },
       // { text: 'Mark Entry', routePath: '/students-marks-entry' },
-      { text: 'Payment Control', routePath: '/payment-control/list' },
       // { text: 'Batches', routePath: '/batch/list' },
       // { text: 'Years', routePath: '/year/list' },
       { text: 'schemes', routePath: '/schemes/add' },
@@ -100,8 +99,6 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     subItems: [
       { text: 'Fee Dashboard', routePath: '/fee-dashboard' },
       { text: 'FeeHead', routePath: '/fee-head/list' },
-      { text: 'FeeDetail', routePath: '/fee-detail/list' },
-      { text: 'FeeComponent', routePath: '/fee-component/list' },
 
     ],
     routePath: '',

@@ -51,7 +51,20 @@ interface FormValues {
 
     exam_start_date: Date | null;
     exam_end_date: Date | null;
+    fees_start_date: Date | null;
+    fees_end_date: Date | null;
+    amount: string;
+    fee_details: {
+        application_fee: string;
+        admission_fee: string;
+        tuition_fee: string;
+        exam_fee: string;
+        lms_fee: string;
+        lab_fee: string;
+    };
 }
+
+type FeeDetailsForm = FormValues["fee_details"];
 
 /* -------------------------------------------------------------------------- */
 /*                              DEFAULT VALUES                                */
@@ -71,6 +84,17 @@ const defaultValues: FormValues = {
 
     exam_start_date: null,
     exam_end_date: null,
+    fees_start_date: null,
+    fees_end_date: null,
+    amount: "",
+    fee_details: {
+        application_fee: "",
+        admission_fee: "",
+        tuition_fee: "",
+        exam_fee: "",
+        lms_fee: "",
+        lab_fee: "",
+    },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -194,6 +218,23 @@ const schema: Yup.ObjectSchema<FormValues> =
                     );
                 }
             ),
+        fees_start_date: Yup.date().nullable().defined(),
+        fees_end_date: Yup.date()
+            .nullable()
+            .defined()
+            .test("fees-end-after-start", "Fees End Date must be on or after Fees Start Date", function (value) {
+                const { fees_start_date } = this.parent as FormValues;
+                return !value || !fees_start_date || new Date(value) >= new Date(fees_start_date);
+            }),
+        amount: Yup.string().defined(),
+        fee_details: Yup.object({
+            application_fee: Yup.string().defined(),
+            admission_fee: Yup.string().defined(),
+            tuition_fee: Yup.string().defined(),
+            exam_fee: Yup.string().defined(),
+            lms_fee: Yup.string().defined(),
+            lab_fee: Yup.string().defined(),
+        }).required(),
     });
 
 /* -------------------------------------------------------------------------- */
@@ -212,6 +253,40 @@ const formatApiDate = (
     return parsed.isValid()
         ? parsed.toDate()
         : null;
+};
+
+const feeDetailsToForm = (details: any): FeeDetailsForm => {
+    if (Array.isArray(details)) {
+        const normalized: FeeDetailsForm = {
+            application_fee: "",
+            admission_fee: "",
+            tuition_fee: "",
+            exam_fee: "",
+            lms_fee: "",
+            lab_fee: "",
+        };
+        const keys: Record<string, keyof typeof normalized> = {
+            "application fee": "application_fee",
+            "admission fee": "admission_fee",
+            "tuition fee": "tuition_fee",
+            "exam fee": "exam_fee",
+            "lms fee": "lms_fee",
+            "lab fee": "lab_fee",
+        };
+        details.forEach((fee: any) => {
+            const key = keys[String(fee.fee_head ?? "").trim().toLowerCase()];
+            if (key) normalized[key] = String(fee.amount ?? "");
+        });
+        return normalized;
+    }
+    return {
+        application_fee: String(details?.application_fee ?? ""),
+        admission_fee: String(details?.admission_fee ?? ""),
+        tuition_fee: String(details?.tuition_fee ?? ""),
+        exam_fee: String(details?.exam_fee ?? ""),
+        lms_fee: String(details?.lms_fee ?? ""),
+        lab_fee: String(details?.lab_fee ?? ""),
+    };
 };
 
 /* -------------------------------------------------------------------------- */
@@ -459,6 +534,12 @@ export default function ProgramBatchSemesterAdd() {
                         formatApiDate(
                             data.exam_end_date
                         ),
+                    fees_start_date: formatApiDate(data.fees_start_date),
+                    fees_end_date: formatApiDate(data.fees_end_date),
+                    amount: data.amount == null && data.total_fee == null
+                        ? ""
+                        : String(data.amount ?? data.total_fee),
+                    fee_details: feeDetailsToForm(data.fee_details),
                 };
 
                 console.log(
@@ -595,6 +676,14 @@ export default function ProgramBatchSemesterAdd() {
                             data.exam_end_date
                         ).format("YYYY-MM-DD")
                         : null,
+                fees_start_date: data.fees_start_date
+                    ? dayjs(data.fees_start_date).format("YYYY-MM-DD")
+                    : null,
+                fees_end_date: data.fees_end_date
+                    ? dayjs(data.fees_end_date).format("YYYY-MM-DD")
+                    : null,
+                amount: data.amount.trim() === "" ? null : Number(data.amount),
+                fee_details: data.fee_details,
             };
 
             console.log(
@@ -745,6 +834,20 @@ export default function ProgramBatchSemesterAdd() {
                                         field={field}
                                         error={!!errors.admission_year}
                                         helperText={errors.admission_year?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="amount"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomInputText
+                                        label="Amount"
+                                        field={field}
+                                        type="number"
                                     />
                                 )}
                             />
@@ -975,6 +1078,37 @@ export default function ProgramBatchSemesterAdd() {
                                 )}
                             />
                         </Grid>
+
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="fees_start_date"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomDateInput
+                                        label="Fees Start Date"
+                                        field={field}
+                                        error={!!errors.fees_start_date}
+                                        helperText={errors.fees_start_date?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="fees_end_date"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomDateInput
+                                        label="Fees End Date"
+                                        field={field}
+                                        error={!!errors.fees_end_date}
+                                        helperText={errors.fees_end_date?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
                     </Grid>
 
                     {/* ================================================================ */}

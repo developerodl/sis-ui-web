@@ -34,8 +34,6 @@ import ExamTimeTableList from "../features/admin/master/examtimetable/ExamTimeTa
 import ExamTimetableAdd from "../features/admin/master/examtimetable/ExamTimeTableAdd";
 import StudentMarksEntry from "../features/admin/student/StudentsMarkScreen";
 import ExamResults from "../features/admin/student/ExamResults";
-import PaymentControlList from "../features/admin/master/payments/Payment-Contorl";
-import PaymentWorkflowAdd from "../features/admin/master/payments/Payment-Contorl add";
 import BatchList from "../features/admin/master/batch/BatchList";
 import BatchAdd from "../features/admin/master/batch/BatchAdd";
 import YearList from "../features/admin/master/year/YearList";
@@ -45,10 +43,6 @@ import GrievanceViewAdmin from "../features/student/grievances/admin/grievancevi
 import GrievanceAdminList from "../features/student/grievances/admin/Grievancelistadmin";
 import GrievanceFacultyView from "../features/student/grievances/faculty/GrievanceFacultyView";
 import GrievanceFacultyList from "../features/student/grievances/faculty/GrievanceFacultyList";
-import FeeDetailAdd from "../features/admin/fees/feesdetail/FeesDetailAdd";
-import FeeDetailList from "../features/admin/fees/feesdetail/FeesDetailList";
-import FeeComponentList from "../features/admin/fees/feecomponent/FeeComponentList";
-import FeeComponentAdd from "../features/admin/fees/feecomponent/FeeComponentAdd";
 import FeeHeadList from "../features/admin/fees/feeshead/FeesHeadList";
 import FeeHeadAdd from "../features/admin/fees/feeshead/FeesHeadAdd";
 import ProgramBatchSemesterList from "../features/admin/fees/programbatchsemester/ProgramBatchSemesterList";
@@ -425,26 +419,6 @@ export const routesConfig = [
     breadcrumb: 'Faculty Assign',
   },
   {
-    path: '/payment-control',
-    children: [
-      {
-        path: 'list',
-        element: <PaymentControlList />,
-        breadcrumb: 'Payment Control List',
-      },
-      {
-        path: 'add',
-        element: <PaymentWorkflowAdd />,
-        breadcrumb: 'Pending Payment Add',
-      },
-      {
-        path: 'edit/:id',
-        element: <PaymentWorkflowAdd />,
-        breadcrumb: 'Pending Payment Edit',
-      },
-    ],
-  },
-  {
     path: '/batch',
     children: [
       {
@@ -518,48 +492,6 @@ export const routesConfig = [
         path: 'edit/:id',
         element: <FeeHeadAdd />,
         breadcrumb: 'Fee Head Edit',
-      }
-    ]
-  },
-  {
-    path: '/fee-detail',
-    breadcrumb: 'Fee Detail',
-    children: [
-      {
-        path: 'list',
-        element: <FeeDetailList />,
-        breadcrumb: 'Fee Detail List',
-      },
-      {
-        path: 'add',
-        element: <FeeDetailAdd />,
-        breadcrumb: 'Fee Detail Add',
-      },
-      {
-        path: 'edit/:id',
-        element: <FeeDetailAdd />,
-        breadcrumb: 'Fee Detail Edit',
-      }
-    ]
-  },
-  {
-    path: '/fee-component',
-    breadcrumb: 'Fee Component',
-    children: [
-      {
-        path: 'list',
-        element: <FeeComponentList />,
-        breadcrumb: 'Fee Component List',
-      },
-      {
-        path: 'add',
-        element: <FeeComponentAdd />,
-        breadcrumb: 'Fee Component Add',
-      },
-      {
-        path: 'edit/:id',
-        element: <FeeComponentAdd />,
-        breadcrumb: 'Fee Component Edit',
       }
     ]
   },

@@ -118,25 +118,7 @@ export const ApiRoutes = {
   FEEDETAILGETALL:
     "/fee-details/getall",
 
-  FEEDETAILCREATE:
-    "/fee-details/create",
-
-  FEEDETAILGETBYID:
-    "/fee-details/get_by_id",
-
-  FEEDETAILUPDATE:
-    "/fee-details/update",
-
-  FEEDETAILDELETE:
-    "/fee-details/delete",
-
   // fee-componets
-  FEECOMPONENTGETALL: "/fee-components/getall",
-  FEECOMPONENTCREATE: "/fee-components/create",
-  FEECOMPONENTGETBYID: "/fee-components/get_by_id",
-  FEECOMPONENTUPDATE: "/fee-components/update",
-  FEECOMPONENTDELETE: "/fee-components/delete",
-
   //fees head
   FEEHEADGETALL: "/fee-heads/getall",
   FEEHEADGETBYID: "/fee-heads/get_by_id",
