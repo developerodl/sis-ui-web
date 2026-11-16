@@ -128,7 +128,7 @@ export const ApiRoutes = {
 
   //program-batch-semesters
   PROGRAMBATCHSEMESTERGETALL: "/program-batch-semesters",
-  PROGRAMBATCHSEMESTERGETBYID: "/program-batch-semesters",
+  PROGRAMBATCHSEMESTERGETBYID: (id: number) => `/program-batch-semesters/${id}`,
   PROGRAMBATCHSEMESTERCREATE: "/program-batch-semesters",
   PROGRAMBATCHSEMESTERUPDATE: "/program-batch-semesters",
   PROGRAMBATCHSEMESTERDELETE: "/program-batch-semesters",

@@ -3,7 +3,9 @@ import {
     Box,
     Button,
     CircularProgress,
+    FormControlLabel,
     Grid,
+    Switch,
 } from "@mui/material";
 import {
     Controller,
@@ -42,9 +44,7 @@ interface FormValues {
     batch: string;
     admission_year: string;
     semester: string;
-
-    Duefrmdate: Date | null;
-    Duetodate: Date | null;
+    pending_payment_workflow_enabled: boolean;
 
     course_start_date: Date | null;
     course_end_date: Date | null;
@@ -53,7 +53,6 @@ interface FormValues {
     exam_end_date: Date | null;
     fees_start_date: Date | null;
     fees_end_date: Date | null;
-    amount: string;
     fee_details: {
         application_fee: string;
         admission_fee: string;
@@ -75,9 +74,7 @@ const defaultValues: FormValues = {
     batch: "",
     admission_year: "",
     semester: "",
-
-    Duefrmdate: null,
-    Duetodate: null,
+    pending_payment_workflow_enabled: false,
 
     course_start_date: null,
     course_end_date: null,
@@ -86,7 +83,6 @@ const defaultValues: FormValues = {
     exam_end_date: null,
     fees_start_date: null,
     fees_end_date: null,
-    amount: "",
     fee_details: {
         application_fee: "",
         admission_fee: "",
@@ -104,35 +100,35 @@ const defaultValues: FormValues = {
 const semesterOptions = [
     {
         label: "Semester 1",
-        value: "Semester 1",
+        value: "1",
     },
     {
         label: "Semester 2",
-        value: "Semester 2",
+        value: "2",
     },
     {
         label: "Semester 3",
-        value: "Semester 3",
+        value: "3",
     },
     {
         label: "Semester 4",
-        value: "Semester 4",
+        value: "4",
     },
     {
         label: "Semester 5",
-        value: "Semester 5",
+        value: "5",
     },
     {
         label: "Semester 6",
-        value: "Semester 6",
+        value: "6",
     },
     {
         label: "Semester 7",
-        value: "Semester 7",
+        value: "7",
     },
     {
         label: "Semester 8",
-        value: "Semester 8",
+        value: "8",
     },
 ];
 
@@ -157,9 +153,8 @@ const schema: Yup.ObjectSchema<FormValues> =
             .trim()
             .required("Semester is required"),
 
-        Duefrmdate: Yup.date().nullable().defined(),
-
-        Duetodate: Yup.date().nullable().defined(),
+        pending_payment_workflow_enabled: Yup.boolean()
+            .defined(),
 
         course_start_date: Yup.date()
             .nullable()
@@ -226,7 +221,6 @@ const schema: Yup.ObjectSchema<FormValues> =
                 const { fees_start_date } = this.parent as FormValues;
                 return !value || !fees_start_date || new Date(value) >= new Date(fees_start_date);
             }),
-        amount: Yup.string().defined(),
         fee_details: Yup.object({
             application_fee: Yup.string().defined(),
             admission_fee: Yup.string().defined(),
@@ -255,6 +249,19 @@ const formatApiDate = (
         : null;
 };
 
+const normalizeSemester = (semester: unknown): string => {
+    const value = String(semester ?? "").trim();
+    const match = value.match(/(?:semester\s*)?(\d+)/i);
+    return match?.[1] ?? value;
+};
+
+const formatDateForApi = (date: unknown): string | null => {
+    if (!date) return null;
+
+    const parsed = dayjs(date as dayjs.ConfigType);
+    return parsed.isValid() ? parsed.format("YYYY-MM-DD") : null;
+};
+
 const feeDetailsToForm = (details: any): FeeDetailsForm => {
     if (Array.isArray(details)) {
         const normalized: FeeDetailsForm = {
@@ -266,6 +273,20 @@ const feeDetailsToForm = (details: any): FeeDetailsForm => {
             lab_fee: "",
         };
         const keys: Record<string, keyof typeof normalized> = {
+            // GL codes returned by the API.
+            "30101": "application_fee",
+            "30102": "admission_fee",
+            "30100": "tuition_fee",
+            "30103": "lms_fee",
+            "30104": "exam_fee",
+            "30105": "lab_fee",
+            // Fee head IDs returned by GET-by-ID.
+            "1": "application_fee",
+            "2": "admission_fee",
+            "3": "tuition_fee",
+            "4": "lms_fee",
+            "5": "exam_fee",
+            "6": "lab_fee",
             "application fee": "application_fee",
             "admission fee": "admission_fee",
             "tuition fee": "tuition_fee",
@@ -274,7 +295,10 @@ const feeDetailsToForm = (details: any): FeeDetailsForm => {
             "lab fee": "lab_fee",
         };
         details.forEach((fee: any) => {
-            const key = keys[String(fee.fee_head ?? "").trim().toLowerCase()];
+            const key =
+                keys[String(fee.gl_code ?? "").trim().toLowerCase()] ??
+                keys[String(fee.fee_head_id ?? "").trim().toLowerCase()] ??
+                keys[String(fee.fee_head ?? "").trim().toLowerCase()];
             if (key) normalized[key] = String(fee.amount ?? "");
         });
         return normalized;
@@ -288,6 +312,19 @@ const feeDetailsToForm = (details: any): FeeDetailsForm => {
         lab_fee: String(details?.lab_fee ?? ""),
     };
 };
+
+const feeDetailsToPayload = (details: FeeDetailsForm) =>
+    ([
+        [1, details.application_fee],
+        [2, details.admission_fee],
+        [3, details.tuition_fee],
+        [4, details.lms_fee],
+        [5, details.exam_fee],
+        [6, details.lab_fee],
+    ] as const).map(([fee_head_id, amount]) => ({
+        fee_head_id,
+        amount: amount.trim() === "" ? 0 : Number(amount),
+    }));
 
 /* -------------------------------------------------------------------------- */
 /*                              COMPONENT                                     */
@@ -354,6 +391,11 @@ export default function ProgramBatchSemesterAdd() {
     const courseStartDate = watch(
         "course_start_date"
     );
+    const feeDetails = watch("fee_details");
+    const totalFee = Object.values(feeDetails ?? {}).reduce(
+        (total, amount) => total + (Number(amount) || 0),
+        0
+    );
 
     /* ------------------------------------------------------------------------ */
     /*                           FETCH PROGRAMS                                  */
@@ -384,8 +426,8 @@ export default function ProgramBatchSemesterAdd() {
                         value: String(p.id),
 
                         label: `${p.programe}${p.programe_code
-                                ? ` (${p.programe_code})`
-                                : ""
+                            ? ` (${p.programe_code})`
+                            : ""
                             }`,
                     }));
 
@@ -409,53 +451,6 @@ export default function ProgramBatchSemesterAdd() {
     }, []);
 
     /* ------------------------------------------------------------------------ */
-    /*                    AUTO CALCULATE DUE DATES                              */
-    /* ------------------------------------------------------------------------ */
-
-    useEffect(() => {
-        if (!courseStartDate) {
-            return;
-        }
-
-        const startDate =
-            dayjs(courseStartDate);
-
-        if (!startDate.isValid()) {
-            return;
-        }
-
-        /*
-         * Due From Date = Course Start Date
-         */
-
-        setValue(
-            "Duefrmdate",
-            startDate.toDate(),
-            {
-                shouldDirty: true,
-            }
-        );
-
-        /*
-         * Due To Date = Course Start Date + 45 Days
-         */
-
-        const dueDate =
-            startDate.add(45, "day");
-
-        setValue(
-            "Duetodate",
-            dueDate.toDate(),
-            {
-                shouldDirty: true,
-            }
-        );
-    }, [
-        courseStartDate,
-        setValue,
-    ]);
-
-    /* ------------------------------------------------------------------------ */
     /*                         FETCH EDIT DATA                                  */
     /* ------------------------------------------------------------------------ */
 
@@ -468,9 +463,7 @@ export default function ProgramBatchSemesterAdd() {
             try {
                 const response =
                     await apiClient.get(
-                        `${ApiRoutes.PROGRAMBATCHSEMESTERGETBYID}/${Number(
-                            id
-                        )}`
+                        ApiRoutes.PROGRAMBATCHSEMESTERGETBYID(Number(id))
                     );
 
                 console.log(
@@ -478,9 +471,16 @@ export default function ProgramBatchSemesterAdd() {
                     response.data
                 );
 
+                const responseData =
+                    response?.data?.data ?? response?.data;
+                const unwrappedResponse = Array.isArray(responseData)
+                    ? responseData[0]
+                    : responseData;
                 const data =
-                    response?.data?.data ??
-                    response?.data;
+                    unwrappedResponse?.program_batch_semester ??
+                    (typeof unwrappedResponse?.batch === "object"
+                        ? unwrappedResponse.batch
+                        : unwrappedResponse);
 
                 if (!data) {
                     showAlert(
@@ -502,18 +502,10 @@ export default function ProgramBatchSemesterAdd() {
                     admission_year:
                         data.admission_year ?? "",
 
-                    semester:
-                        data.semester ?? "",
+                    semester: normalizeSemester(data.semester),
 
-                    Duefrmdate:
-                        formatApiDate(
-                            data.Duefrmdate
-                        ),
-
-                    Duetodate:
-                        formatApiDate(
-                            data.Duetodate
-                        ),
+                    pending_payment_workflow_enabled:
+                        Boolean(data.pending_payment_workflow_enabled),
 
                     course_start_date:
                         formatApiDate(
@@ -536,9 +528,6 @@ export default function ProgramBatchSemesterAdd() {
                         ),
                     fees_start_date: formatApiDate(data.fees_start_date),
                     fees_end_date: formatApiDate(data.fees_end_date),
-                    amount: data.amount == null && data.total_fee == null
-                        ? ""
-                        : String(data.amount ?? data.total_fee),
                     fee_details: feeDetailsToForm(data.fee_details),
                 };
 
@@ -635,55 +624,19 @@ export default function ProgramBatchSemesterAdd() {
 
                 admission_year: data.admission_year.trim(),
 
-                semester: data.semester.trim(),
+                semester: `Semester ${normalizeSemester(data.semester)}`,
 
-                Duefrmdate: data.Duefrmdate
-                    ? dayjs(
-                        data.Duefrmdate
-                    ).format("YYYY-MM-DD")
-                    : null,
+                course_start_date: formatDateForApi(data.course_start_date),
 
-                Duetodate: data.Duetodate
-                    ? dayjs(
-                        data.Duetodate
-                    ).format("YYYY-MM-DD")
-                    : null,
+                course_end_date: formatDateForApi(data.course_end_date),
 
-                course_start_date:
-                    data.course_start_date
-                        ? dayjs(
-                            data.course_start_date
-                        ).format("YYYY-MM-DD")
-                        : null,
+                exam_start_date: formatDateForApi(data.exam_start_date),
 
-                course_end_date:
-                    data.course_end_date
-                        ? dayjs(
-                            data.course_end_date
-                        ).format("YYYY-MM-DD")
-                        : null,
-
-                exam_start_date:
-                    data.exam_start_date
-                        ? dayjs(
-                            data.exam_start_date
-                        ).format("YYYY-MM-DD")
-                        : null,
-
-                exam_end_date:
-                    data.exam_end_date
-                        ? dayjs(
-                            data.exam_end_date
-                        ).format("YYYY-MM-DD")
-                        : null,
-                fees_start_date: data.fees_start_date
-                    ? dayjs(data.fees_start_date).format("YYYY-MM-DD")
-                    : null,
-                fees_end_date: data.fees_end_date
-                    ? dayjs(data.fees_end_date).format("YYYY-MM-DD")
-                    : null,
-                amount: data.amount.trim() === "" ? null : Number(data.amount),
-                fee_details: data.fee_details,
+                exam_end_date: formatDateForApi(data.exam_end_date),
+                fees_start_date: formatDateForApi(data.fees_start_date),
+                fees_end_date: formatDateForApi(data.fees_end_date),
+                pending_payment_workflow_enabled: data.pending_payment_workflow_enabled,
+                fee_details: feeDetailsToPayload(data.fee_details),
             };
 
             console.log(
@@ -722,10 +675,8 @@ export default function ProgramBatchSemesterAdd() {
                 "/program-batch-semester/list"
             );
         } catch (error: any) {
-            console.error(
-                "Save error:",
-                error
-            );
+            console.error("Save error:", error);
+            console.error("Save error response:", error?.response?.data);
 
             showAlert(
                 error?.response?.data?.detail ||
@@ -735,6 +686,17 @@ export default function ProgramBatchSemesterAdd() {
             );
         }
     };
+
+    const onInvalidSubmit = (validationErrors: typeof errors) => {
+        console.error("Program batch semester validation failed:", validationErrors);
+        console.table(
+            Object.entries(validationErrors).map(([field, error]) => ({
+                field,
+                message: error?.message,
+            }))
+        );
+    };
+
     /* ------------------------------------------------------------------------ */
     /*                                UI                                        */
     /* ------------------------------------------------------------------------ */
@@ -749,9 +711,7 @@ export default function ProgramBatchSemesterAdd() {
             }}
         >
             <form
-                onSubmit={handleSubmit(
-                    onSubmit
-                )}
+                onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
             >
                 <CardComponent
                     sx={{
@@ -784,6 +744,7 @@ export default function ProgramBatchSemesterAdd() {
                                         options={
                                             programs
                                         }
+                                        error={!!errors.program_id}
                                         helperText={
                                             errors
                                                 .program_id
@@ -824,35 +785,6 @@ export default function ProgramBatchSemesterAdd() {
                             />
                         </Grid>
 
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Controller
-                                name="admission_year"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomInputText
-                                        label="Admission Year"
-                                        field={field}
-                                        error={!!errors.admission_year}
-                                        helperText={errors.admission_year?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Controller
-                                name="amount"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomInputText
-                                        label="Amount"
-                                        field={field}
-                                        type="number"
-                                    />
-                                )}
-                            />
-                        </Grid>
-
                         {/* ============================================================ */}
                         {/* SEMESTER                                                      */}
                         {/* ============================================================ */}
@@ -875,6 +807,7 @@ export default function ProgramBatchSemesterAdd() {
                                         options={
                                             semesterOptions
                                         }
+                                        error={!!errors.semester}
                                         helperText={
                                             errors
                                                 .semester
@@ -885,67 +818,46 @@ export default function ProgramBatchSemesterAdd() {
                             />
                         </Grid>
 
-                        {/* ============================================================ */}
-                        {/* DUE FROM DATE                                                 */}
-                        {/* ============================================================ */}
-
-                        <Grid
-                            size={{
-                                xs: 12,
-                                md: 6,
-                            }}
-                        >
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
-                                name="Duefrmdate"
+                                name="admission_year"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
-                                    <CustomDateInput
-                                        label="Due From Date"
+                                render={({ field }) => (
+                                    <CustomInputText
+                                        label="Admission Year"
                                         field={field}
-                                        error={
-                                            !!errors.Duefrmdate
-                                        }
-                                        helperText={
-                                            errors
-                                                .Duefrmdate
-                                                ?.message
-                                        }
-                                        disabled
+                                        error={!!errors.admission_year}
+                                        helperText={errors.admission_year?.message}
                                     />
                                 )}
                             />
                         </Grid>
 
-                        {/* ============================================================ */}
-                        {/* DUE TO DATE                                                   */}
-                        {/* ============================================================ */}
-
-                        <Grid
-                            size={{
-                                xs: 12,
-                                md: 6,
-                            }}
-                        >
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Controller
-                                name="Duetodate"
+                                name="fees_start_date"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
+                                render={({ field }) => (
                                     <CustomDateInput
-                                        label="Due To Date"
+                                        label="Fees Start Date"
                                         field={field}
-                                        error={
-                                            !!errors.Duetodate
-                                        }
-                                        helperText={
-                                            errors
-                                                .Duetodate
-                                                ?.message
-                                        }
-                                        disabled
+                                        error={!!errors.fees_start_date}
+                                        helperText={errors.fees_start_date?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Controller
+                                name="fees_end_date"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomDateInput
+                                        label="Fees End Date"
+                                        field={field}
+                                        error={!!errors.fees_end_date}
+                                        helperText={errors.fees_end_date?.message}
                                     />
                                 )}
                             />
@@ -1079,31 +991,53 @@ export default function ProgramBatchSemesterAdd() {
                             />
                         </Grid>
 
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Controller
-                                name="fees_start_date"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomDateInput
-                                        label="Fees Start Date"
-                                        field={field}
-                                        error={!!errors.fees_start_date}
-                                        helperText={errors.fees_start_date?.message}
-                                    />
-                                )}
-                            />
+                        <Grid size={{ xs: 12 }}>
+                            <Box sx={{ fontWeight: 600, mt: 1 }}>Fee Details</Box>
+                        </Grid>
+                        {([
+                            ["application_fee", "Application Fee (30101)"],
+                            ["admission_fee", "Admission Fee (30102)"],
+                            ["tuition_fee", "Tuition Fee (30100)"],
+                            ["exam_fee", "Exam Fee (30103)"],
+                            ["lms_fee", "LMS Fee (30104)"],
+                            ["lab_fee", "Lab Fee (30105)"],
+                        ] as const).map(([name, label]) => (
+                            <Grid key={name} size={{ xs: 12, md: 6 }}>
+                                <Controller
+                                    name={`fee_details.${name}`}
+                                    control={control}
+                                    render={({ field }) => (
+                                        <CustomInputText
+                                            label={label}
+                                            field={field}
+                                            type="number"
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                        ))}
+
+                        <Grid size={{ xs: 12 }}>
+                            <Box sx={{ fontWeight: 600 }}>
+                                Total Fee: {totalFee}
+                            </Box>
                         </Grid>
 
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid size={{ xs: 12 }}>
                             <Controller
-                                name="fees_end_date"
+                                name="pending_payment_workflow_enabled"
                                 control={control}
                                 render={({ field }) => (
-                                    <CustomDateInput
-                                        label="Fees End Date"
-                                        field={field}
-                                        error={!!errors.fees_end_date}
-                                        helperText={errors.fees_end_date?.message}
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={field.value}
+                                                onChange={(_, checked) => field.onChange(checked)}
+                                                onBlur={field.onBlur}
+                                                inputRef={field.ref}
+                                            />
+                                        }
+                                        label="Enable Pending Payment Workflow"
                                     />
                                 )}
                             />
