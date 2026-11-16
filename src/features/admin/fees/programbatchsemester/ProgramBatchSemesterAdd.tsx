@@ -375,7 +375,6 @@ export default function ProgramBatchSemesterAdd() {
         handleSubmit,
         reset,
         watch,
-        setValue,
         formState: {
             errors,
             isDirty,
@@ -388,9 +387,9 @@ export default function ProgramBatchSemesterAdd() {
     /*                              WATCH                                       */
     /* ------------------------------------------------------------------------ */
 
-    const courseStartDate = watch(
-        "course_start_date"
-    );
+    // const courseStartDate = watch(
+    //     "course_start_date"
+    // );
     const feeDetails = watch("fee_details");
     const totalFee = Object.values(feeDetails ?? {}).reduce(
         (total, amount) => total + (Number(amount) || 0),
