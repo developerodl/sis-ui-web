@@ -132,36 +132,53 @@ export default function PendingPaymentTab({
 
     try {
       // Create pending payment order from backend
-      const payment = await apiRequest({
+      const paymentResponse = await apiRequest({
         url: `${ApiRoutes.PAYPENDINGSTUDENT}/${studentId}/pending-payment/pay`,
         method: "post",
       });
+      // APIs may wrap checkout fields in a response, order, or Razorpay object.
+      const paymentCandidates = [
+        paymentResponse,
+        paymentResponse?.data,
+        paymentResponse?.data?.data,
+        paymentResponse?.result,
+        paymentResponse?.payment,
+        paymentResponse?.order,
+        paymentResponse?.razorpay,
+        paymentResponse?.checkout,
+        paymentResponse?.data?.payment,
+        paymentResponse?.data?.order,
+        paymentResponse?.data?.razorpay,
+        paymentResponse?.data?.checkout,
+      ].filter(Boolean);
+      const payment = Object.assign({}, ...paymentCandidates);
 
-      // Hosted checkout URL support
+      // Get Razorpay order details
+      const orderId =
+        payment?.order_id ||
+        payment?.razorpay_order_id ||
+        payment?.orderId ||
+        payment?.razorpayOrderId ||
+        payment?.id;
+
+      const key =
+        payment?.key_id ||
+        payment?.key ||
+        payment?.keyId ||
+        payment?.razorpay_key_id ||
+        payment?.razorpayKeyId;
+
       const checkoutUrl =
         payment?.payment_link ||
         payment?.payment_url ||
         payment?.checkout_url ||
         payment?.redirect_url;
 
-      if (checkoutUrl) {
-        window.location.assign(checkoutUrl);
-        return;
-      }
-
-      // Get Razorpay order details
-      const orderId =
-        payment?.order_id ||
-        payment?.razorpay_order_id;
-
-      const key =
-        payment?.key_id ||
-        payment?.key;
-
       if (!orderId || !key) {
         throw new Error(
-          payment?.message ||
-            "The payment service did not return checkout details."
+          checkoutUrl
+            ? "The pending-payment API returned a hosted payment URL but no Razorpay order ID or key. It must create and return a Razorpay order to open the seminar-style checkout."
+            : `The pending-payment API response is missing the Razorpay order ID or key (received fields: ${Object.keys(payment).join(", ") || "none"}). The API must return order_id and key_id to open the seminar-style checkout.`
         );
       }
 
