@@ -1,6 +1,6 @@
-// export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
+export const BASE_URL = 'https://api.sriramachandradigilearn.edu.in/';
 // export const BASE_URL = 'https://uat-api.sriramachandradigilearn.edu.in/';
-export const BASE_URL = "http://127.0.0.1:8000/";
+// export const BASE_URL = "http://127.0.0.1:8000/";
 import.meta.env.VITE_API_URL;
 export const ApiRoutes = {
   LOGIN: '/auth/login',
@@ -69,7 +69,7 @@ export const ApiRoutes = {
   PAYMENTCONTROLLIST: 'programe/pending-payment-workflow/list',
   PAYMENTCONTROL: 'programe',
   PAYMENTCONTROLDELETE: (scopeId: number | string) =>
-  `programe/pending-payment-workflow/${scopeId}`,
+    `programe/pending-payment-workflow/${scopeId}`,
 
   /* Batch Master */
 
