@@ -161,7 +161,8 @@ export default function MarksEntryScreen() {
   const isMarkEntryStaff = isFaculty || isExternalStaff;
   const isHOD = role === "hod" || role === "h.o.d";
   const isDirector = role === "director";
-  const isReviewer = isHOD || isDirector;
+  const isAdmin = role === "admin";
+  const isReviewer = isHOD || isDirector || isAdmin;
   const [rejectReasonInput, setRejectReasonInput] = useState("");
   const [showRejectBox, setShowRejectBox] = useState(false);
 
@@ -301,9 +302,6 @@ export default function MarksEntryScreen() {
               ? assignmentResponse.data
               : [];
 
-          console.log("External/Faculty assignment response:", assignmentResponse.data);
-          console.log("External/Faculty assignments:", assignments);
-
           setFacultyAssignments(assignments);
 
           // Build Program dropdown from assigned courses
@@ -335,15 +333,13 @@ export default function MarksEntryScreen() {
 
           setPrograms(programResponse.data || []);
 
-          // For HOD / Director: load all assignments to display who evaluated the course
-          if (isReviewer) {
-            try {
-              const hodAssignmentsRes = await apiClient.get(ApiRoutes.HODASSIGNMENTS);
-              const assignList = hodAssignmentsRes.data?.data || hodAssignmentsRes.data || [];
-              setHodAllAssignments(Array.isArray(assignList) ? assignList : []);
-            } catch (e) {
-              console.error("Failed to load HOD assignments for evaluator lookup", e);
-            }
+          // For HOD / Director / Admin: load all assignments to display who evaluated the course
+          try {
+            const hodAssignmentsRes = await apiClient.get(ApiRoutes.HODASSIGNMENTS);
+            const assignList = hodAssignmentsRes.data?.data || hodAssignmentsRes.data || [];
+            setHodAllAssignments(Array.isArray(assignList) ? assignList : []);
+          } catch (e) {
+            console.error("Failed to load HOD assignments for evaluator lookup", e);
           }
         }
 
@@ -999,16 +995,38 @@ export default function MarksEntryScreen() {
         student.hod_status?.trim().toLowerCase() === "approved"
     );
 
-  // For HOD / Director: Find the assigned faculty / external staff who evaluated this course
+  // For HOD / Director / Admin: Find the assigned faculty / external staff who evaluated this course
   const currentAssignedEvaluator = useMemo(() => {
     if (!isReviewer || !filters.programId || !filters.courseId) return null;
-    const match = hodAllAssignments.find(
+
+    // 1. Exact match with Program, Course, Semester, and Batch
+    let match = hodAllAssignments.find(
       (a: any) =>
         Number(a.program_id) === Number(filters.programId) &&
         Number(a.course_id) === Number(filters.courseId) &&
         (filters.semesterNo ? Number(a.semester_no || a.semester_id) === Number(filters.semesterNo) : true) &&
         (filters.batch ? String(a.batch).trim().toLowerCase() === String(filters.batch).trim().toLowerCase() : true)
     );
+
+    // 2. Fallback: match Program, Course, and Semester (any batch)
+    if (!match) {
+      match = hodAllAssignments.find(
+        (a: any) =>
+          Number(a.program_id) === Number(filters.programId) &&
+          Number(a.course_id) === Number(filters.courseId) &&
+          (filters.semesterNo ? Number(a.semester_no || a.semester_id) === Number(filters.semesterNo) : true)
+      );
+    }
+
+    // 3. Fallback: match Program and Course
+    if (!match) {
+      match = hodAllAssignments.find(
+        (a: any) =>
+          Number(a.program_id) === Number(filters.programId) &&
+          Number(a.course_id) === Number(filters.courseId)
+      );
+    }
+
     return match ? match.faculty_name : null;
   }, [isReviewer, filters.programId, filters.courseId, filters.semesterNo, filters.batch, hodAllAssignments]);
 
