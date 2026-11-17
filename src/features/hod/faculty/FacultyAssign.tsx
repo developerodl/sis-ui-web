@@ -388,15 +388,26 @@ const [assignmentsLoading, setAssignmentsLoading] =
   //     selectedSemester !== "" &&                     
   //     course.semester_id === Number(selectedSemester)
   // );
-  // Filter courses by selected semester
-const filteredCourses = courses.filter(
-  (course) =>
-    selectedSemester !== "" &&
-    Number(course.semester_id) === Number(selectedSemester)
-);
-console.log("Selected semester:", selectedSemester);
-console.log("All courses:", courses);
-console.log("Filtered courses:", filteredCourses);
+  // Filter courses by selected semester AND exclude courses that are already assigned
+  const assignedCourseIds = React.useMemo(() => {
+    return new Set(
+      assignments
+        .filter((assignment) =>
+          Number(assignment.program_id) === Number(selectedProgram) &&
+          Number(assignment.semester_id) === Number(selectedSemester) &&
+          (!selectedBatch || assignment.batch?.trim().toLowerCase() === selectedBatch?.trim().toLowerCase()) &&
+          (!selectedAdmissionYear || assignment.admission_year === selectedAdmissionYear)
+        )
+        .map((assignment) => Number(assignment.course_id))
+    );
+  }, [assignments, selectedProgram, selectedSemester, selectedBatch, selectedAdmissionYear]);
+
+  const filteredCourses = courses.filter(
+    (course) =>
+      selectedSemester !== "" &&
+      Number(course.semester_id) === Number(selectedSemester) &&
+      !assignedCourseIds.has(Number(course.id))
+  );
 
   // Existing faculty table formatting
   const formattedData = faculties.map((faculty, index) => ({

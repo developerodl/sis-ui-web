@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Card,
@@ -49,6 +49,7 @@ interface FacultyAssignment {
   semester_no: number;
   semester_name: string;
   batch: string;
+  admission_year?: string | null; // academic year assigned by HOD
   mark_type?: string;
 }
 
@@ -88,10 +89,29 @@ interface Scheme {
 
 }
 
-const MARK_TYPES: Option[] = [
-  { value: "internal", label: "Internal Mark" },
-  { value: "external", label: "External Mark" },
-];
+// const MARK_TYPES: Option[] = [
+//   { value: "internal", label: "Internal Mark" },
+//   { value: "external", label: "External Mark" },
+// ];
+
+// New dynamic list – only the allowed type is shown
+const MARK_TYPES: Option[] = (() => {
+  // role is already derived a few lines below (see later)
+  const role = String(getValue("role_name") || "").trim().toLowerCase();
+  const isExternalStaff = role === "external staff" || role === "external_staff";
+  const isInternalStaff = role === "internal staff" || role === "internal_staff";
+  if (isExternalStaff) {
+    return [{ value: "external", label: "External Mark" }];
+  }
+  if (isInternalStaff) {
+    return [{ value: "internal", label: "Internal Mark" }];
+  }
+  // Fallback – keep both for any admin / HOD view
+  return [
+    { value: "internal", label: "Internal Mark" },
+    { value: "external", label: "External Mark" },
+  ];
+})();
 
 /* ---------------- COMPONENT ---------------- */
 export default function MarksEntryScreen() {
@@ -107,6 +127,7 @@ export default function MarksEntryScreen() {
   const [facultyAssignments, setFacultyAssignments] = useState<
     FacultyAssignment[]
   >([]);
+  const [hodAllAssignments, setHodAllAssignments] = useState<any[]>([]);
 
   const [viewClicked, setViewClicked] = useState(false);
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -117,7 +138,13 @@ export default function MarksEntryScreen() {
     academicYear: "",
     semesterNo: "",
     courseId: "",
-    markType: "",
+    // Pre-set markType for external staff so the API call always has a valid value
+    markType: (() => {
+      const r = String(getValue("role_name") || "").trim().toLowerCase();
+      if (r === "external staff" || r === "external_staff") return "external";
+      if (r === "internal staff" || r === "internal_staff") return "internal";
+      return "";
+    })(),
   });
 
   const [marksInput, setMarksInput] = useState<Record<number, string>>({});
@@ -129,27 +156,17 @@ export default function MarksEntryScreen() {
   };
   const role = String(getValue("role_name") || "").trim().toLowerCase();
   const isFaculty = role === "faculty" || role === "faculty1";
-  const 
-  isExternalStaff =
-    role === "external staff" || role === "external_staff";
+  const isExternalStaff = role === "external staff" || role === "external_staff";
+  const isMarkTypeVisible = !isExternalStaff;
   const isMarkEntryStaff = isFaculty || isExternalStaff;
   const isHOD = role === "hod" || role === "h.o.d";
   const isDirector = role === "director";
   const isReviewer = isHOD || isDirector;
-
   const [rejectReasonInput, setRejectReasonInput] = useState("");
   const [showRejectBox, setShowRejectBox] = useState(false);
 
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
-
-  {isMarkEntryStaff && (
-  <Alert severity="info" sx={{ mb: 2 }}>
-    Marks can be entered only for courses assigned to your account by the
-    Admin/HR. If no course, semester, batch, or mark type is available,
-    please contact the Admin/HR to complete the assignment.
-  </Alert>
-)}
 
 
 
@@ -281,8 +298,8 @@ export default function MarksEntryScreen() {
           const assignments = Array.isArray(assignmentResponse.data?.data)
             ? assignmentResponse.data.data
             : Array.isArray(assignmentResponse.data)
-            ? assignmentResponse.data
-            : [];
+              ? assignmentResponse.data
+              : [];
 
           console.log("External/Faculty assignment response:", assignmentResponse.data);
           console.log("External/Faculty assignments:", assignments);
@@ -317,6 +334,17 @@ export default function MarksEntryScreen() {
           );
 
           setPrograms(programResponse.data || []);
+
+          // For HOD / Director: load all assignments to display who evaluated the course
+          if (isReviewer) {
+            try {
+              const hodAssignmentsRes = await apiClient.get(ApiRoutes.HODASSIGNMENTS);
+              const assignList = hodAssignmentsRes.data?.data || hodAssignmentsRes.data || [];
+              setHodAllAssignments(Array.isArray(assignList) ? assignList : []);
+            } catch (e) {
+              console.error("Failed to load HOD assignments for evaluator lookup", e);
+            }
+          }
         }
 
         // BOTH faculty and HOD/Admin need schemes
@@ -337,26 +365,49 @@ export default function MarksEntryScreen() {
 
     loadInitialData();
 
-    apiClient
-      .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
-      .then((res) => {
-        const list = res.data || [];
+    // For HOD/Admin/Director – load all academic years from the API.
+    // For external staff / faculty – academic years are derived from their assignments
+    // (see the useEffect below that depends on facultyAssignments).
+    if (!isMarkEntryStaff) {
+      apiClient
+        .get(`${ApiRoutes.STUDENTMARKSENTRY}/academic-years`)
+        .then((res) => {
+          const list = res.data || [];
 
-        setAcademicYears(
-          list.map((year: string) => ({
-            value: year,
-            label: year,
-          }))
+          setAcademicYears(
+            list.map((year: string) => ({
+              value: year,
+              label: year,
+            }))
+          );
+        })
+        .catch(() =>
+          showAlert(
+            "Failed to load academic year list",
+            "error"
+          )
         );
-      })
-      .catch(() =>
-        showAlert(
-          "Failed to load academic year list",
-          "error"
-        )
-      );
+    }
   }, []);
-  
+
+  /* ---------------- ACADEMIC YEARS FOR STAFF (from assignments) ---------------- */
+  // For external staff / faculty: derive unique academic years directly from their
+  // HOD-assigned records so only the year(s) they were assigned are shown.
+  useEffect(() => {
+    if (!isMarkEntryStaff) return; // HOD/Admin get years from the API above
+    if (facultyAssignments.length === 0) return;
+
+    // Use admission_year from each assignment (the year HOD assigned them)
+    const assignedYears = facultyAssignments
+      .map((a: FacultyAssignment) => a.admission_year)
+      .filter((y): y is string => Boolean(y));
+
+    const uniqueYears = Array.from(new Set(assignedYears));
+    setAcademicYears(
+      uniqueYears.map((y) => ({ value: y, label: y }))
+    );
+  }, [facultyAssignments, isMarkEntryStaff]);
+
   /* ---------------- LOAD SEMESTERS ---------------- */
   // useEffect(() => {
   //   if (!filters.programId) {
@@ -504,20 +555,6 @@ export default function MarksEntryScreen() {
     facultyAssignments,
     isMarkEntryStaff,
   ]);
-  
-useEffect(() => {
-    if (!filters.programId) {
-      setBatches([]);
-      return;
-    }
-    apiClient
-      .get(`${ApiRoutes.STUDENTBATCHES}?program_id=${filters.programId}`)
-      .then((res) => {
-        const list: string[] = res.data || [];
-        setBatches(list.map((b) => ({ value: b, label: b })));
-      })
-      .catch(() => showAlert("Failed to load batches", "error"));
-  }, [filters.programId]);
 
   /* ---------------- LOAD BATCHES ---------------- */
   useEffect(() => {
@@ -526,29 +563,33 @@ useEffect(() => {
       return;
     }
 
-// Faculty and External Staff: show only assigned courses
+    // Faculty and External Staff: show batches assigned to this staff for the selected program
+    // If semester and course are selected, filter by them; otherwise show all batches assigned for this program
     if (isMarkEntryStaff) {
-      if (!filters.semesterNo || !filters.courseId) {
-        setBatches([]);
-        return;
+      let filteredAssignments = facultyAssignments.filter(
+        (assignment) => assignment.program_id === Number(filters.programId)
+      );
+
+      if (filters.semesterNo) {
+        filteredAssignments = filteredAssignments.filter(
+          (assignment) => assignment.semester_no === Number(filters.semesterNo)
+        );
       }
 
-      const facultyBatches = facultyAssignments
-        .filter(
-          (assignment) =>
-            assignment.program_id === Number(filters.programId) &&
-            assignment.semester_no === Number(filters.semesterNo) &&
-            assignment.course_id === Number(filters.courseId)
-        )
+      if (filters.courseId) {
+        filteredAssignments = filteredAssignments.filter(
+          (assignment) => assignment.course_id === Number(filters.courseId)
+        );
+      }
+
+      const facultyBatches = filteredAssignments
         .map((assignment) => ({
           value: assignment.batch,
           label: assignment.batch,
         }))
         .filter(
           (batch, index, array) =>
-            array.findIndex(
-              (item) => item.value === batch.value
-            ) === index
+            array.findIndex((item) => item.value === batch.value) === index
         );
 
       setBatches(facultyBatches);
@@ -601,21 +642,21 @@ useEffect(() => {
     filters.markType === "internal"
       ? activeScheme?.internal_min
       : filters.markType === "external"
-      ? activeScheme?.external_min
-      : undefined;
+        ? activeScheme?.external_min
+        : undefined;
 
   const maxMark =
     filters.markType === "internal"
       ? activeScheme?.internal_max
       : filters.markType === "external"
-      ? activeScheme?.external_max
-      : undefined;
+        ? activeScheme?.external_max
+        : undefined;
 
   const isMarkSchemeConfigured =
-  minMark !== undefined &&
-  minMark !== null &&
-  maxMark !== undefined &&
-  maxMark !== null;
+    minMark !== undefined &&
+    minMark !== null &&
+    maxMark !== undefined &&
+    maxMark !== null;
 
   // const isMarkValid = (marks: string): boolean => {
   //   if (marks === "" || maxMark === undefined || maxMark === null) return true;
@@ -645,7 +686,12 @@ useEffect(() => {
   };
 
   const isViewEnabled = Boolean(
-    filters.programId && filters.batch && filters.academicYear && filters.semesterNo && filters.courseId && filters.markType
+    filters.programId &&
+    filters.batch &&
+    filters.academicYear &&
+    filters.semesterNo &&
+    filters.courseId &&
+    (isMarkTypeVisible ? filters.markType : true) // ignore markType when hidden for external staff
   );
 
   const handleViewStudents = async () => {
@@ -674,29 +720,48 @@ useEffect(() => {
           (student) => student.is_answer_sheet_evaluated === true
         );
 
-      if (hasEvaluatedStudents) {
+      // Notify only external staff when some students have already completed Answer Sheet Evaluation.
+      if (hasEvaluatedStudents && isExternalStaff) {
         showAlert(
           "Some students have already completed Answer Sheet Evaluation. Their External marks cannot be edited or submitted again.",
           "info"
         );
       }
 
-      const prefill: Record<number, string> = {};
+      // const prefill: Record<number, string> = {};
+      // const attendancePrefill: Record<number, string> = {};
+      // rows.forEach((r) => {
+      //   if (r.final_marks !== null && r.final_marks !== undefined) {
+      //     prefill[r.id] = String(r.final_marks);
+      //   }
+      //   if (r.attendance_percentage !== null && r.attendance_percentage !== undefined) {
+      //     attendancePrefill[r.id] = String(r.attendance_percentage);
+      //   }
+      // });
+      // setMarksInput(prefill);
+      // setAttendanceInput(attendancePrefill);
+      // setViewClicked(true);
+      // Prefill marks and attendance inputs for the fetched students
+      const marksPrefill: Record<number, string> = {};
       const attendancePrefill: Record<number, string> = {};
       rows.forEach((r) => {
         if (r.final_marks !== null && r.final_marks !== undefined) {
-          prefill[r.id] = String(r.final_marks);
+          marksPrefill[r.id] = String(r.final_marks);
         }
-        if (r.attendance_percentage !== null && r.attendance_percentage !== undefined) {
+        if (
+          r.attendance_percentage !== null &&
+          r.attendance_percentage !== undefined
+        ) {
           attendancePrefill[r.id] = String(r.attendance_percentage);
         }
       });
-      setMarksInput(prefill);
+      setMarksInput(marksPrefill);
       setAttendanceInput(attendancePrefill);
       setViewClicked(true);
     } catch (err) {
       showAlert("Failed to load students", "error");
     }
+
   };
 
   const handleMarkChange = (studentId: number, value: string) => {
@@ -738,7 +803,7 @@ useEffect(() => {
       (s) => marksInput[s.id] && marksInput[s.id] !== "" && !isMarkValid(marksInput[s.id])
     );
     if (invalidEntry) {
-      showAlert(`Marks must be between 0 and ${maxMark} for ${invalidEntry.name}`,"error");
+      showAlert(`Marks must be between 0 and ${maxMark} for ${invalidEntry.name}`, "error");
       return;
     }
     const invalidAttendanceEntry = students.find(
@@ -882,9 +947,9 @@ useEffect(() => {
 
   const handleDirectorApprove = async () => {
     if (isDirectorAlreadyApproved) {
-    return;
-  }
-  
+      return;
+    }
+
     try {
       await apiRequest({
         url: ApiRoutes.DIRECTORAPPROVE,
@@ -908,23 +973,23 @@ useEffect(() => {
   const visibleStudents = isDirector
     ? students.filter((s) => s.hod_status === "Approved")
     : isHOD
-    ? students.filter((s) => s.faculty_status === "Submitted")
-    : students;
+      ? students.filter((s) => s.faculty_status === "Submitted")
+      : students;
 
   const isDirectorAlreadyApproved =
-  isDirector &&
-  visibleStudents.length > 0 &&
-  visibleStudents.every(
-    (student) =>
-      student.director_status?.trim().toLowerCase() === "approved"
-  );
+    isDirector &&
+    visibleStudents.length > 0 &&
+    visibleStudents.every(
+      (student) =>
+        student.director_status?.trim().toLowerCase() === "approved"
+    );
 
   const hodDecisionStudents = students.filter(
-  (s) =>
-    s.hod_status?.trim().toLowerCase() === "approved" ||
-    s.hod_status?.trim().toLowerCase() === "rejected" ||
-    s.faculty_status?.trim().toLowerCase() === "submitted"
-);
+    (s) =>
+      s.hod_status?.trim().toLowerCase() === "approved" ||
+      s.hod_status?.trim().toLowerCase() === "rejected" ||
+      s.faculty_status?.trim().toLowerCase() === "submitted"
+  );
 
   const isHodAlreadyApproved =
     isHOD &&
@@ -933,6 +998,20 @@ useEffect(() => {
       (student) =>
         student.hod_status?.trim().toLowerCase() === "approved"
     );
+
+  // For HOD / Director: Find the assigned faculty / external staff who evaluated this course
+  const currentAssignedEvaluator = useMemo(() => {
+    if (!isReviewer || !filters.programId || !filters.courseId) return null;
+    const match = hodAllAssignments.find(
+      (a: any) =>
+        Number(a.program_id) === Number(filters.programId) &&
+        Number(a.course_id) === Number(filters.courseId) &&
+        (filters.semesterNo ? Number(a.semester_no || a.semester_id) === Number(filters.semesterNo) : true) &&
+        (filters.batch ? String(a.batch).trim().toLowerCase() === String(filters.batch).trim().toLowerCase() : true)
+    );
+    return match ? match.faculty_name : null;
+  }, [isReviewer, filters.programId, filters.courseId, filters.semesterNo, filters.batch, hodAllAssignments]);
+
   const paginatedStudents = visibleStudents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleExportExcel = () => {
@@ -962,7 +1041,7 @@ useEffect(() => {
 
     exportToExcel(
       exportRows,
-      [ 
+      [
         { header: "S.No", key: "sno" },
         { header: "Register No", key: "reg_no" },
         { header: "Student Name", key: "name" },
@@ -978,7 +1057,7 @@ useEffect(() => {
     );
   };
 
-    const handleExportWord = async () => {
+  const handleExportWord = async () => {
     const programLabel =
       programs.find((p) => String(p.id) === filters.programId)?.short_name ||
       programs.find((p) => String(p.id) === filters.programId)?.programe ||
@@ -988,7 +1067,7 @@ useEffect(() => {
     const markTypeLabel = MARK_TYPES.find((m) => m.value === filters.markType)?.label || filters.markType;
 
     // const rows = visibleStudents.map((s, index) => {
-     const sortedForWord = [...visibleStudents].sort((a, b) =>
+    const sortedForWord = [...visibleStudents].sort((a, b) =>
       (a.reg_no || "").localeCompare(b.reg_no || "", undefined, { numeric: true })
     );
     const rows = sortedForWord.map((s, index) => {
@@ -1020,13 +1099,13 @@ useEffect(() => {
     );
   };
   const hasEditableMarks = students.some(
-                          (s) =>
-                            s.faculty_status !== "Submitted" &&
-                            !(
-                              filters.markType.toLowerCase() === "external" &&
-                              s.is_answer_sheet_evaluated === true
-                            )
-                        );
+    (s) =>
+      s.faculty_status !== "Submitted" &&
+      !(
+        filters.markType.toLowerCase() === "external" &&
+        s.is_answer_sheet_evaluated === true
+      )
+  );
 
   /* ---------------- UI ---------------- */
   return (
@@ -1039,6 +1118,15 @@ useEffect(() => {
           animate={{ opacity: 1, y: 0 }}
           sx={{ p: 3, borderRadius: 3 }}
         >
+          {/* Show top alert ONLY when no assignment exists for this staff */}
+          {isMarkEntryStaff && facultyAssignments.length === 0 && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Marks can be entered only for courses assigned to your account by the
+              Admin/HR. If no course, semester, batch, or mark type is available,
+              please contact the Admin/HR to complete the assignment.
+            </Alert>
+          )}
+
           <Typography variant="h6" mb={2}>
             Program Filter
           </Typography>
@@ -1059,29 +1147,29 @@ useEffect(() => {
                   ))} */}
                   {isMarkEntryStaff
                     ? facultyAssignments
-                        .filter(
-                          (assignment, index, array) =>
-                            array.findIndex(
-                              (item) =>
-                                item.program_id === assignment.program_id
-                            ) === index
-                        )
-                        .map((assignment) => (
-                          <MenuItem
-                            key={assignment.program_id}
-                            value={String(assignment.program_id)}
-                          >
-                            {assignment.program_name}
-                          </MenuItem>
-                        ))
-                    : programs.map((p) => (
+                      .filter(
+                        (assignment, index, array) =>
+                          array.findIndex(
+                            (item) =>
+                              item.program_id === assignment.program_id
+                          ) === index
+                      )
+                      .map((assignment) => (
                         <MenuItem
-                          key={p.id}
-                          value={String(p.id)}
+                          key={assignment.program_id}
+                          value={String(assignment.program_id)}
                         >
-                          {p.short_name ?? p.programe}
+                          {assignment.program_name}
                         </MenuItem>
-                      ))}
+                      ))
+                    : programs.map((p) => (
+                      <MenuItem
+                        key={p.id}
+                        value={String(p.id)}
+                      >
+                        {p.short_name ?? p.programe}
+                      </MenuItem>
+                    ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -1153,8 +1241,7 @@ useEffect(() => {
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <FormControl fullWidth>
+            {/* <FormControl fullWidth>
                 <InputLabel>Mark Type</InputLabel>
                 <Select
                   value={filters.markType}
@@ -1167,13 +1254,39 @@ useEffect(() => {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
-            </Grid>
+              </FormControl> */}
+            {/* MARK TYPE SELECT – disabled when only one option is available */}
+            {/* The dropdown is locked when the logged‑in staff role permits only one type
+                  (e.g., an External faculty member can see only “External Mark”). */}
+            {/* MARK TYPE – rendered only when the flag is true */}
+            {isMarkTypeVisible && (
+              <Grid size={{ xs: 12, md: 3 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Mark Type</InputLabel>
+                  <Select
+                    value={filters.markType}
+                    label="Mark Type"
+                    // No need to disable – the whole block is omitted for external staff
+                    onChange={(e) => handleChange("markType", e.target.value)}
+                  >
+                    {MARK_TYPES.map((m) => (
+                      <MenuItem key={m.value} value={m.value}>
+                        {m.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
             <Grid size={{ xs: 12 }} display="flex" justifyContent="flex-end">
+              {/* <Button variant="contained" disabled={!isViewEnabled} onClick={handleViewStudents}>
+                View Students
+              </Button> */}
               <Button variant="contained" disabled={!isViewEnabled} onClick={handleViewStudents}>
                 View Students
               </Button>
+
             </Grid>
           </Grid>
         </Card>
@@ -1181,7 +1294,8 @@ useEffect(() => {
         {/* TABLE */}
         {viewClicked && (
           <Card sx={{ mt: 4, p: 3 }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, flexWrap: "wrap", gap: 1 }}>
+              <Box sx={{ display: "flex", gap: 1 }}>
                 <Button
                   variant="outlined"
                   color="secondary"
@@ -1199,6 +1313,23 @@ useEffect(() => {
                   Export Word
                 </Button>
               </Box>
+
+              {/* Evaluated / Assigned Faculty indicator for HOD and Director */}
+              {isReviewer && currentAssignedEvaluator && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                    Evaluated By:
+                  </Typography>
+                  <Chip
+                    label={currentAssignedEvaluator}
+                    color="primary"
+                    variant="outlined"
+                    size="medium"
+                    sx={{ fontWeight: 700, fontSize: "0.95rem" }}
+                  />
+                </Box>
+              )}
+            </Box>
 
             {/* <Alert severity="info" sx={{ mb: 2 }}>
               {minMark !== undefined && minMark !== null
@@ -1249,8 +1380,12 @@ useEffect(() => {
             })()}
 
             {visibleStudents.length === 0 ? (
-              <Alert severity="warning">
-                {isDirector ? "No HOD-approved marks available for review yet." : "No students found for this program & semester."}
+              <Alert severity="info">
+                {isDirector
+                  ? "No HOD-approved marks available for review yet."
+                  : isMarkEntryStaff
+                    ? "No students are assigned for the selected Academic Year, Semester, Course, and Batch."
+                    : "No students found for this program & semester."}
               </Alert>
             ) : (
               <>
@@ -1267,7 +1402,7 @@ useEffect(() => {
                           <TableCell>HOD Status</TableCell>
                         ) : isHOD ? (
                           <>
-                            <TableCell>Admin Status</TableCell>
+                            <TableCell>Faculty Status</TableCell>
                             <TableCell>Director Status</TableCell>
                           </>
                         ) : (
@@ -1316,7 +1451,7 @@ useEffect(() => {
                                 value={attendanceValue}
                                 onChange={(e) => handleAttendanceChange(s.id, e.target.value)}
                                 error={attendanceValue !== "" && !attendanceValid}
-                                helperText={attendanceValue !== "" && !attendanceValid ? "Must be between 0 and 100" : lowAttendance? "Low attendance (<75%)" : ""}
+                                helperText={attendanceValue !== "" && !attendanceValid ? "Must be between 0 and 100" : lowAttendance ? "Low attendance (<75%)" : ""}
                               />
                             </TableCell>
                             <TableCell>
@@ -1334,35 +1469,35 @@ useEffect(() => {
                                 }
                               /> */}
                               <TextField
-                                  size="small"
-                                  type="number"
-                                  disabled={isInputDisabled}
-                                  value={markValue}
-                                  inputProps={{
-                                    min: 0,
-                                    max: maxMark ?? undefined,
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "-" || e.key === "e" || e.key === "E") {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-
-                                    if (value !== "" && Number(value) < 0) {
-                                      return;
-                                    }
-
-                                    handleMarkChange(s.id, value);
-                                  }}
-                                  error={markValue !== "" && !isMarkValid(markValue)}
-                                  helperText={
-                                    markValue !== "" && !isMarkValid(markValue)
-                                      ? `Marks must be between 0 and ${maxMark}`
-                                      : ""
+                                size="small"
+                                type="number"
+                                disabled={isInputDisabled}
+                                value={markValue}
+                                inputProps={{
+                                  min: 0,
+                                  max: maxMark ?? undefined,
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "-" || e.key === "e" || e.key === "E") {
+                                    e.preventDefault();
                                   }
-                                />
+                                }}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+
+                                  if (value !== "" && Number(value) < 0) {
+                                    return;
+                                  }
+
+                                  handleMarkChange(s.id, value);
+                                }}
+                                error={markValue !== "" && !isMarkValid(markValue)}
+                                helperText={
+                                  markValue !== "" && !isMarkValid(markValue)
+                                    ? `Marks must be between 0 and ${maxMark}`
+                                    : ""
+                                }
+                              />
                             </TableCell>
                             <TableCell>
                               <Stack direction="row" spacing={0.5} alignItems="center">
@@ -1398,13 +1533,13 @@ useEffect(() => {
                                   />
                                 </TableCell>
                                 {!isHOD && (
-                                <TableCell>
-                                  <Chip
-                                    label={getHodStatusLabel(s.hod_status)}
-                                    size="small"
-                                    color={s.hod_status === "Approved" ? "success" : s.hod_status === "Rejected" ? "error" : "default"}
-                                  />
-                                </TableCell>
+                                  <TableCell>
+                                    <Chip
+                                      label={getHodStatusLabel(s.hod_status)}
+                                      size="small"
+                                      color={s.hod_status === "Approved" ? "success" : s.hod_status === "Rejected" ? "error" : "default"}
+                                    />
+                                  </TableCell>
                                 )}
                                 <TableCell>
                                   <Chip
@@ -1484,13 +1619,25 @@ useEffect(() => {
                               Reject
                             </Button>
                           ) : (
-                            <Button
-                              variant="contained"
-                              color="error"
-                              onClick={handleHodReject}
-                            >
-                              Confirm Reject
-                            </Button>
+                            <>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                onClick={() => {
+                                  setShowRejectBox(false);
+                                  setRejectReasonInput("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="error"
+                                onClick={handleHodReject}
+                              >
+                                Confirm Reject
+                              </Button>
+                            </>
                           )}
                         </Stack>
                       </>
