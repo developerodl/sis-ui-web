@@ -69,10 +69,16 @@ export default function FeesReceipt() {
 
           let total = 0;
           filtered.forEach((p) => {
-            if (p.payment_type === "application_fee") total += p.payment_amount;
+            if (p.payment_type === "application_fee") total += Number(p.payment_amount) || 0;
             if (p.payment_type === "semester_fee" && p.semester_fee) {
               const sf = p.semester_fee;
-              total += sf.tuition_fee + sf.lab_fee + sf.lms_fee + sf.exam_fee + 1000;
+              const itemizedTotal =
+                (Number(sf.tuition_fee) || 0) +
+                (Number(sf.lab_fee) || 0) +
+                (Number(sf.lms_fee) || 0) +
+                (Number(sf.exam_fee) || 0) +
+                (Number(sf.admission_fee) || 0);
+              total += Number(p.payment_amount ?? sf.total_fee ?? itemizedTotal) || 0;
             }
           });
           if (total > 0) {
@@ -101,9 +107,11 @@ export default function FeesReceipt() {
         { sno: sno++, towards: "Tuition Fee", amount: sf.tuition_fee },
         { sno: sno++, towards: "Lab Fee", amount: sf.lab_fee },
         { sno: sno++, towards: "LMS Fee", amount: sf.lms_fee },
-        { sno: sno++, towards: "Exam Fee", amount: sf.exam_fee },
-        { sno: sno++, towards: "Admission Fee", amount: 1000 }
+        { sno: sno++, towards: "Exam Fee", amount: sf.exam_fee }
       );
+      if (sf.admission_fee != null) {
+        feeRows.push({ sno: sno++, towards: "Admission Fee", amount: Number(sf.admission_fee) || 0 });
+      }
     }
   });
 

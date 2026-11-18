@@ -10,6 +10,7 @@ import {
 import {
     Controller,
     useForm,
+    useFieldArray,
 } from "react-hook-form";
 import {
     yupResolver,
@@ -53,17 +54,11 @@ interface FormValues {
     exam_end_date: Date | null;
     fees_start_date: Date | null;
     fees_end_date: Date | null;
-    fee_details: {
-        application_fee: string;
-        admission_fee: string;
-        tuition_fee: string;
-        exam_fee: string;
-        lms_fee: string;
-        lab_fee: string;
-    };
+    fee_details: { fee_head_id: string; amount: string }[];
 }
 
 type FeeDetailsForm = FormValues["fee_details"];
+interface FeeHead { id: number; account_head: string; gl_code: string }
 
 /* -------------------------------------------------------------------------- */
 /*                              DEFAULT VALUES                                */
@@ -83,14 +78,7 @@ const defaultValues: FormValues = {
     exam_end_date: null,
     fees_start_date: null,
     fees_end_date: null,
-    fee_details: {
-        application_fee: "",
-        admission_fee: "",
-        tuition_fee: "",
-        exam_fee: "",
-        lms_fee: "",
-        lab_fee: "",
-    },
+    fee_details: [],
 };
 
 /* -------------------------------------------------------------------------- */
@@ -221,14 +209,10 @@ const schema: Yup.ObjectSchema<FormValues> =
                 const { fees_start_date } = this.parent as FormValues;
                 return !value || !fees_start_date || new Date(value) >= new Date(fees_start_date);
             }),
-        fee_details: Yup.object({
-            application_fee: Yup.string().defined(),
-            admission_fee: Yup.string().defined(),
-            tuition_fee: Yup.string().defined(),
-            exam_fee: Yup.string().defined(),
-            lms_fee: Yup.string().defined(),
-            lab_fee: Yup.string().defined(),
-        }).required(),
+        fee_details: Yup.array().of(Yup.object({
+            fee_head_id: Yup.string().required("Select a fee head"),
+            amount: Yup.string().required("Enter an amount").test("valid-amount", "Enter a valid non-negative amount", (value) => value === undefined || (value.trim() !== "" && Number.isFinite(Number(value)) && Number(value) >= 0)),
+        }).required()).required(),
     });
 
 /* -------------------------------------------------------------------------- */
@@ -264,66 +248,19 @@ const formatDateForApi = (date: unknown): string | null => {
 
 const feeDetailsToForm = (details: any): FeeDetailsForm => {
     if (Array.isArray(details)) {
-        const normalized: FeeDetailsForm = {
-            application_fee: "",
-            admission_fee: "",
-            tuition_fee: "",
-            exam_fee: "",
-            lms_fee: "",
-            lab_fee: "",
-        };
-        const keys: Record<string, keyof typeof normalized> = {
-            // GL codes returned by the API.
-            "30101": "application_fee",
-            "30102": "admission_fee",
-            "30100": "tuition_fee",
-            "30103": "lms_fee",
-            "30104": "exam_fee",
-            "30105": "lab_fee",
-            // Fee head IDs returned by GET-by-ID.
-            "1": "application_fee",
-            "2": "admission_fee",
-            "3": "tuition_fee",
-            "4": "lms_fee",
-            "5": "exam_fee",
-            "6": "lab_fee",
-            "application fee": "application_fee",
-            "admission fee": "admission_fee",
-            "tuition fee": "tuition_fee",
-            "exam fee": "exam_fee",
-            "lms fee": "lms_fee",
-            "lab fee": "lab_fee",
-        };
-        details.forEach((fee: any) => {
-            const key =
-                keys[String(fee.gl_code ?? "").trim().toLowerCase()] ??
-                keys[String(fee.fee_head_id ?? "").trim().toLowerCase()] ??
-                keys[String(fee.fee_head ?? "").trim().toLowerCase()];
-            if (key) normalized[key] = String(fee.amount ?? "");
-        });
-        return normalized;
+        return details.map((fee: any) => ({
+            fee_head_id: String(fee.fee_head_id ?? fee.id ?? ""),
+            amount: String(fee.amount ?? ""),
+        }));
     }
-    return {
-        application_fee: String(details?.application_fee ?? ""),
-        admission_fee: String(details?.admission_fee ?? ""),
-        tuition_fee: String(details?.tuition_fee ?? ""),
-        exam_fee: String(details?.exam_fee ?? ""),
-        lms_fee: String(details?.lms_fee ?? ""),
-        lab_fee: String(details?.lab_fee ?? ""),
-    };
+    const legacyKeys = ["application_fee", "admission_fee", "tuition_fee", "lms_fee", "exam_fee", "lab_fee"];
+    return legacyKeys.flatMap((key, index) => details?.[key] == null || details[key] === "" ? [] : [{ fee_head_id: String(index + 1), amount: String(details[key]) }]);
 };
 
 const feeDetailsToPayload = (details: FeeDetailsForm) =>
-    ([
-        [1, details.application_fee],
-        [2, details.admission_fee],
-        [3, details.tuition_fee],
-        [4, details.lms_fee],
-        [5, details.exam_fee],
-        [6, details.lab_fee],
-    ] as const).map(([fee_head_id, amount]) => ({
-        fee_head_id,
-        amount: amount.trim() === "" ? 0 : Number(amount),
+    details.filter((fee) => fee.fee_head_id && fee.amount.trim() !== "").map((fee) => ({
+        fee_head_id: Number(fee.fee_head_id),
+        amount: Number(fee.amount),
     }));
 
 /* -------------------------------------------------------------------------- */
@@ -358,6 +295,7 @@ export default function ProgramBatchSemesterAdd() {
             label: string;
         }[]
     >([]);
+    const [feeHeads, setFeeHeads] = useState<FeeHead[]>([]);
 
     const [
         initialData,
@@ -383,6 +321,7 @@ export default function ProgramBatchSemesterAdd() {
         resolver: yupResolver(schema),
         defaultValues,
     });
+    const { fields: feeDetailFields, append: appendFeeDetail, remove: removeFeeDetail } = useFieldArray({ control, name: "fee_details" });
     /* ------------------------------------------------------------------------ */
     /*                              WATCH                                       */
     /* ------------------------------------------------------------------------ */
@@ -391,10 +330,24 @@ export default function ProgramBatchSemesterAdd() {
     //     "course_start_date"
     // );
     const feeDetails = watch("fee_details");
-    const totalFee = Object.values(feeDetails ?? {}).reduce(
-        (total, amount) => total + (Number(amount) || 0),
+    const totalFee = (feeDetails ?? []).reduce(
+        (total, fee) => total + (Number(fee.amount) || 0),
         0
     );
+
+    useEffect(() => {
+        const fetchFeeHeads = async () => {
+            try {
+                const response = await apiClient.get(ApiRoutes.FEEHEADGETALL);
+                const result = Array.isArray(response.data) ? response.data : response.data?.data || [];
+                setFeeHeads(result);
+            } catch (error) {
+                console.error("Failed to load fee heads:", error);
+                showAlert("Failed to load fee heads", "error");
+            }
+        };
+        fetchFeeHeads();
+    }, []);
 
     /* ------------------------------------------------------------------------ */
     /*                           FETCH PROGRAMS                                  */
@@ -991,30 +944,62 @@ export default function ProgramBatchSemesterAdd() {
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
-                            <Box sx={{ fontWeight: 600, mt: 1 }}>Fee Details</Box>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 1 }}>
+                                <Box sx={{ fontWeight: 600 }}>Fee Details</Box>
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    onClick={() => appendFeeDetail({ fee_head_id: "", amount: "" })}
+                                    disabled={feeHeads.length === 0 || feeDetailFields.length >= feeHeads.length}
+                                >
+                                    + Add Fee
+                                </Button>
+                            </Box>
                         </Grid>
-                        {([
-                            ["application_fee", "Application Fee (30101)"],
-                            ["admission_fee", "Admission Fee (30102)"],
-                            ["tuition_fee", "Tuition Fee (30100)"],
-                            ["exam_fee", "Exam Fee (30103)"],
-                            ["lms_fee", "LMS Fee (30104)"],
-                            ["lab_fee", "Lab Fee (30105)"],
-                        ] as const).map(([name, label]) => (
-                            <Grid key={name} size={{ xs: 12, md: 6 }}>
+                        {feeDetailFields.map((row, index) => {
+                            const selectedIds = (feeDetails ?? []).map((fee) => fee.fee_head_id).filter(Boolean);
+                            const selectedId = feeDetails?.[index]?.fee_head_id;
+                            const availableHeads = feeHeads
+                                .filter((head) => !selectedIds.includes(String(head.id)) || String(head.id) === selectedId)
+                                .map((head) => ({ value: String(head.id), label: `${head.account_head} (${head.gl_code})` }));
+                            return (
+                            <Grid key={row.id} container size={{ xs: 12 }} spacing={2} alignItems="center">
+                                <Grid size={{ xs: 12, md: 5 }}>
                                 <Controller
-                                    name={`fee_details.${name}`}
+                                    name={`fee_details.${index}.fee_head_id`}
                                     control={control}
-                                    render={({ field }) => (
-                                        <CustomInputText
-                                            label={label}
+                                    render={({ field, fieldState }) => (
+                                        <CustomSelect
+                                            label="Fee Head"
                                             field={field}
-                                            type="number"
+                                            options={availableHeads}
+                                            error={!!fieldState.error}
+                                            helperText={fieldState.error?.message}
                                         />
                                     )}
                                 />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 5 }}>
+                                    <Controller
+                                        name={`fee_details.${index}.amount`}
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <CustomInputText
+                                                label="Amount"
+                                                field={field}
+                                                type="number"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 2 }}>
+                                    <Button type="button" color="error" onClick={() => removeFeeDetail(index)}>Remove</Button>
+                                </Grid>
                             </Grid>
-                        ))}
+                            );
+                        })}
 
                         <Grid size={{ xs: 12 }}>
                             <Box sx={{ fontWeight: 600 }}>

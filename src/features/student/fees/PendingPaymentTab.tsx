@@ -153,13 +153,16 @@ export default function PendingPaymentTab({
       ].filter(Boolean);
       const payment = Object.assign({}, ...paymentCandidates);
 
-      // Get Razorpay order details
+      // `id` is ambiguous (it can be an internal payment/student ID). Only use
+      // explicit order ID fields or an `id` nested under an order object.
       const orderId =
         payment?.order_id ||
         payment?.razorpay_order_id ||
         payment?.orderId ||
         payment?.razorpayOrderId ||
-        payment?.id;
+        paymentResponse?.order?.id ||
+        paymentResponse?.data?.order?.id ||
+        paymentResponse?.data?.data?.order?.id;
 
       const key =
         payment?.key_id ||

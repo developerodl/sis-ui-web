@@ -2,6 +2,11 @@ import * as React from "react";
 
 import {
   Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -76,6 +81,26 @@ interface Program {
 
   program_code?: string;
 }
+
+interface FeeDetail {
+  fee_head_id?: number;
+  fee_head?: string;
+  gl_code?: string;
+  amount?: string | number;
+}
+
+const parseFeeDetails = (value: unknown): FeeDetail[] => {
+  if (Array.isArray(value)) return value as FeeDetail[];
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
 
 /* -------------------------------------------------------------------------- */
 /*                              COMPONENT                                     */
@@ -504,7 +529,15 @@ export default function ProgramBatchSemesterList() {
     { key: "Duefrmdate", label: "Fees Due Start", width: 150, render: (row: ProgramBatchSemester) => row.Duefrmdate || "—" },
     { key: "Duetodate", label: "Fees Due End", width: 150, render: (row: ProgramBatchSemester) => row.Duetodate || "—" },
     { key: "pending_payment_workflow_enabled", label: "Pending Payment Workflow", width: 210, render: (row: ProgramBatchSemester) => row.pending_payment_workflow_enabled ? "Enabled" : "Disabled" },
-    { key: "fee_details", label: "Fee Details", width: 140, render: (row: ProgramBatchSemester) => row.fee_details == null ? "—" : "Configured" },
+    {
+      key: "fee_details",
+      label: "Fee Details",
+      width: 140,
+      render: (row: ProgramBatchSemester) => {
+        const count = parseFeeDetails(row.fee_details).length;
+        return count ? `${count} fee ${count === 1 ? "head" : "heads"}` : "—";
+      },
+    },
   ];
 
   /* ---------------------------------------------------------------------- */
@@ -640,6 +673,49 @@ export default function ProgramBatchSemesterList() {
             page={page}
             rowsPerPage={rowsPerPage}
             showSno={false}
+            isRowExpandable={(row: ProgramBatchSemester) => parseFeeDetails(row.fee_details).length > 0}
+            renderExpanded={(row: ProgramBatchSemester) => {
+              const feeDetails = parseFeeDetails(row.fee_details);
+              return (
+                <Table
+                  size="small"
+                  sx={{
+                    width: "100%",
+                    maxWidth: 680,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    overflow: "hidden",
+                    "& th": { bgcolor: "action.hover", fontWeight: 700 },
+                    "& td, & th": { borderColor: "divider", py: 1 },
+                    "& tbody tr:hover": { bgcolor: "action.hover" },
+                  }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      {["Fee Head", "GL Code", "Amount"].map((heading) => (
+                        <TableCell key={heading} sx={{ fontWeight: 600 }}>{heading}</TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {feeDetails.map((fee, index) => (
+                      <TableRow key={`${fee.fee_head_id ?? fee.gl_code ?? "fee"}-${index}`}>
+                        <TableCell>{fee.fee_head || "—"}</TableCell>
+                        <TableCell>{fee.gl_code || "—"}</TableCell>
+                        <TableCell align="right">{fee.amount ?? "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                    {row.total_fee != null && (
+                      <TableRow>
+                        <TableCell colSpan={2} sx={{ fontWeight: 700, textAlign: "right", bgcolor: "action.hover" }}>Total Fee</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, bgcolor: "action.hover" }}>{row.total_fee}</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              );
+            }}
             actions={[
               {
                 label: "Edit",
