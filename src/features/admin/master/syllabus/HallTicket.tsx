@@ -26,6 +26,11 @@ const HallTicket = ({ student }: HallTicketProps) => {
   const gender = getValue("gender");
   const userimage = gender == "Female" ? femaleimage : maleimage;
   const student_id = student?.id || getValue("student_id");
+  const isIndustrialHygiene = String(student?.program_id) === "1500132";
+  const isJuly2026IndustrialHygiene =
+    isIndustrialHygiene &&
+    String(student?.batch || "").trim().toLowerCase() === "july" &&
+    String(student?.admission_year || "").trim() === "2026-2027";
 
   const profileImageUrl = student_id
     ? `${BASE_URL}student/profile-image-proxy/${student_id}`
@@ -189,6 +194,70 @@ const HallTicket = ({ student }: HallTicketProps) => {
       "6.30 PM - 8.30 PM",
     ],
 ];
+  const IndustrialHygieneSemesterTwoTimetable = [
+    [
+      "05 December 2026\n(Saturday)",
+      "EHE25OCT07",
+      "Control of Hazards and Health Surveillance",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "06 December 2026\n(Sunday)",
+      "EHE25OCT08",
+      "Industrial Safety and Management",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "12 December 2026\n(Saturday)",
+      "EHE25OCT09",
+      "Legislative Frame work of Environment, Health and Safety",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "13 December 2026\n(Sunday)",
+      "EHE25OCT10",
+      "Industrial Disaster management and Emergency Preparedness",
+      "6.30 PM - 8.30 PM",
+    ],
+  ];
+  const IndustrialHygieneSemesterOneTimetable = [
+    [
+      "05 December 2026\n(Saturday)",
+      "EHE25OCT01",
+      "Occupational and Environmental Health",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "06 December 2026\n(Sunday)",
+      "EHE25OCT02",
+      "Fundamentals of Physiology and Industrial Toxicology",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "12 December 2026\n(Saturday)",
+      "EHE25OCT03",
+      "Occupational Exposure to Physical and Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "13 December 2026\n(Sunday)",
+      "EHE25OCT04",
+      "Occupational Exposure to Particulates and Chemical Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "19 December 2026\n(Saturday)",
+      "EHE25OCT05",
+      "Occupational Exposure to Biological and Ergonomic Hazards",
+      "6.30 PM - 8.30 PM",
+    ],
+    [
+      "20 December 2026\n(Sunday)",
+      "EHE25OCT06",
+      "Research Methodology",
+      "6.30 PM - 8.30 PM",
+    ],
+  ];
   // const isWellnessCoaching =
   //   String(student?.program_id) === "1500136";
 
@@ -212,7 +281,11 @@ const HallTicket = ({ student }: HallTicketProps) => {
 
   let examTimetable: string[][] = [];
 
-  if (isOba) {
+  if (isJuly2026IndustrialHygiene) {
+    examTimetable = IndustrialHygieneSemesterOneTimetable;
+  } else if (isIndustrialHygiene) {
+    examTimetable = IndustrialHygieneSemesterTwoTimetable;
+  } else if (isOba) {
     examTimetable = ObaTimetable;
   } else if (isDatascince) {
     examTimetable = DataScienceTimetable;
@@ -286,9 +359,13 @@ const HallTicket = ({ student }: HallTicketProps) => {
     name: `${student?.first_name} ${student?.last_name}`,
     gender: gender,
     dob: formattedDOB,
-    semester: "Semester-1",
+    semester: isIndustrialHygiene
+      ? isJuly2026IndustrialHygiene ? "Semester-I" : "Semester-II"
+      : "Semester-1",
     registrationNo: student?.registration_no,
-    program: student?.program_id == "1500038" ? (
+    program: isIndustrialHygiene ? (
+      <Box component="span">PG Certification in Industrial Hygiene</Box>
+    ) : student?.program_id == "1500038" ? (
       <Box component="span">B.Sc (Hons) - (Data Science)  </Box>
     ) : student?.program_id == "1500130" ? (
       <Box component="span">
@@ -305,7 +382,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
     passwordDOB: passwordDOB
   };
 
-  if (!isOba && !isDatascince) {
+  if (!isOba && !isDatascince && !isIndustrialHygiene) {
     return null;
   }
 
@@ -373,7 +450,7 @@ const HallTicket = ({ student }: HallTicketProps) => {
                     CENTRE FOR DISTANCE AND ONLINE EDUCATION
                   </Typography>
                   <Typography align="center" sx={{ fontSize: 15, fontWeight: 600, color: "#090909ff" }}>
-                    HALL TICKET – JANUARY 2026
+                    {isIndustrialHygiene ? "HALL TICKET – DECEMBER 2026" : "HALL TICKET – JANUARY 2026"}
                   </Typography>
                 </Box>
               </Box>

@@ -34,6 +34,18 @@ export default function StudentDetailTab({
 
   const isStudent = role === "student";
   const isFaculty = role === "faculty" || role === "faculty1";
+  const isJanuary2025IndustrialHygiene =
+    String(student?.program_id) === "1500132" &&
+    String(student?.batch || "").trim().toLowerCase() === "january" &&
+    String(student?.admission_year || "").trim() === "2025-2026";
+  const isJuly2026IndustrialHygiene =
+    String(student?.program_id) === "1500132" &&
+    String(student?.batch || "").trim().toLowerCase() === "july" &&
+    String(student?.admission_year || "").trim() === "2026-2027";
+  const showHallTicket =
+    isJanuary2025IndustrialHygiene ||
+    isJuly2026IndustrialHygiene ||
+    ["1500130", "1500038"].includes(String(student?.program_id));
   const { loading } = useLoader();
   // const [marksData, setMarksData] = useState<any>(null);
 
@@ -697,16 +709,14 @@ export default function StudentDetailTab({
     ...(hideDebTab ? [] : ['DEB']),
     'Documents',
     'ID Card',
-    'Hall Ticket',
-    // ...(isHallTicketEligible ? ['Hall Ticket'] : []),
+    ...(showHallTicket ? ['Hall Ticket'] : []),
   ];
 
   const studenttabs = [
     'Basic Info',
     ...(hideDebTab ? [] : ['DEB']),
     'ID Card',
-    'Hall Ticket',
-    // ...(isHallTicketEligible ? ['Hall Ticket'] : []),
+    ...(showHallTicket ? ['Hall Ticket'] : []),
   ];
   // const studenttabs = [
   //   'Basic Info',
@@ -816,7 +826,7 @@ export default function StudentDetailTab({
         basicInfoTab,
         ...(hideDebTab ? [] : [debTab]),
         IDCardTab,
-        HallTicketTab,
+        ...(showHallTicket ? [HallTicketTab] : []),
       ]
       : [
         basicInfoTab,
@@ -824,7 +834,7 @@ export default function StudentDetailTab({
         ...(hideDebTab ? [] : [debTab]),
         documentsTab,
         IDCardTab,
-        HallTicketTab,
+        ...(showHallTicket ? [HallTicketTab] : []),
       ];
   // const tabContents =
   //   rollid === 3
